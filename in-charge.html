@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In-Charge Portal — PMUN 2026</title>
+  <link rel="stylesheet" href="global.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js?v=4"></script>
+  <script src="in-charge.js?v=4"></script>
+</head>
+<body class="theme-light">
+
+  <div id="demo-banner" class="demo-mode-badge" style="display: none;">
+    Demo Mode Active — Running on Local Storage mock database.
+  </div>
+
+  <!-- SELECT VIEW -->
+  <section id="incharge-select" class="portal-view" style="display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="incharge-select-container" style="max-width: 600px; width: 100%;">
+      <div class="incharge-select-card animate-fade-in" style="background-color: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--border-radius-lg); padding: 3rem; text-align: center; box-shadow: var(--shadow-md);">
+        <h2 style="font-family: var(--font-serif); font-size: 2rem; color: var(--color-navy); margin-bottom: 0.5rem;">Select Your Committee</h2>
+        <p style="color: var(--color-text-muted); margin-bottom: 2.5rem;">Verify allocations and registrants for your assigned Grade committee.</p>
+        <div class="incharge-select-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+          <button class="incharge-select-btn" onclick="selectGrade(8)" style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.5rem 1rem; font-size: 1.1rem; color: var(--color-navy); font-weight: 700; cursor: pointer; transition: var(--transition-smooth);">Grade 8</button>
+          <button class="incharge-select-btn" onclick="selectGrade(9)" style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.5rem 1rem; font-size: 1.1rem; color: var(--color-navy); font-weight: 700; cursor: pointer; transition: var(--transition-smooth);">Grade 9</button>
+          <button class="incharge-select-btn" onclick="selectGrade(10)" style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.5rem 1rem; font-size: 1.1rem; color: var(--color-navy); font-weight: 700; cursor: pointer; transition: var(--transition-smooth);">Grade 10</button>
+        </div>
+        <button class="btn-back" onclick="AppState.logout()" style="margin-top:2.5rem; color:var(--color-navy); border: none; background: none; font-weight: 600; cursor: pointer;">Logout Portal</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD VIEW -->
+  <section id="incharge-dashboard" class="portal-view" style="display: none; min-height: 100vh;">
+    <!-- Dashboard Header -->
+    <header class="dashboard-header" style="background-color: var(--color-white); border-bottom: 1px solid var(--color-border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="width: 42px; height: 42px; object-fit: contain;">
+        <h2 id="incharge-grade-title" style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0;">Grade Committee Dashboard</h2>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button id="btn-incharge-switch" class="btn-secondary" style="color: var(--color-navy); border-color: var(--color-navy); font-weight: 600;" onclick="switchCommittee()">Switch Committee</button>
+        <button class="btn-logout btn-danger" onclick="AppState.logout()" style="background-color: var(--color-danger); color: var(--color-white); border: none; padding: 0.5rem 1.25rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer;">Logout Portal</button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Area -->
+    <main class="dashboard-main" style="padding: 2.5rem; max-width: 1200px; margin: 0 auto;">
+      <!-- KPI Counts Grid -->
+      <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
+        <div class="kpi-card" style="background-color: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.75rem 2rem; box-shadow: var(--shadow-sm);">
+          <p style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Total Registrations</p>
+          <h2 id="incharge-kpi-count" style="font-size: 2.5rem; color: var(--color-podar-blue); font-family: var(--font-sans); font-weight: 800; margin: 0;">0</h2>
+        </div>
+        <div class="kpi-card" style="background-color: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.75rem 2rem; box-shadow: var(--shadow-sm);">
+          <p style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Maximum Capacity</p>
+          <h2 id="incharge-kpi-capacity" style="font-size: 2.5rem; color: var(--color-navy); font-family: var(--font-sans); font-weight: 800; margin: 0;">0</h2>
+        </div>
+        <div class="kpi-card" style="background-color: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.75rem 2rem; box-shadow: var(--shadow-sm);">
+          <p style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Remaining Slots</p>
+          <h2 id="incharge-kpi-remaining" style="font-size: 2.5rem; color: var(--color-navy); font-family: var(--font-sans); font-weight: 800; margin: 0;">0</h2>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Section -->
+      <div class="settings-section-card" style="padding: 2rem; margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <input type="text" id="incharge-search" class="input-field" placeholder="Search by name, school, ID..." style="flex: 1; min-width: 250px;">
+          <select id="incharge-sec-filter" class="input-field" style="width: 180px;">
+            <option value="ALL">All Sections</option>
+          </select>
+          <button id="btn-incharge-export" class="btn-primary" style="background-color: var(--color-navy); border-color: var(--color-navy); font-weight: 600;">Export Roster CSV</button>
+        </div>
+
+        <div class="table-container" style="border: 1px solid var(--color-border); border-radius: var(--border-radius); overflow-x: auto; background-color: var(--color-white);">
+          <table class="dashboard-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="background-color: var(--color-bg-light); border-bottom: 1px solid var(--color-border);">
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">ID</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Name</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Grade</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700; text-align: center;">Section</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">School</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Date Registered</th>
+              </tr>
+            </thead>
+            <tbody id="incharge-table-body">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Country Portfolio Allocation Stats -->
+      <div class="settings-section-card" style="padding: 2.5rem; margin-top: 2rem;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--color-navy); margin-bottom: 0.5rem;">Committee Country Portfolios</h3>
+        <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">Availability and assignments of portfolios inside your Grade committees.</p>
+        
+        <div class="table-container" style="border: 1px solid var(--color-border); border-radius: var(--border-radius); overflow-x: auto; background-color: var(--color-white);">
+          <table class="dashboard-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="background-color: var(--color-bg-light); border-bottom: 1px solid var(--color-border);">
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Committee</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Country</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700; text-align: center;">Preferences Count</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Assigned Delegate</th>
+                <th style="padding: 1rem 1.5rem; color: var(--color-navy); font-weight: 700;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="incharge-portfolio-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In-Charge Committee Selection — PMUN 2026</title>
+  <link rel="stylesheet" href="global.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+</head>
+<body class="theme-light">
+
+  <div id="demo-banner" class="demo-mode-badge">
+    Demo Mode Active — Passwords: 
+    <strong>staff8_2026</strong> (Grade 8), 
+    <strong>staff9_2026</strong> (Grade 9), 
+    <strong>staff10_2026</strong> (Grade 10).
+  </div>
+
+  <main class="selection-container" style="max-width: 900px;">
+    <div class="logo-header animate-fade-in">
+      <img src="resources/podar_tree_logo.png" class="logo-icon" alt="Podar Logo" style="object-fit: contain;">
+      <div class="brand-text-block" style="text-align: center; margin-top: 1rem;">
+        <h2 style="font-family: var(--font-sans); font-weight: 900; font-size: 1.5rem; color: var(--color-navy); margin: 0; letter-spacing: 0.5px; text-transform: uppercase;">PODAR INTERNATIONAL SCHOOL</h2>
+        <h4 style="font-family: var(--font-sans); font-weight: 700; font-size: 0.85rem; color: var(--color-podar-blue); margin: 0.25rem 0 0 0; letter-spacing: 1.2px; text-transform: uppercase;">MODEL UNITED NATIONS</h4>
+      </div>
+      <h3 style="margin-top: 2rem; font-family: var(--font-serif); font-size: 2.2rem; color: var(--color-navy);">Committee Selection</h3>
+      <p style="margin-top: 0.5rem; color: var(--color-text-muted); font-size: 1.1rem; font-weight: 500;">Select your assigned Grade level to access the In-Charge portal.</p>
+    </div>
+
+    <div class="role-cards-grid animate-fade-in" style="animation-delay: 0.1s; grid-template-columns: repeat(3, 1fr); max-width: 800px; margin-top: 2.5rem;">
+      <!-- Grade 8 In-Charge -->
+      <div class="role-card" id="card-in-charge-8">
+        <div class="role-icon-box">
+          <span style="font-size: 1.8rem; font-weight: 800; color: var(--color-podar-blue);">8</span>
+        </div>
+        <h3>GRADE 8</h3>
+        <p>DISEC Space Militarization Roster Portal.</p>
+        <button class="btn-continue">Grade 8 Portal →</button>
+      </div>
+
+      <!-- Grade 9 In-Charge -->
+      <div class="role-card" id="card-in-charge-9">
+        <div class="role-icon-box">
+          <span style="font-size: 1.8rem; font-weight: 800; color: var(--color-podar-blue);">9</span>
+        </div>
+        <h3>GRADE 9</h3>
+        <p>UNHRC Climate Refugees Roster Portal.</p>
+        <button class="btn-continue">Grade 9 Portal →</button>
+      </div>
+
+      <!-- Grade 10 In-Charge -->
+      <div class="role-card" id="card-in-charge-10">
+        <div class="role-icon-box">
+          <span style="font-size: 1.8rem; font-weight: 800; color: var(--color-podar-blue);">10</span>
+        </div>
+        <h3>GRADE 10</h3>
+        <p>UNSC Sovereign Cyber Warfare Roster Portal.</p>
+        <button class="btn-continue">Grade 10 Portal →</button>
+      </div>
+    </div>
+
+    <button class="btn-back" id="btn-back-gate" style="margin-top: 3rem; border: none; background: none; color: var(--color-navy); font-weight: 600; cursor: pointer;">
+      ← Back to Portal Select
+    </button>
+  </main>
+
+  <script src="supabase-client.js?v=4"></script>
+  <script src="in-charge-gate.js?v=4"></script>
+</body>
+</html>

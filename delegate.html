@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delegate Dashboard — PMUN 2026</title>
+  <link rel="stylesheet" href="global.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js?v=4"></script>
+  <script src="delegate.js?v=4"></script>
+  <style>
+    /* Navigation Bar overrides for pill style */
+    .nav-links li a {
+      transition: all 0.3s ease !important;
+      padding: 0.5rem 1.25rem !important;
+      border-bottom: none !important;
+    }
+    .nav-links li.active a {
+      background-color: #0b3c66 !important;
+      border-radius: 20px !important;
+      color: var(--color-white) !important;
+    }
+    .nav-links li a:hover {
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      border-radius: 20px !important;
+    }
+    /* Custom Resource Reader styling */
+    .res-nav-btn {
+      background-color: var(--color-bg-light);
+      border: 1px solid var(--color-border) !important;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .res-nav-btn:hover {
+      background-color: #e2e8f0 !important;
+    }
+    .res-nav-btn.active-res {
+      background-color: var(--color-podar-blue) !important;
+      color: var(--color-white) !important;
+      border-color: var(--color-podar-blue) !important;
+    }
+    .res-content-pane {
+      display: none;
+    }
+    .res-content-pane.active-pane {
+      display: flex;
+    }
+
+    /* Public Header links styling */
+    .public-nav-link {
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .public-nav-link:hover, .public-nav-link.active {
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+    </style>
+</head>
+<body class="theme-light">
+
+  <div id="demo-banner" class="demo-mode-badge" style="display: none;">
+    Demo Mode Active — Running on Local Storage mock database.
+  </div>
+
+  <!-- DELEGATE CORE PAGE STRUCTURE -->
+  
+  <!-- PUBLIC HEADER (Shown only in public/anonymous mode) -->
+  <header id="public-header" style="background-color: #00204a; padding: 1.25rem 4rem; display: none; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15); height: 42px;">
+    <div id="brand-logo-container-public" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+      <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
+      <div style="display: flex; align-items: center; color: #ffffff; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 0.75rem; height: 32px;">
+        <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif; white-space: nowrap;">PODAR INTERNATIONAL SCHOOL</span>
+      </div>
+    </div>
+    <nav style="display: flex; gap: 2rem;">
+      <a href="index.html" class="public-nav-link">HOME</a>
+      <a href="delegate.html?tab=about&public=true" class="public-nav-link" id="pub-link-about">ABOUT PMUN</a>
+      <a href="delegate.html?tab=committees&public=true" class="public-nav-link" id="pub-link-committees">COMMITTEES</a>
+      <a href="delegate.html?tab=rules&public=true" class="public-nav-link" id="pub-link-rules">RULES & GUIDELINES</a>
+      <a href="delegate.html?tab=contact&public=true" class="public-nav-link" id="pub-link-contact">CONTACT</a>
+    </nav>
+  </header>
+
+  <div class="delegate-layout" style="background-color: #f7f9fc;">
+    <header class="delegate-header" style="background-color: var(--color-white); border-bottom: 1px solid var(--color-border); width: 100%;">
+      <!-- Top White Bar -->
+      <div style="display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 1.25rem 2rem; position: relative;">
+        <!-- Left Side: Podar International School, Godhani, Nagpur & MUN -->
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="width: 56px; height: 56px; object-fit: contain;">
+          <div style="text-align: left; line-height: 1.25;">
+            <h2 style="font-family: var(--font-sans); font-weight: 900; font-size: 1.25rem; color: var(--color-navy); margin: 0; letter-spacing: 0.5px; text-transform: uppercase;">PODAR INTERNATIONAL SCHOOL</h2>
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); display: block; letter-spacing: 0.5px; margin-top: 0.05rem;">GODHANI, NAGPUR</span>
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--color-podar-blue); display: block; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.05rem;">MODEL UNITED NATIONS</span>
+          </div>
+        </div>
+
+        <!-- Right Side: Faint Watermark Emblem decoration -->
+        <div style="opacity: 0.08; position: absolute; right: 2rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="currentColor" style="color: var(--color-navy);">
+            <path d="M50 15a35 35 0 1 0 35 35 35 35 0 0 0-35-35zm0 65a30 30 0 1 1 30-30 30 30 0 0 1-30 30z"/>
+            <path d="M50 25a25 25 0 1 0 25 25 25 25 0 0 0-25-25zm0 45a20 20 0 1 1 20-20 20 20 0 0 1-20 20z"/>
+            <line x1="50" y1="15" x2="50" y2="85" stroke="currentColor" stroke-width="2"/>
+            <line x1="15" y1="50" x2="85" y2="50" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Navigation Bar (Dark Blue Full-Width) -->
+      <nav class="nav-container" style="background-color: var(--color-navy); padding: 0.65rem 0;">
+        <ul class="nav-links" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; list-style: none; padding: 0; margin: 0;">
+          <li data-tab="home" style="margin: 0;">
+            <a href="delegate.html?tab=home" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-white); font-weight: 500; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Home
+            </a>
+          </li>
+
+          <li data-tab="about" style="margin: 0;">
+            <a href="delegate.html?tab=about" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-white); font-weight: 500; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a5 5 0 1 0 0 10 5 5 0 1 0 0-10z"></path>
+                <path d="M12 14c-4 0-7 2-7 6v2h14v-2c0-4-3-6-7-6z"></path>
+              </svg>
+              About PMUN
+            </a>
+          </li>
+
+          <li data-tab="committees" style="margin: 0;">
+            <a href="delegate.html?tab=committees" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-white); font-weight: 500; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Committees
+            </a>
+          </li>
+
+          <li data-tab="resources" style="margin: 0;">
+            <a href="delegate.html?tab=resources" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-white); font-weight: 500; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+              Resources
+            </a>
+          </li>
+
+          <li data-tab="schedule" style="margin: 0;">
+            <a href="delegate.html?tab=schedule" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-white); font-weight: 500; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Schedule
+            </a>
+          </li>
+
+          <li data-tab="contact" style="margin: 0;">
+            <a href="delegate.html?tab=contact" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-white); font-weight: 500; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              Contact
+            </a>
+          </li>
+
+          <!-- Logout Link -->
+          <li style="margin: 0; margin-left: 2rem;">
+            <a href="#logout" onclick="AppState.logout()" style="display: flex; align-items: center; padding: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--color-danger); font-weight: 600; text-decoration: none; border-radius: 4px; transition: var(--transition-smooth);">
+              <svg style="width: 16px; height: 16px; margin-right: 6px; stroke: currentColor; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Subpage View 3A: HOME -->
+    <div id="home-tab" class="tab-content">
+      <!-- Choose Your Committee Header -->
+      <div style="text-align: center; margin: 3rem 0 2.5rem 0;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
+          <div style="height: 1px; width: 80px; background: linear-gradient(to right, transparent, var(--color-border));"></div>
+          <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--color-podar-blue); font-weight: 700;">Choose Your Committee</span>
+          <div style="height: 1px; width: 80px; background: linear-gradient(to left, transparent, var(--color-border));"></div>
+        </div>
+        <h2 style="font-family: var(--font-serif); font-size: 2.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">Select Your Committee</h2>
+        <p style="color: var(--color-text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+          Explore the committees tailored for each grade level.<br>Click on your grade to learn more.
+        </p>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="grade-cards-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; margin: 0 auto 3rem auto; padding: 0 1rem;">
+        <!-- Card 1: ECOSOC -->
+        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+          <div style="width: 100%;">
+            <!-- Tree Logo -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">ECOSOC</h3>
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Food Supply Chains in the Age of Online Commerce</p>
+          </div>
+          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=ecosoc'">
+            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <!-- Layered Curved wave at bottom -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+        </div>
+
+        <!-- Card 2: UN Women -->
+        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+          <div style="width: 100%;">
+            <!-- Tree Logo -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UN Women</h3>
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Women's Rights and Empowerment</p>
+          </div>
+          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=un-women'">
+            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <!-- Layered Curved wave at bottom -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+        </div>
+
+        <!-- Card 3: UNHRC -->
+        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+          <div style="width: 100%;">
+            <!-- Tree Logo -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNHRC</h3>
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Protecting Digital Rights during Conflicts</p>
+          </div>
+          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unhrc'">
+            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <!-- Layered Curved wave at bottom -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+        </div>
+
+        <!-- Card 4: FAO -->
+        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+          <div style="width: 100%;">
+            <!-- Tree Logo -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">FAO</h3>
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Food Insecurity in Conflict Areas</p>
+          </div>
+          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=fao'">
+            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <!-- Layered Curved wave at bottom -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+        </div>
+
+        <!-- Card 5: UNEP -->
+        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+          <div style="width: 100%;">
+            <!-- Tree Logo -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNEP</h3>
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Equitable Access to Solar Energy</p>
+          </div>
+          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unep'">
+            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <!-- Layered Curved wave at bottom -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+        </div>
+
+        <!-- Card 6: UNICEF -->
+        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+          <div style="width: 100%;">
+            <!-- Tree Logo -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNICEF</h3>
+            <!-- Divider -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Foreign Aid Reductions and Child Healthcare</p>
+          </div>
+          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unicef'">
+            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <!-- Layered Curved wave at bottom -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+        </div>
+      </div>
+
+      <!-- Footer Quote section -->
+      <div style="text-align: center; margin: 4rem auto 2rem auto; display: flex; align-items: center; justify-content: center; gap: 1.5rem; max-width: 1000px; padding: 0 1rem;">
+        <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, var(--color-border));"></div>
+        <span style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-podar-blue); font-weight: 600; font-style: italic;">Diplomacy Today, Leadership Tomorrow.</span>
+        <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, var(--color-border));"></div>
+      </div>
+    </div>
+
+    <!-- Subpage View 3B: ABOUT PMUN -->
+    <div id="about-tab" class="tab-content">
+      <div class="settings-section-card animate-fade-in" style="line-height:1.8; padding: 2.5rem;">
+        <h2 style="font-family: var(--font-serif); font-size:2.2rem; margin-bottom:1.25rem; color:var(--color-navy); border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">About PMUN</h2>
+        <p style="margin-bottom:1.5rem;">Podar International School Model United Nations (PMUN) is an academic simulation of the United Nations where students play the role of delegates from different countries and attempt to solve real-world global issues using the policies and perspectives of their assigned nation.</p>
+        
+        <h3 style="font-family: var(--font-serif); font-size:1.5rem; margin-top: 2rem; margin-bottom:0.75rem; color:var(--color-navy);">Our Mission</h3>
+        <p style="margin-bottom:1.5rem;">Our mission is to foster a platform of academic excellence, diplomacy, and global citizenship. PMUN encourages young minds to research comprehensively, collaborate productively, and think critically about structural international agendas.</p>
+        
+        <h3 style="font-family: var(--font-serif); font-size:1.5rem; margin-top: 2rem; margin-bottom:0.75rem; color:var(--color-navy);">Why Model United Nations?</h3>
+        <p style="margin-bottom:1.5rem;">Model UN helps students build essential leadership, public speaking, negotiation, and research skills. By stepping into the shoes of diplomats, delegates develop historical empathy, learn to build consensus, and understand the complexities of multilateral cooperation.</p>
+        
+        <h3 style="font-family: var(--font-serif); font-size:1.5rem; margin-top: 2rem; margin-bottom:0.75rem; color:var(--color-navy);">About Podar International School</h3>
+        <p style="margin-bottom:1.5rem;">Established with a commitment to providing quality education, Podar International School has been at the forefront of experiential learning. PMUN is an extension of this educational vision, empowering students to engage with real-world complexities outside the traditional classroom.</p>
+        
+        <h3 style="font-family: var(--font-serif); font-size:1.5rem; margin-top: 2rem; margin-bottom:0.75rem; color:var(--color-navy);">PMUN 2026</h3>
+        <p style="margin-bottom:1.5rem;">PMUN 2026 is designed to challenge delegates in Grades 8, 9, and 10 with graded, age-appropriate scenarios: Grade 8 deals with outer space security (DISEC), Grade 9 handles climate refugees (UNHRC), and Grade 10 tackles modern cyber warfare (UNSC).</p>
+
+        <div style="background-color:var(--color-bg-light); border-left: 4px solid var(--color-podar-blue); padding: 1.5rem; margin-top:2.5rem; border-radius: var(--border-radius);">
+          <strong style="color:var(--color-navy); display:block; margin-bottom:0.5rem;">Our Philosophy</strong>
+          "To cultivate analytical minds capable of addressing systemic international issues with respect, diplomatic compromise, and progressive policies."
+        </div>
+      </div>
+    </div>
+
+    <!-- Subpage View 3C: COMMITTEES -->
+    <div id="committees-tab" class="tab-content">
+      <button class="btn-back" style="margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; border: none; background: none; color: var(--color-navy); font-weight: 600; cursor: pointer;" onclick="window.location.href='delegate.html?tab=home'">← Back to Home</button>
+      <section class="section-header">
+        <h3>PMUN Committees</h3>
+        <p>Discover our academic agendas. Click on a grade card below to access agendas, boards, and resource manuals.</p>
+      </section>
+      <div class="grade-cards-grid">
+        <!-- UNEP -->
+        <div class="grade-card" onclick="window.location.href='committee-detail.html?committee=unep'" style="cursor: pointer;">
+          <h4 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--color-navy);">UNEP</h4>
+          <p style="font-weight: 700; color: var(--color-podar-blue); margin-bottom: 0.25rem;">Environment Programme</p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 1.25rem;">Harnessing Solar Energy for Equitable Access and Clean Air.</p>
+          <button class="btn-continue" style="background-color: var(--color-podar-blue); width: 100%; border: none; border-radius: 4px; padding: 0.6rem; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Committee Details →</button>
+        </div>
+        <!-- ECOSOC -->
+        <div class="grade-card" onclick="window.location.href='committee-detail.html?committee=ecosoc'" style="cursor: pointer;">
+          <h4 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--color-navy);">ECOSOC</h4>
+          <p style="font-weight: 700; color: var(--color-podar-blue); margin-bottom: 0.25rem;">Economic & Social Council</p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 1.25rem;">Food Supply Chains in the Age of Online Commerce.</p>
+          <button class="btn-continue" style="background-color: var(--color-podar-blue); width: 100%; border: none; border-radius: 4px; padding: 0.6rem; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Committee Details →</button>
+        </div>
+        <!-- UN Women -->
+        <div class="grade-card" onclick="window.location.href='committee-detail.html?committee=un-women'" style="cursor: pointer;">
+          <h4 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--color-navy);">UN Women</h4>
+          <p style="font-weight: 700; color: var(--color-podar-blue); margin-bottom: 0.25rem;">Entity for Gender Equality</p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 1.25rem;">Addressing Challenges to Women’s Rights and Empowerment.</p>
+          <button class="btn-continue" style="background-color: var(--color-podar-blue); width: 100%; border: none; border-radius: 4px; padding: 0.6rem; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Committee Details →</button>
+        </div>
+        <!-- FAO -->
+        <div class="grade-card" onclick="window.location.href='committee-detail.html?committee=fao'" style="cursor: pointer;">
+          <h4 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--color-navy);">FAO</h4>
+          <p style="font-weight: 700; color: var(--color-podar-blue); margin-bottom: 0.25rem;">Food & Agriculture Org</p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 1.25rem;">Addressing the Crisis of Food Insecurity in Conflict Areas.</p>
+          <button class="btn-continue" style="background-color: var(--color-podar-blue); width: 100%; border: none; border-radius: 4px; padding: 0.6rem; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Committee Details →</button>
+        </div>
+        <!-- UNHRC -->
+        <div class="grade-card" onclick="window.location.href='committee-detail.html?committee=unhrc'" style="cursor: pointer;">
+          <h4 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--color-navy);">UNHRC</h4>
+          <p style="font-weight: 700; color: var(--color-podar-blue); margin-bottom: 0.25rem;">Human Rights Council</p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 1.25rem;">Protecting Digital Rights during Conflicts.</p>
+          <button class="btn-continue" style="background-color: var(--color-podar-blue); width: 100%; border: none; border-radius: 4px; padding: 0.6rem; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Committee Details →</button>
+        </div>
+        <!-- UNICEF -->
+        <div class="grade-card" onclick="window.location.href='committee-detail.html?committee=unicef'" style="cursor: pointer;">
+          <h4 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--color-navy);">UNICEF</h4>
+          <p style="font-weight: 700; color: var(--color-podar-blue); margin-bottom: 0.25rem;">Children's Fund</p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 1.25rem;">Impact of Foreign Aid Reductions on Global Child Healthcare.</p>
+          <button class="btn-continue" style="background-color: var(--color-podar-blue); width: 100%; border: none; border-radius: 4px; padding: 0.6rem; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Committee Details →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subpage View 3D: RESOURCES -->
+    <div id="resources-tab" class="tab-content">
+      <div class="settings-section-card animate-fade-in" style="padding: 2.2rem; max-width: 100%; border: 1px solid var(--color-border); border-radius: var(--border-radius); background-color: var(--color-white); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        
+        <!-- Header area with Title & PDF download link -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #edf2f7; padding-bottom: 1.25rem; margin-bottom: 1.75rem;">
+          <div>
+            <h2 style="font-family: var(--font-serif); font-size:2.2rem; margin-bottom:0.25rem; color:var(--color-navy); font-weight:700;">Rules of Procedure & Prep Guide</h2>
+            <p style="color: var(--color-text-muted); margin: 0; font-size: 0.95rem; font-weight:500;">Official study materials, delegate guides, templates, and procedures for PMUN 2026-27.</p>
+          </div>
+          <a href="resources/rules_of_procedure.pdf" target="_blank" class="btn-continue" style="background-color: var(--color-podar-blue); padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 4px; text-decoration: none; color: #ffffff; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: background-color 0.2s;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download PDF Manual
+          </a>
+        </div>
+
+        <div style="display: flex; gap: 2rem;">
+          <!-- Left Column: Navigation Sidebar (Chapters List) -->
+          <div style="width: 25%; display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid var(--color-border); padding-right: 1.5rem; min-height: 550px;">
+            <h4 style="font-family: var(--font-sans); color: var(--color-navy); margin-top: 0; margin-bottom: 0.5rem; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; opacity: 0.7;">Table of Contents</h4>
+            
+            <button onclick="switchResourceChapter('setup')" id="res-btn-setup" class="res-nav-btn active-res" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-navy); cursor: pointer; width: 100%;">
+              <span style="font-size: 1.1rem;">🏢</span>
+              <span>1. Committee Setup</span>
+            </button>
+            
+            <button onclick="switchResourceChapter('motions')" id="res-btn-motions" class="res-nav-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-navy); cursor: pointer; width: 100%;">
+              <span style="font-size: 1.1rem;">⚖️</span>
+              <span>2. Motions & Points</span>
+            </button>
+            
+            <button onclick="switchResourceChapter('yields')" id="res-btn-yields" class="res-nav-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-navy); cursor: pointer; width: 100%;">
+              <span style="font-size: 1.1rem;">💬</span>
+              <span>3. Yields Explained</span>
+            </button>
+            
+            <button onclick="switchResourceChapter('rules')" id="res-btn-rules" class="res-nav-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-navy); cursor: pointer; width: 100%;">
+              <span style="font-size: 1.1rem;">📜</span>
+              <span>4. Rules of Procedure</span>
+            </button>
+            
+            <button onclick="switchResourceChapter('documents')" id="res-btn-documents" class="res-nav-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-navy); cursor: pointer; width: 100%;">
+              <span style="font-size: 1.1rem;">📝</span>
+              <span>5. Document Samples</span>
+            </button>
+            
+            <button onclick="switchResourceChapter('links')" id="res-btn-links" class="res-nav-btn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-navy); cursor: pointer; width: 100%;">
+              <span style="font-size: 1.1rem;">🔗</span>
+              <span>6. Reference Links</span>
+            </button>
+          </div>
+
+          <!-- Right Column: Content Viewer Panel -->
+          <div style="width: 75%; padding-left: 0.5rem; display: flex; flex-direction: column;">
+            
+            <!-- CHAPTER 1: COMMITTEE SETUP -->
+            <div id="res-ch-setup" class="res-content-pane active-pane" style="flex-direction: column; gap: 1.5rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">A. Committee Setup</h3>
+              <p style="line-height: 1.6; color: var(--color-text-dark); margin: 0;">A committee is like a discussion room where delegates engage in discussions, debate, and attempt to resolve global issues. Each committee focuses on one main agenda. For example - UNSC, UNICEF etc.</p>
+              
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                  <h4 style="color: var(--color-podar-blue); font-size: 1rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">Chair</h4>
+                  <p style="font-size: 0.88rem; line-height: 1.5; color: var(--color-text-muted); margin: 0;">The Chair in an MUN leads the committee, manages the debate, ensures rules are followed, and helps delegates stay organised and respectful throughout the session.</p>
+                </div>
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                  <h4 style="color: var(--color-podar-blue); font-size: 1rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">Vice-Chair</h4>
+                  <p style="font-size: 0.88rem; line-height: 1.5; color: var(--color-text-muted); margin: 0;">Supports the Chair by helping manage the debate, keeping time, maintaining the speaker's list, and assisting with any procedural matters during the session.</p>
+                </div>
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                  <h4 style="color: var(--color-podar-blue); font-size: 1rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">Delegates</h4>
+                  <p style="font-size: 0.88rem; line-height: 1.5; color: var(--color-text-muted); margin: 0;">The participating students who act as representatives of assigned countries, debating agendas and proposing resolutions.</p>
+                </div>
+              </div>
+
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 1rem 0 0 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">B. Specific Procedures of PMUN 2026-27</h3>
+              <ol style="line-height: 1.8; color: var(--color-text-dark); margin: 0; padding-left: 1.25rem; font-weight: 500; display: flex; flex-direction: column; gap: 0.5rem;">
+                <li><strong>Quorum:</strong> A Minimum of <strong>20 delegates</strong> will be required to conduct the PMUN in a committee.</li>
+                <li>The <strong>Position Paper</strong> is the only paper that needs to be submitted to the Chair.</li>
+                <li>The <strong>Position Paper</strong> should be submitted to the Chair of their respective Committees <strong>two days before</strong> the Conference.</li>
+                <li>For <strong>bloc formation</strong>, ensure there are at least three countries in a bloc.</li>
+                <li>The final <strong>Resolution</strong> will be passed by a <strong>2/3rd majority</strong> in the voting process.</li>
+              </ol>
+            </div>
+
+            <!-- CHAPTER 2: MOTIONS & POINTS -->
+            <div id="res-ch-motions" class="res-content-pane" style="flex-direction: column; gap: 1.5rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">1. Motions</h3>
+              <p style="line-height: 1.6; color: var(--color-text-dark); margin: 0;">A <strong>motion</strong> is a formal request made by a delegate during an MUN session to guide or change the flow of the debate. Motions structure the discussion, introduce new topics, or move the committee into different phases of action.</p>
+              
+              <div class="table-container" style="border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+                <table class="dashboard-table" style="margin: 0; width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background-color: var(--color-bg-light);">
+                      <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 700; color: var(--color-navy); border-bottom: 1px solid var(--color-border); width: 45%;">Motion Type</th>
+                      <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 700; color: var(--color-navy); border-bottom: 1px solid var(--color-border);">Formal Speech Example</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;">1. Motion to Open the General Speakers’ List (GSL)</td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Motion to open the General Speakers' List for discussion on the agenda."</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;">2. Motion for a Moderated Caucus</td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Motion for a 10-minute moderated caucus on renewable energy solutions, with 1-minute speaking time."</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;">3. Motion for an Unmoderated Caucus</td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Motion for a 15-minute unmoderated caucus to draft a resolution."</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;">4. Motion to Close the Speakers’ List</td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Motion to close the General Speakers' List."</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;">5. Motion to Introduce a Draft Resolution</td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Motion to introduce Draft Resolution 1.1."</td>
+                    </tr>
+                    <tr style="border-bottom: none;">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600;">6. Motion to Move into Voting Procedure</td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Motion to enter Voting Procedure on Draft Resolution 1.1."</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 1rem 0 0 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">2. Points</h3>
+              <p style="line-height: 1.6; color: var(--color-text-dark); margin: 0;"><strong>Points</strong> are formal tools used by delegates to address the Chair or the committee, mainly for questions, clarifications, or personal/procedural concerns.</p>
+
+              <div class="table-container" style="border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
+                <table class="dashboard-table" style="margin: 0; width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background-color: var(--color-bg-light);">
+                      <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 700; color: var(--color-navy); border-bottom: 1px solid var(--color-border); width: 45%;">Point Type & Use</th>
+                      <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 700; color: var(--color-navy); border-bottom: 1px solid var(--color-border);">Formal Speech Example</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600; font-size: 0.88rem; line-height: 1.4;">1. Point of Order<br><span style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted);">Raised when a delegate believes rules of procedure are being violated.</span></td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Point of order: The delegate has exceeded the time limit."</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600; font-size: 0.88rem; line-height: 1.4;">2. Point of Personal Privilege<br><span style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted);">Raised when a delegate experiences personal discomfort (e.g. can’t hear, room too cold).</span></td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Point of personal privilege: Could the delegate please speak louder?"</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600; font-size: 0.88rem; line-height: 1.4;">3. Point of Parliamentary Inquiry<br><span style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted);">Asked when a delegate has a question about the rules or what is procedurally allowed.</span></td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Point of parliamentary inquiry: Can I yield my time to another delegate after my speech?"</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600; font-size: 0.88rem; line-height: 1.4;">4. Point of Information / Inquiry<br><span style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted);">To ask a question to another delegate, often after they have finished speaking and yielded time.</span></td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Point of Information: Does the delegate recognise the humanitarian impact of this resolution?"</td>
+                    </tr>
+                    <tr style="border-bottom: none;">
+                      <td style="padding: 0.75rem 1rem; font-weight: 600; font-size: 0.88rem; line-height: 1.4;">5. Right of Reply<br><span style="font-weight: 500; font-size: 0.8rem; color: var(--color-text-muted);">Requested when a delegate feels their country has been insulted or misrepresented.</span></td>
+                      <td style="padding: 0.75rem 1rem; font-style: italic; color: var(--color-text-dark);">"Right of Reply: The delegate of Country X has made offensive remarks about my nation's government."</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- CHAPTER 3: YIELDS EXPLAINED -->
+            <div id="res-ch-yields" class="res-content-pane" style="flex-direction: column; gap: 1.5rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">3. Yields</h3>
+              <p style="line-height: 1.6; color: var(--color-text-dark); margin: 0;">In Model United Nations, <strong>yields</strong> are used when a delegate finishes their formal GSL speech and has remaining speaking time. How you yield that time determines what happens next. Yields are only used during formal speeches.</p>
+              
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="background-color: var(--color-bg-light); border-left: 4px solid var(--color-podar-blue); padding: 1rem 1.25rem; border-radius: 0 8px 8px 0;">
+                  <h4 style="margin: 0 0 0.25rem 0; color: var(--color-navy); font-weight: 700; font-size: 0.95rem;">1. Yield to the Chair</h4>
+                  <p style="margin: 0 0 0.5rem 0; font-size: 0.88rem; color: var(--color-text-dark);">The delegate gives up the remainder of their time. The Chair moves to the next speaker. (Use this if you do not want to take questions or yield to another delegate).</p>
+                  <span style="font-style: italic; font-size: 0.85rem; color: var(--color-text-muted); display: block;">Speech: "With that, I yield the rest of my time to the chair."</span>
+                </div>
+
+                <div style="background-color: var(--color-bg-light); border-left: 4px solid var(--color-podar-blue); padding: 1rem 1.25rem; border-radius: 0 8px 8px 0;">
+                  <h4 style="margin: 0 0 0.25rem 0; color: var(--color-navy); font-weight: 700; font-size: 0.95rem;">2. Yield to Another Delegate</h4>
+                  <p style="margin: 0 0 0.5rem 0; font-size: 0.88rem; color: var(--color-text-dark);">You pass the rest of your speaking time to a delegate of your choice. (The receiving delegate cannot yield it again).</p>
+                  <span style="font-style: italic; font-size: 0.85rem; color: var(--color-text-muted); display: block;">Speech: "I yield the remainder of my time to the delegate of Brazil."</span>
+                </div>
+
+                <div style="background-color: var(--color-bg-light); border-left: 4px solid var(--color-podar-blue); padding: 1rem 1.25rem; border-radius: 0 8px 8px 0;">
+                  <h4 style="margin: 0 0 0.25rem 0; color: var(--color-navy); font-weight: 700; font-size: 0.95rem;">3. Yield to Questions</h4>
+                  <p style="margin: 0 0 0.5rem 0; font-size: 0.88rem; color: var(--color-text-dark);">You allow other delegates to ask you questions. The Chair will open the floor for points of information, and recognize delegates.</p>
+                  <span style="font-style: italic; font-size: 0.85rem; color: var(--color-text-muted); display: block;">Speech: "I now yield the remainder of my time to questions."</span>
+                </div>
+              </div>
+
+              <div style="background-color: #fffaf0; border: 1px dashed #dd6b20; border-radius: 8px; padding: 1.25rem; margin-top: 0.5rem;">
+                <h4 style="color: #dd6b20; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  Important Notes on Yielding
+                </h4>
+                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.88rem; color: #7b341e; display: flex; flex-direction: column; gap: 0.35rem; font-weight: 500;">
+                  <li>If you run out of time and hear the gavel, you <strong>cannot yield</strong>; you must yield before your time is up.</li>
+                  <li><strong>Yielding to the chair</strong> is always the safest option if you are unsure or nervous.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- CHAPTER 4: RULES OF PROCEDURE -->
+            <div id="res-ch-rules" class="res-content-pane" style="flex-direction: column; gap: 1.5rem; max-height: 580px; overflow-y: auto; padding-right: 0.5rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">E. Rules of Procedures Detailed</h3>
+              
+              <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">1. Roll Call of Delegates</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">Roll calls are conducted at the beginning of each session day. The chair announces each country's name alphabetically. After hearing their country, delegates answer with either:</p>
+                  <ul style="font-size: 0.88rem; margin: 0.35rem 0 0 0; padding-left: 1.25rem; color: var(--color-text-muted);">
+                    <li><strong>Present:</strong> You can choose to vote yes, no, or abstain on draft resolutions.</li>
+                    <li><strong>Present and Voting:</strong> You must vote yes or no on any final resolution. You cannot abstain.</li>
+                  </ul>
+                  <p style="font-size: 0.8rem; font-style: italic; color: var(--color-text-muted); margin-top: 0.35rem;">*If a delegate misses roll call, they must send a paper chit to the Chair stating their voting stance.</p>
+                </div>
+
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">2. General Speakers' List (GSL)</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">The default mode of debate. Established after roll call. Shows the order in which delegates deliver their formal <strong>Opening Speeches</strong>. Delegates raise placards to register to be added to the GSL.</p>
+                </div>
+
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">3. Setting the Agenda</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">The process of voting to decide which topic shortlisted from the study guides will be debated first. Passed by simple majority.</p>
+                </div>
+
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">4. Moderated Caucus</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">A formal, structured caucus enabling rapid discussions on specific sub-issues of the agenda. The proposing delegate must specify: **Total duration** (e.g. 10 mins), **Individual speaking time** (e.g. 60 seconds), and the **Topic**. Requires a simple majority of votes to pass.</p>
+                </div>
+
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">5. Unmoderated Caucus & Bloc Building</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">A temporary suspension of rules allowing delegates to move around, talk freely, build coalition groups (<strong>Blocs</strong>), and write Draft Resolutions.</p>
+                  <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 6px; padding: 0.75rem 1rem; margin-top: 0.5rem; font-size: 0.85rem;">
+                    <strong>Process for Building a Bloc:</strong><br>
+                    1. Find Like-Minded Delegates -> 2. Form a Bloc (at least 3 countries) -> 3. Discuss Solutions -> 4. Draft Resolution.
+                  </div>
+                </div>
+
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">6. Presenting Draft Resolutions & Amendments</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">Resolutions outline the proposed solutions. Once drafted, they are submitted to the Chair for review, and then formally read to the committee. Delegates can propose <strong>Amendments</strong> to clauses:</p>
+                  <ul style="font-size: 0.88rem; margin: 0.35rem 0 0 0; padding-left: 1.25rem; color: var(--color-text-muted);">
+                    <li><strong>Friendly:</strong> Approved by all sponsors. Added automatically.</li>
+                    <li><strong>Unfriendly:</strong> Not approved by sponsors. Debated and voted upon by the committee.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 style="color: var(--color-navy); font-size: 1rem; margin-top: 0; margin-bottom: 0.35rem; font-weight: 700;">7. Voting on Draft Resolutions</h4>
+                  <p style="font-size: 0.92rem; line-height: 1.5; color: var(--color-text-dark); margin: 0;">The final step. All debate ceases. The doors are sealed (no one enters or leaves, absolute silence). Delegates vote by raising placards (In Favour / Against / Abstain). A **2/3rd majority** is required for a resolution to pass and become a **Final Resolution**.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- CHAPTER 5: DOCUMENT SAMPLES -->
+            <div id="res-ch-documents" class="res-content-pane" style="flex-direction: column; gap: 1.5rem; max-height: 580px; overflow-y: auto; padding-right: 0.5rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">G. PMUN Documents & Samples</h3>
+              
+              <!-- Tabbed Documents selection inside this pane -->
+              <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                <button onclick="toggleDocTab('doc-position')" id="btn-doc-pos" style="background: none; border: none; font-weight: 700; font-size: 0.9rem; color: var(--color-podar-blue); border-bottom: 2px solid var(--color-podar-blue); padding-bottom: 0.25rem; cursor: pointer; transition: color 0.2s;">1. Position Paper</button>
+                <button onclick="toggleDocTab('doc-speech')" id="btn-doc-speech" style="background: none; border: none; font-weight: 700; font-size: 0.9rem; color: var(--color-text-muted); padding-bottom: 0.25rem; cursor: pointer; transition: color 0.2s;">2. Opening Speech</button>
+                <button onclick="toggleDocTab('doc-resolution')" id="btn-doc-res" style="background: none; border: none; font-weight: 700; font-size: 0.9rem; color: var(--color-text-muted); padding-bottom: 0.25rem; cursor: pointer; transition: color 0.2s;">3. Draft Resolution</button>
+              </div>
+
+              <!-- DOCUMENT 1: POSITION PAPER -->
+              <div id="doc-position" class="doc-pane" style="display: flex; flex-direction: column; gap: 1rem;">
+                <p style="font-size: 0.9rem; color: var(--color-text-dark); line-height: 1.5; margin: 0;">A <strong>Position Paper</strong> outlines your nation's stance, background policy, past actions, and solutions on the agenda. It must be submitted two days before the conference.</p>
+                
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; font-family: monospace; font-size: 0.85rem; line-height: 1.5; color: #2d3748; max-height: 350px; overflow-y: auto;">
+                  <strong>Committee:</strong> General Assembly (SOCHUM)<br>
+                  <strong>Topic:</strong> Brain Drain - The Migration of Health Care Workers<br>
+                  <strong>Country:</strong> Central African Republic (CAR)<br>
+                  <strong>Delegate Name:</strong> Raj Sharma<br>
+                  <strong>School Name:</strong> Podar International School, Mumbai<br>
+                  <hr style="border: none; border-top: 1px solid var(--color-border); margin: 0.75rem 0;">
+                  <strong>[Introduction/Background]</strong><br>
+                  The Central African Republic, one of the world's poorest nations, faces a severe healthcare crisis driven by brain drain — the emigration of doctors, nurses, and skilled workers to wealthier countries offering better pay and conditions. This has left CAR critically understaffed, with only 0.08 doctors per 1,000 people according to the WHO. The impact is continent-wide, with Africa losing approximately $2 billion annually due to skilled worker migration.<br><br>
+                  <strong>[Country’s Position/Policy]</strong><br>
+                  The Central African Republic recognizes brain drain as a critical threat to healthcare rights. While respecting individuals' freedom to work abroad, CAR stresses the need for stronger support systems to retain health workers within their communities. Wealthy nations must refrain from actively recruiting from already understaffed countries. CAR endorses the WHO Global Code of Practice on fair health worker recruitment, and echoes UN Secretary-General António Guterres' words that "no country can afford to lose its most skilled people, especially in health care, where every worker counts."<br><br>
+                  <strong>[Past International Actions]</strong><br>
+                  The World Health Organization (WHO) created the Global Code of Practice in 2010 to encourage ethical recruitment of health workers. Some countries have also supported African nations with medical training and aid. However, these actions have not been strong enough. Many health workers still leave because their home countries lack proper hospitals, pay, and safety. The United Nations Development Programme (UNDP) and African Union have both highlighted the brain drain as a threat to development and health equality.<br><br>
+                  <strong>[Possible Solutions]</strong><br>
+                  The Central African Republic believes that addressing brain drain requires both local action and international support, and proposes the following measures:<br>
+                  1. Increased international funding to improve hospitals, equipment, and health worker training.<br>
+                  2. Better incentives such as improved pay, housing, and job security to retain health workers locally.<br>
+                  3. Ethical recruitment agreements to prevent developed nations from poaching health workers from shortage-affected countries.<br>
+                  4. Return programs to encourage and support health workers abroad to come back home.<br>
+                  5. Regional cooperation with African nations to establish shared training programs.<br><br>
+                  <strong>[Conclusion]</strong><br>
+                  The Central African Republic believes that health care is a basic human right. We must work together to keep our health workers in the country and improve the system for all. With international support and fair practices, we can reduce brain drain and ensure that every person—no matter where they live—has access to healthcare.
+                </div>
+              </div>
+
+              <!-- DOCUMENT 2: OPENING SPEECH -->
+              <div id="doc-speech" class="doc-pane" style="display: none; flex-direction: column; gap: 1rem;">
+                <p style="font-size: 0.9rem; color: var(--color-text-dark); line-height: 1.5; margin: 0;">An <strong>Opening Speech</strong> is the first address you make (1-2 minutes, 150-250 words) to present your position at the start of the conference.</p>
+                
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; font-family: monospace; font-size: 0.85rem; line-height: 1.5; color: #2d3748; max-height: 350px; overflow-y: auto;">
+                  <strong>Committee:</strong> United Nations Development Programme (UNDP)<br>
+                  <strong>Country:</strong> Republic of Kenya<br>
+                  <strong>Agenda:</strong> Strengthening Rural Water Infrastructure in Sub-Saharan Africa to Advance SDG 6<br>
+                  <hr style="border: none; border-top: 1px solid var(--color-border); margin: 0.75rem 0;">
+                  <strong>Honourable Chair, distinguished delegates,</strong><br><br>
+                  The Republic of Kenya is honoured to participate in this crucial discussion on strengthening rural water infrastructure in Sub-Saharan Africa, in support of achieving Sustainable Development Goal 6.<br><br>
+                  Access to clean water is not just a human right; it is the foundation for public health, education, agriculture, and gender equality. In Kenya, despite significant progress, millions of people in rural communities still face daily challenges in accessing safe and reliable water.<br><br>
+                  The Republic of Kenya believes that addressing this issue requires a multi-dimensional approach: improving local water infrastructure, supporting community-based water management, investing in renewable energy solutions for pumping and purification, and most importantly, ensuring international cooperation.<br><br>
+                  Kenya applauds the efforts of the African Union, UN-Water, and various non-governmental organisations working tirelessly on the ground. However, we urge all member states to increase their financial and technical commitment to building climate-resilient water systems that will serve future generations.<br><br>
+                  We stand ready to collaborate, share successful models such as our Water Sector Trust Fund, and work with all delegates towards equitable, innovative, and sustainable solutions for rural water access across our continent.<br><br>
+                  <strong>Thank you.</strong>
+                </div>
+
+                <div style="background-color: #eef5fc; border-left: 4px solid var(--color-podar-blue); padding: 1rem; border-radius: 0 6px 6px 0; font-size: 0.85rem; color: var(--color-navy); font-weight: 500;">
+                  <strong>Speaking Tips:</strong> Be concise (stick to 1-2 minutes), remain country-specific (represent your assigned nation, not your own opinions), use formal diplomatic language, and deliver with confidence and steady pacing.
+                </div>
+              </div>
+
+              <!-- DOCUMENT 3: DRAFT RESOLUTION -->
+              <div id="doc-resolution" class="doc-pane" style="display: none; flex-direction: column; gap: 1rem;">
+                <p style="font-size: 0.9rem; color: var(--color-text-dark); line-height: 1.5; margin: 0;">A <strong>Draft Resolution</strong> is a formal proposal. It contains preambulatory clauses (context) and operative clauses (action items).</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0;">
+                  <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.8rem; line-height: 1.4; color: var(--color-text-dark);">
+                    <strong>Common Preambulatory Phrases:</strong><br>
+                    <span style="color: var(--color-text-muted);">Acknowledging, Affirming, Alarmed, Appreciating, Bearing in mind, Deeply concerned, Emphasising, Having adopted, Noting with concern, Recalling, Recognising, Stressing, Welcoming.</span>
+                  </div>
+                  <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.8rem; line-height: 1.4; color: var(--color-text-dark);">
+                    <strong>Common Operative Phrases (Numbered):</strong><br>
+                    <span style="color: var(--color-text-muted);">Calls upon, Condemns, Encourages, Endorses, Invites, Reaffirms, Recommends the adoption of, Requests, Supports, Urges all parties.</span>
+                  </div>
+                </div>
+
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; font-family: monospace; font-size: 0.85rem; line-height: 1.5; color: #2d3748; max-height: 250px; overflow-y: auto;">
+                  <strong>Committee:</strong> United Nations Children’s Fund (UNICEF)<br>
+                  <strong>Sponsors:</strong> India, Bangladesh, Nepal<br>
+                  <strong>Signatories:</strong> Sri Lanka, Bhutan, Pakistan, Maldives<br>
+                  <strong>Draft Resolution Number:</strong> DR/1.1<br>
+                  <hr style="border: none; border-top: 1px solid var(--color-border); margin: 0.75rem 0;">
+                  <strong>Preambulatory Clauses:</strong><br>
+                  <u>Recognizing</u> that education is a fundamental right of every child as outlined in the Convention on the Rights of the Child,<br>
+                  <u>Concerned</u> by the disparities in access to education in South Asia due to factors including poverty, gender inequality, and geographic remoteness,<br>
+                  <u>Recalling</u> Sustainable Development Goal 4 which aims to "ensure inclusive and equitable quality education and promote lifelong learning opportunities for all,"<br><br>
+                  <strong>Operative Clauses:</strong><br>
+                  1. <u>Urges</u> member states in South Asia to strengthen national education strategies through community-based awareness initiatives;<br>
+                  2. <u>Establishes</u> the South Asia Regional Education Fund (SAREF) in cooperation with the World Bank and UNESCO to finance school construction and teacher training;<br>
+                  3. <u>Recommends</u> the creation of mobile classrooms using renewable energy to reach children in rural and disaster-affected areas;<br>
+                  4. <u>Calls upon</u> member states to collaborate on a regional teacher training exchange program under the SAARC framework.
+                </div>
+              </div>
+            </div>
+
+            <!-- CHAPTER 6: REFERENCE LINKS -->
+            <div id="res-ch-links" class="res-content-pane" style="flex-direction: column; gap: 1.5rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-navy); margin: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">F. Reference Links & Resources</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+                  <h4 style="color: var(--color-navy); font-size: 0.95rem; margin-top: 0; margin-bottom: 0.75rem; font-weight: 700;">Rules of Procedure Video Guides</h4>
+                  <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.88rem; color: var(--color-text-dark); display: flex; flex-direction: column; gap: 0.5rem; font-weight: 500;">
+                    <li><a href="https://www.skillsphere.org/model-un-training/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">Skillsphere Model UN Training</a> (12 Videos by Anansh)</li>
+                    <li><a href="https://bestdelegate.com/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">Best Delegate Portal</a></li>
+                    <li><a href="https://www.munprep.org/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">MUN Prep Guides</a></li>
+                    <li><a href="https://munish.nl/dl/mun_official/Final_MUN_Guide.pdf" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">Official MUN Handbook (PDF)</a></li>
+                  </ul>
+                </div>
+
+                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+                  <h4 style="color: var(--color-navy); font-size: 0.95rem; margin-top: 0; margin-bottom: 0.75rem; font-weight: 700;">Vocabulary & Glossary Links</h4>
+                  <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.88rem; color: var(--color-text-dark); display: flex; flex-direction: column; gap: 0.5rem; font-weight: 500;">
+                    <li><a href="https://www.munprep.org/mun-vocabulary/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">MUN Vocabulary list</a></li>
+                    <li><a href="https://www.wisemee.com/mun-glossary/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">WiseMee MUN Glossary</a></li>
+                    <li><a href="https://bestdelegate.com/model-un-made-easy-top-20-important-terms-to-know-in-committee/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none;">Top 20 Essential Terms</a></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+                <h4 style="color: var(--color-navy); font-size: 0.95rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">Online Applications for Voting Procedures</h4>
+                <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0; margin-bottom: 0.75rem; font-weight: 500;">Tools recommended by the Secretariat desk for conducting caucus tracking and voting:</p>
+                <div style="display: flex; gap: 1.5rem; font-size: 0.88rem; font-weight: 600;">
+                  <a href="https://muncoordinated.io/" target="_blank" style="color: var(--color-podar-blue); text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">🌐 muncoordinated.io</a>
+                  <a href="https://mymun.com/mun-command" target="_blank" style="color: var(--color-podar-blue); text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">🌐 mymun.com/mun-command</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subpage View 3E: SCHEDULE -->
+    <div id="schedule-tab" class="tab-content">
+      <div class="settings-section-card animate-fade-in" style="padding: 2.5rem;">
+        <h3 style="font-family: var(--font-serif); font-size:2rem; margin-bottom:1.5rem; color:var(--color-navy);">Overall Conference Schedule</h3>
+        
+        <div class="table-container">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Day / Session</th>
+                <th>Time Range</th>
+                <th>Activity Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600; color: var(--color-podar-blue);">Day 1 — Session 1</td>
+                <td>09:00 AM – 10:30 AM</td>
+                <td>Opening Ceremony & Keynote Address (Main Auditorium)</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--color-podar-blue);">Day 1 — Session 2</td>
+                <td>11:00 AM – 01:00 PM</td>
+                <td>Committee Session I: Roll Call & General Speakers List (GSL)</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--color-podar-blue);">Day 1 — Session 3</td>
+                <td>02:00 PM – 04:30 PM</td>
+                <td>Committee Session II: Moderated & Unmoderated Caucus Debate</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--color-podar-blue);">Day 2 — Session 4</td>
+                <td>09:00 AM – 11:30 AM</td>
+                <td>Committee Session III: Draft Resolution Writing & Working Group Lobbying</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--color-podar-blue);">Day 2 — Session 5</td>
+                <td>12:30 PM – 03:00 PM</td>
+                <td>Committee Session IV: Resolution Amendment & Voting Procedures</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600; color: var(--color-podar-blue);">Day 2 — Session 6</td>
+                <td>03:30 PM – 04:30 PM</td>
+                <td>Closing & Awards Ceremony (Auditorium)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subpage View 3F: CONTACT -->
+    <div id="contact-tab" class="tab-content">
+      <div class="settings-section-card animate-fade-in" style="padding: 2.5rem;">
+        <h2 style="font-family: var(--font-serif); font-size:2.2rem; margin-bottom:0.5rem; color:var(--color-navy);">Contact Secretariat</h2>
+        <p style="color: var(--color-text-muted); margin-bottom: 2rem;">For registration concerns, committee queries, or administrative help, reach out to our team.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1.5rem;">
+          <!-- Podar International School -->
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.5rem;">
+            <h4 style="font-family: var(--font-sans); color: var(--color-navy); margin-bottom: 0.75rem; font-size: 1.15rem;">Podar International School</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.6;">
+              MUN Secretariat Desk<br>
+              Mumbai, Maharashtra, India<br>
+              Website: podareducation.org
+            </p>
+          </div>
+
+          <!-- MUN Coordinator -->
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.5rem;">
+            <h4 style="font-family: var(--font-sans); color: var(--color-navy); margin-bottom: 0.75rem; font-size: 1.15rem;">MUN Coordinator</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.6;">
+              Email: coordination.mun@podar.edu<br>
+              Enquiries: PMUN Coordination Desk
+            </p>
+          </div>
+
+          <!-- PMUN Team -->
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 1.5rem;">
+            <h4 style="font-family: var(--font-sans); color: var(--color-navy); margin-bottom: 0.75rem; font-size: 1.15rem;">PMUN Team</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.6;">
+              Email: pmun@podar.edu<br>
+              Support: PMUN Secretariat Desk
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</body>
+</html>
