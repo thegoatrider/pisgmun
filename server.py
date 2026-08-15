@@ -738,10 +738,14 @@ def add_security_headers(response):
         "img-src 'self' data:; "
         "frame-ancestors 'none';"
     )
-    # Force browser to never cache pages or assets during active development
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
+    # Serve caching headers based on static vs dynamic content
+    path = request.path.lower()
+    if path.endswith(('.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.pdf')):
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    else:
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
     return response
 
 

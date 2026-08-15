@@ -92,6 +92,73 @@
     .social-link:hover {
       background-color: #0c56b3 !important;
     }
+  
+    /* Mobile/Tablet Responsiveness Overrides */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem 1.5rem !important;
+        flex-direction: column !important;
+        height: auto !important;
+        gap: 0.75rem !important;
+      }
+      header nav {
+        gap: 1rem !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      header span {
+        font-size: 0.75rem !important;
+        white-space: normal !important;
+        text-align: center !important;
+      }
+      #hero-section {
+        padding: 2.5rem 1.5rem !important;
+        min-height: auto !important;
+        background-position: center top !important;
+        background-image: linear-gradient(to bottom, rgba(210, 226, 248, 0.92) 0%, rgba(210, 226, 248, 0.8) 100%), url('hero-banner-raw_v6.png') !important;
+      }
+      #hero-content {
+        max-width: 100% !important;
+        text-align: center !important;
+        align-items: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      #hero-content h1 {
+        font-size: 3.5rem !important;
+      }
+      #hero-content h2 {
+        font-size: 1.6rem !important;
+      }
+      #hero-content p {
+        font-size: 0.95rem !important;
+      }
+      #about-section {
+        padding: 2.5rem 1.5rem !important;
+      }
+      #portal-access {
+        padding: 2.5rem 1.5rem !important;
+      }
+      #portal-access h2 {
+        font-size: 2rem !important;
+      }
+      .portal-card {
+        width: 100% !important;
+        max-width: 380px !important;
+        min-height: auto !important;
+      }
+      footer {
+        padding: 2.5rem 1.5rem !important;
+      }
+      footer .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+        text-align: center !important;
+      }
+      footer .social-icons {
+        justify-content: center !important;
+      }
+    }
     </style>
 </head>
 <body class="theme-light">
@@ -105,7 +172,7 @@
   <header style="background-color: #00204a; padding: 1.25rem 4rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15); height: 42px;">
     <div style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;" id="navbar-brand">
       <!-- Clean Podar Tree Logo beside school name -->
-      <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
+      <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
       <!-- Podar International School text in one single line -->
       <div style="display: flex; align-items: center; color: #ffffff; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 0.75rem; height: 32px;">
         <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif; white-space: nowrap;">PODAR INTERNATIONAL SCHOOL</span>
@@ -130,7 +197,7 @@
         <!-- Top Row: Crest Logo + PMUN Heading -->
         <div style="display: flex; align-items: center; gap: 1.5rem;">
           <!-- UN detailed oak tree crest logo (size increased to 84px and multiply blended for seamless background) -->
-          <img src="hero-logo-navy_v9.png" alt="PMUN Crest" style="height: 84px; width: 84px; object-fit: contain; mix-blend-mode: multiply;">
+          <img src="hero-logo-navy_v9.png" loading="lazy" alt="PMUN Crest" style="height: 84px; width: 84px; object-fit: contain; mix-blend-mode: multiply;">
           <h1 style="font-family: 'Playfair Display', serif; font-size: 5.2rem; font-weight: 500; color: #00204a; margin: 0; line-height: 0.9; letter-spacing: 2px;">PMUN</h1>
         </div>
         
@@ -304,7 +371,7 @@
       <!-- Footer Col 1 -->
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="width: 36px; height: 36px; object-fit: contain; filter: brightness(0) invert(1);">
+          <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="width: 36px; height: 36px; object-fit: contain; filter: brightness(0) invert(1);">
           <span style="font-weight: 800; font-size: 1rem; letter-spacing: 1px; font-family: 'Playfair Display', serif;">PODAR INTERNATIONAL SCHOOL</span>
         </div>
         <p style="color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0;">

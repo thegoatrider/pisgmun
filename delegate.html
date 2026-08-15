@@ -63,6 +63,59 @@
       color: #ffffff;
       border-color: #ffffff;
     }
+  
+    /* Mobile/Tablet Responsiveness Overrides for Public and Dashboard viewports */
+    @media (max-width: 768px) {
+      #public-header {
+        padding: 1rem 1.5rem !important;
+        flex-direction: column !important;
+        height: auto !important;
+        gap: 0.75rem !important;
+      }
+      #public-header nav {
+        gap: 1rem !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+      }
+      #public-header span {
+        font-size: 0.75rem !important;
+        white-space: normal !important;
+        text-align: center !important;
+      }
+      .grade-cards-grid {
+        grid-template-columns: 1fr !important;
+        padding: 0 1rem !important;
+      }
+      .grade-card-new {
+        min-height: auto !important;
+        padding: 2rem 1.5rem !important;
+      }
+      /* Dashboard Header and forms */
+      .delegate-header {
+        flex-direction: column !important;
+        padding: 1rem !important;
+        height: auto !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      .delegate-header div[style*="border-left"] {
+        border-left: none !important;
+        padding-left: 0 !important;
+        margin-top: 0.5rem !important;
+      }
+      /* Resource chapter sidebar layout */
+      .settings-section-card div[style*="display: flex; gap: 2rem;"] {
+        flex-direction: column !important;
+      }
+      .settings-section-card div[style*="width: 25%;"] {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--color-border) !important;
+        padding-right: 0 !important;
+        padding-bottom: 1rem !important;
+        min-height: auto !important;
+      }
+    }
     </style>
 </head>
 <body class="theme-light">
@@ -76,7 +129,7 @@
   <!-- PUBLIC HEADER (Shown only in public/anonymous mode) -->
   <header id="public-header" style="background-color: #00204a; padding: 1.25rem 4rem; display: none; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15); height: 42px;">
     <div id="brand-logo-container-public" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-      <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
+      <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
       <div style="display: flex; align-items: center; color: #ffffff; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 0.75rem; height: 32px;">
         <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif; white-space: nowrap;">PODAR INTERNATIONAL SCHOOL</span>
       </div>
@@ -96,7 +149,7 @@
       <div style="display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 1.25rem 2rem; position: relative;">
         <!-- Left Side: Podar International School, Godhani, Nagpur & MUN -->
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="width: 56px; height: 56px; object-fit: contain;">
+          <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="width: 56px; height: 56px; object-fit: contain;">
           <div style="text-align: left; line-height: 1.25;">
             <h2 style="font-family: var(--font-sans); font-weight: 900; font-size: 1.25rem; color: var(--color-navy); margin: 0; letter-spacing: 0.5px; text-transform: uppercase;">PODAR INTERNATIONAL SCHOOL</h2>
             <span style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); display: block; letter-spacing: 0.5px; margin-top: 0.05rem;">GODHANI, NAGPUR</span>
@@ -219,7 +272,7 @@
           <div style="width: 100%;">
             <!-- Tree Logo -->
             <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">ECOSOC</h3>
             <!-- Divider -->
@@ -244,7 +297,7 @@
           <div style="width: 100%;">
             <!-- Tree Logo -->
             <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UN Women</h3>
             <!-- Divider -->
@@ -269,7 +322,7 @@
           <div style="width: 100%;">
             <!-- Tree Logo -->
             <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNHRC</h3>
             <!-- Divider -->
@@ -294,7 +347,7 @@
           <div style="width: 100%;">
             <!-- Tree Logo -->
             <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">FAO</h3>
             <!-- Divider -->
@@ -319,7 +372,7 @@
           <div style="width: 100%;">
             <!-- Tree Logo -->
             <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNEP</h3>
             <!-- Divider -->
@@ -344,7 +397,7 @@
           <div style="width: 100%;">
             <!-- Tree Logo -->
             <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNICEF</h3>
             <!-- Divider -->
