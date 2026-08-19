@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View PDF — PMUN 2026</title>
+  <link rel="stylesheet" href="global.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #f7f9fc;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+    }
+    .pdf-viewer-header {
+      background-color: #00204a;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .btn-back-link {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.15);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .btn-back-link:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .pdf-container {
+      max-width: 1100px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
+    .pdf-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .pdf-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .btn-download {
+      background-color: #0c56b3;
+      color: #ffffff;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.2s;
+    }
+    .btn-download:hover {
+      background-color: #09428b;
+    }
+    .iframe-wrapper {
+      width: 100%;
+      height: 75vh;
+      min-height: 500px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #f8fafc;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    @media (max-width: 768px) {
+      .pdf-viewer-header { padding: 0.75rem 1rem; }
+      .pdf-container { margin: 0.75rem auto; padding: 0 0.5rem; }
+      .pdf-card { padding: 1rem 0.75rem; border-radius: 8px; }
+      .iframe-wrapper { height: 70vh; min-height: 420px; }
+      h2 { font-size: 1.2rem !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="pdf-viewer-header">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <a href="javascript:history.back()" class="btn-back-link">← Back</a>
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-size: 0.9rem; font-weight: 800; font-family: 'Playfair Display', serif; letter-spacing: 1px;">PODAR MUN 2026</span>
+        <span style="font-size: 0.65rem; color: rgba(255,255,255,0.75); text-transform: uppercase;">Godhani, Nagpur</span>
+      </div>
+    </div>
+    <a id="nav-direct-download" href="#" download class="btn-download" style="font-size: 0.78rem; padding: 0.4rem 0.85rem;">
+      ⬇ Download PDF
+    </a>
+  </header>
+
+  <!-- MAIN VIEWER CONTAINER -->
+  <div class="pdf-container">
+    <div class="pdf-card">
+      <div class="pdf-actions">
+        <div>
+          <h2 id="pdf-title" style="font-family: 'Playfair Display', serif; color: #00204a; margin: 0; font-size: 1.5rem; font-weight: 700;">Document Viewer</h2>
+          <p style="color: #64748b; font-size: 0.85rem; margin: 0.25rem 0 0 0;">Official Podar MUN 2026 Reference Document</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <a id="btn-raw-file" href="#" target="_blank" rel="noopener" class="btn-download" style="background-color: #f1f5f9; color: #00204a; border: 1px solid #cbd5e1;">
+            ↗ Open Raw File
+          </a>
+          <a id="btn-direct-download" href="#" download class="btn-download">
+            ⬇ Download PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- IFrame Container with Smartphone Fallback -->
+      <div class="iframe-wrapper">
+        <iframe id="pdf-iframe" src="about:blank" title="PDF Document Viewer"></iframe>
+      </div>
+
+      <div style="margin-top: 0.85rem; text-align: center; font-size: 0.82rem; color: #64748b;">
+        Having trouble viewing on your smartphone? <a id="link-gdocs-fallback" href="#" target="_blank" style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Click here to open in Mobile Google PDF Viewer</a> or <a id="link-download-fallback" href="#" download style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Download Direct File</a>.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      let file = urlParams.get("file") || "resources/unep_background_guide.pdf";
+      let title = urlParams.get("title") || "Background Guide";
+
+      // Ensure root relative path
+      if (!file.startsWith("/")) {
+        file = "/" + file;
+      }
+
+      const cleanTitle = title.replace(/\.pdf$/i, "").replace(/_/g, " ").toUpperCase();
+      document.getElementById("pdf-title").innerText = cleanTitle;
+      document.title = `${cleanTitle} — PMUN 2026`;
+
+      // Absolute Vercel URL for Google Docs Viewer compatibility
+      const fullVercelUrl = `https://pisgmun.vercel.app${file}`;
+      const gdocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullVercelUrl)}&embedded=true`;
+
+      // Detect mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      const iframe = document.getElementById("pdf-iframe");
+      
+      // On mobile browsers (iOS Safari / Android Chrome), use Google Docs viewer embed for 100% reliable inline rendering
+      if (isMobile) {
+        iframe.src = gdocsViewerUrl;
+      } else {
+        iframe.src = file;
+      }
+
+      // Action links
+      document.getElementById("nav-direct-download").href = file;
+      document.getElementById("btn-direct-download").href = file;
+      document.getElementById("btn-raw-file").href = file;
+      document.getElementById("link-gdocs-fallback").href = gdocsViewerUrl;
+      document.getElementById("link-download-fallback").href = file;
+    });
+  </script>
+
+</body>
+</html>
