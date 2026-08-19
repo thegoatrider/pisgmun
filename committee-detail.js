@@ -1,12 +1,15 @@
 // Route Auth Guard
     (async () => {
-      const isPublic = new URLSearchParams(window.location.search).get("public") === "true";
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPublic = urlParams.get("public") === "true";
       if (isPublic) return;
       
       await DB.init();
       await AppState.loadData();
-      if (!AppState.checkAuth("delegate")) {
-        window.location.href = "login.html?role=delegate";
+      const isLoggedIn = AppState.checkAuth("delegate");
+      if (!isLoggedIn) {
+        urlParams.set("public", "true");
+        window.location.replace(`committee-detail.html?${urlParams.toString()}`);
       }
     })();
 
@@ -803,7 +806,7 @@
 
       // Trigger guide layout display if guide database contains entries for this committee
       const cleanCommId = committeeId.toLowerCase();
-      if (BACKGROUND_GUIDES[cleanCommId] && !isPublic) {
+      if (BACKGROUND_GUIDES[cleanCommId]) {
         const wrap = container.querySelector("#committee-bg-guide-wrapper");
         const normal = container.querySelector("#committee-normal-resources");
         if (wrap) wrap.style.display = "block";

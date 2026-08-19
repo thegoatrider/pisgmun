@@ -251,20 +251,20 @@ document.addEventListener("click", function(e) {
       if (isPublic) {
         // Hide navigation bar container
         const nav = document.querySelector(".nav-container");
-        if (nav) nav.style.display = "none";
+        if (nav) nav.style.setProperty("display", "none", "important");
         
         // Hide watermark
         const watermark = document.querySelector('div[style*="opacity: 0.08"]');
-        if (watermark) watermark.style.display = "none";
+        if (watermark) watermark.style.setProperty("display", "none", "important");
         
         // Hide delegate header
         const delegateHeader = document.querySelector(".delegate-header");
-        if (delegateHeader) delegateHeader.style.display = "none";
+        if (delegateHeader) delegateHeader.style.setProperty("display", "none", "important");
 
         // Show public header
         const publicHeader = document.getElementById("public-header");
         if (publicHeader) {
-          publicHeader.style.display = "flex";
+          publicHeader.style.setProperty("display", "flex", "important");
           const activeLink = document.getElementById("pub-link-" + activeTab);
           if (activeLink) activeLink.classList.add("active");
           const brandLogo = document.getElementById("brand-logo-container-public");
