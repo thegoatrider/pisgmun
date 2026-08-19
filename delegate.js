@@ -14,17 +14,16 @@ document.addEventListener("click", function(e) {
 // Route Auth Guard
     (async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const activeTab = urlParams.get("tab");
       const isPublicParam = urlParams.get("public") === "true";
-      const publicTabs = ["about", "committees", "rules", "resources", "contact"];
-      const isPublic = isPublicParam || (activeTab && publicTabs.includes(activeTab.toLowerCase()));
-
-      if (isPublic) return;
+      if (isPublicParam) return;
       
       await DB.init();
       await AppState.loadData();
-      if (!AppState.checkAuth("delegate")) {
-        window.location.href = "login.html?role=delegate";
+      const isLoggedIn = AppState.checkAuth("delegate");
+      
+      if (!isLoggedIn) {
+        urlParams.set("public", "true");
+        window.location.replace(`delegate.html?${urlParams.toString()}`);
       }
     })();
 
