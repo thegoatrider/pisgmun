@@ -622,10 +622,19 @@
       // Format schedule
       const scheduleLines = committee.schedule ? committee.schedule.split("|").map(line => `<li style="margin-bottom:0.5rem;">${line.trim()}</li>`).join("") : "<li>Schedule details will be updated shortly.</li>";
 
+      // Back button target fix
+      const backNavTarget = isPublic ? "committees.html" : "delegate.html?tab=committees";
+
+      // Root absolute PDF URL for Vercel & Mobile compatibility
+      const rawPdfPath = pdfMapping[committeeId.toLowerCase()] || 'resources/rules_of_procedure.pdf';
+      const rootPdfUrl = rawPdfPath.startsWith('/') ? rawPdfPath : '/' + rawPdfPath;
+      const fullVercelPdfUrl = `https://pisgmun.vercel.app${rootPdfUrl}`;
+      const googleDocsPdfUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullVercelPdfUrl)}&embedded=true`;
+
       // Inject Layout
       container.innerHTML = `
         <!-- Back Button -->
-        <button class="btn-back" style="margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; border: none; background: none; color: var(--color-navy); font-weight: 600; cursor: pointer;" onclick="window.location.href='delegate.html?tab=committees${isPublic ? \'&public=true\' : \'\'}'">← Back to Committees</button>
+        <button class="btn-back" style="margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; border: none; background: none; color: var(--color-navy); font-weight: 600; cursor: pointer;" onclick="window.location.href='${backNavTarget}'">← Back to Committees</button>
 
         <!-- Header -->
         <div class="grade-detail-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--color-border); padding-bottom: 1.5rem; margin-bottom: 2rem;">
@@ -634,6 +643,34 @@
             <h2 style="font-family: var(--font-serif); font-size: 2.2rem; color: var(--color-navy); margin: 0;">${committee.id.toUpperCase()} COMMITTEE</h2>
           </div>
           <img src="resources/podar_tree_logo.png" alt="Podar Logo" style="width: 58px; height: 58px; object-fit: contain;">
+        </div>
+
+        <!-- OFFICIAL PDF BACKGROUND GUIDE VIEWER CARD -->
+        <div class="pdf-viewer-card" style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-bottom: 2px solid #edf2f7; padding-bottom: 1rem; margin-bottom: 1.25rem;">
+            <div>
+              <h3 style="font-family: var(--font-serif); color: var(--color-navy); margin: 0; font-size: 1.4rem; font-weight: 700;">📄 Official ${committee.name} Background Guide</h3>
+              <p style="color: var(--color-text-muted); font-size: 0.88rem; margin: 0.25rem 0 0 0;">View or download the official conference preparation manual below.</p>
+            </div>
+            <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+              <a href="${rootPdfUrl}" target="_blank" rel="noopener" style="background-color: var(--color-podar-blue); color: #ffffff; padding: 0.65rem 1.1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
+                ↗ Open PDF in Browser
+              </a>
+              <a href="${rootPdfUrl}" download="${committeeId}_background_guide.pdf" style="background-color: #f1f5f9; color: var(--color-navy); border: 1px solid var(--color-border); padding: 0.65rem 1.1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
+                ⬇ Download PDF File
+              </a>
+            </div>
+          </div>
+
+          <!-- Embedded Responsive PDF Container -->
+          <div style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background-color: #f8fafc;">
+            <iframe src="${rootPdfUrl}" style="width: 100%; height: 580px; border: none;" title="${committee.name} Background Guide PDF">
+              <p style="padding: 1.5rem; text-align: center;">Your browser does not support embedded PDFs. <a href="${rootPdfUrl}" target="_blank">Click here to open PDF directly</a>.</p>
+            </iframe>
+          </div>
+          <div style="margin-top: 0.85rem; text-align: center; font-size: 0.82rem; color: var(--color-text-muted);">
+            Mobile user? If the preview above is slow to load, <a href="${googleDocsPdfUrl}" target="_blank" style="color: var(--color-podar-blue); font-weight: 700; text-decoration: underline;">Click here to view via Mobile PDF Viewer</a> or <a href="${rootPdfUrl}" target="_blank" style="color: var(--color-podar-blue); font-weight: 700; text-decoration: underline;">Download Direct File</a>.
+          </div>
         </div>
 
         <!-- REGISTER FIRST CALLOUT -->
