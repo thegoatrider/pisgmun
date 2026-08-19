@@ -236,23 +236,29 @@ function setupPreferredCommitteeSelect() {
     const cleanComm = commId ? commId.toLowerCase() : "";
     const allowedGrades = commGrades[cleanComm];
 
-    Array.from(gradeSelect.options).forEach(opt => {
-      if (!opt.value) return;
-      const gradeNum = parseInt(opt.value);
-      if (!allowedGrades || allowedGrades.includes(gradeNum)) {
-        opt.disabled = false;
-        opt.hidden = false;
-        opt.style.display = "";
-      } else {
-        opt.disabled = true;
-        opt.hidden = true;
-        opt.style.display = "none";
+    const currentVal = gradeSelect.value;
+    gradeSelect.innerHTML = '<option value="" disabled selected>Select Grade</option>';
+
+    const allGradeOpts = [
+      { val: 7, text: "Grade 7" },
+      { val: 8, text: "Grade 8" },
+      { val: 9, text: "Grade 9" },
+      { val: 10, text: "Grade 10" }
+    ];
+
+    allGradeOpts.forEach(g => {
+      if (!allowedGrades || allowedGrades.includes(g.val)) {
+        const option = document.createElement("option");
+        option.value = g.val.toString();
+        option.textContent = g.text;
+        gradeSelect.appendChild(option);
       }
     });
 
     if (allowedGrades) {
-      const currentGrade = parseInt(gradeSelect.value);
-      if (!currentGrade || !allowedGrades.includes(currentGrade)) {
+      if (currentVal && allowedGrades.includes(parseInt(currentVal))) {
+        gradeSelect.value = currentVal;
+      } else {
         gradeSelect.value = allowedGrades[0].toString();
       }
     }
@@ -268,22 +274,35 @@ function setupPreferredCommitteeSelect() {
     let selectedGrade = parseInt(document.getElementById("field-grade").value);
     if (!selectedGrade) return;
 
-    const currentComm = select.value.toLowerCase();
-    if (currentComm && !isCommForGrade(currentComm, selectedGrade)) {
-      select.value = "";
+    select.innerHTML = '<option value="" disabled selected>Select Committee</option>';
+    
+    const cat1List = committeesList.filter(c => {
+      const id = c.id.toLowerCase();
+      return ["unep", "un-women", "fao"].includes(id) && isCommForGrade(id, selectedGrade);
+    });
+    
+    const cat2List = committeesList.filter(c => {
+      const id = c.id.toLowerCase();
+      return ["unhrc", "unicef", "ecosoc"].includes(id) && isCommForGrade(id, selectedGrade);
+    });
+
+    if (cat1List.length > 0) {
+      let group1 = `<optgroup label="7th & 8th Grade Committees">`;
+      cat1List.forEach(comm => {
+        group1 += `<option value="${comm.id}">${comm.name}</option>`;
+      });
+      group1 += `</optgroup>`;
+      select.innerHTML += group1;
     }
 
-    Array.from(select.options).forEach(opt => {
-      if (!opt.value) return;
-      const optCommId = opt.value.toLowerCase();
-      if (isCommForGrade(optCommId, selectedGrade)) {
-        opt.disabled = false;
-        opt.style.display = "block";
-      } else {
-        opt.disabled = true;
-        opt.style.display = "none";
-      }
-    });
+    if (cat2List.length > 0) {
+      let group2 = `<optgroup label="9th & 10th Grade Committees">`;
+      cat2List.forEach(comm => {
+        group2 += `<option value="${comm.id}">${comm.name}</option>`;
+      });
+      group2 += `</optgroup>`;
+      select.innerHTML += group2;
+    }
   });
 
   if (committeeVal) {
