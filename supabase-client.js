@@ -12,7 +12,7 @@ const DB_DEFAULT_COMMITTEES = {
   "ecosoc": {
     id: "ecosoc",
     name: "Economic and Social Council (ECOSOC)",
-    grade: 8,
+    grade: 10,
     description: "ECOSOC deals with international economic, social, cultural, educational, and health matters. This year, ECOSOC simulates online trade dynamics and digital economies.",
     agenda: "Food Supply Chains in the Age of Online Commerce",
     eb_chair: "Aanya Sharma",
@@ -31,7 +31,7 @@ const DB_DEFAULT_COMMITTEES = {
   "un-women": {
     id: "un-women",
     name: "UN Women",
-    grade: 9,
+    grade: 8,
     description: "UN Women is the UN entity dedicated to gender equality and the empowerment of women. This committee addresses international gender disparities and empowerment programs.",
     agenda: "Women's Rights and Empowerment",
     eb_chair: "Kiara Sen",
@@ -69,7 +69,7 @@ const DB_DEFAULT_COMMITTEES = {
   "fao": {
     id: "fao",
     name: "Food and Agriculture Organization (FAO)",
-    grade: 9,
+    grade: 8,
     description: "The FAO leads international efforts to defeat hunger and improve nutrition and food security globally.",
     agenda: "Food Insecurity in Conflict Areas",
     eb_chair: "Aarav Patel",

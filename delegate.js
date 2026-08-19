@@ -239,28 +239,42 @@ document.addEventListener("click", function(e) {
           rulesPdfBtn.removeAttribute("target");
           rulesPdfBtn.style.backgroundColor = "#718096";
           rulesPdfBtn.style.cursor = "not-allowed";
-          rulesPdfBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            alert("The official Rules of Procedure PDF Manual is restricted to registered delegates. Please register or log in to view and download study guides.");
-          });
-        }
-      }
- else {
-        // Verify registration status to render portfolio status cards
-        try {
-          await DB.init();
-          await AppState.loadData();
-          const myRegId = localStorage.getItem("pmun_registration_id");
-          if (myRegId) {
-            const myReg = AppState.registrations.find(r => r.id === myRegId);
-            if (myReg) {
-              renderAssignmentCard(myReg);
+    // Function to calculate and update live registration counters per committee
+    async function updateLiveCounters() {
+      try {
+        const regs = await DB.getRegistrations();
+        const comms = ["unep", "un-women", "fao", "unhrc", "unicef", "ecosoc"];
+        comms.forEach(commId => {
+          const count = regs.filter(r => r.preferred_committee && r.preferred_committee.toLowerCase() === commId.toLowerCase()).length;
+          const counterEl = document.getElementById(`counter-${commId}`);
+          if (counterEl) {
+            const textEl = counterEl.querySelector(".counter-text");
+            if (textEl) {
+              textEl.innerText = `Live: ${count} Registration${count === 1 ? '' : 's'}`;
             }
           }
-        } catch (err) {
-          console.error("Error setting up delegate status card:", err);
-        }
+        });
+      } catch (err) {
+        console.error("Error updating live counters:", err);
       }
+    }
+
+    if (activeTab === "home") {
+      try {
+        await DB.init();
+        await AppState.loadData();
+        await updateLiveCounters();
+        const myRegId = localStorage.getItem("pmun_registration_id");
+        if (myRegId) {
+          const myReg = AppState.registrations.find(r => r.id === myRegId);
+          if (myReg) {
+            renderAssignmentCard(myReg);
+          }
+        }
+      } catch (err) {
+        console.error("Error setting up delegate status card:", err);
+      }
+    }
 
 
       // Map rules parameter to resources tab content

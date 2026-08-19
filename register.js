@@ -15,10 +15,18 @@ const commAgendas = {
 };
 
 const commGrades = {
-  "unep": 8, "ecosoc": 8,
-  "fao": 9, "un-women": 9,
-  "unicef": 10, "unhrc": 10
+  "unep": [7, 8],
+  "un-women": [7, 8],
+  "fao": [7, 8],
+  "unhrc": [9, 10],
+  "unicef": [9, 10],
+  "ecosoc": [9, 10]
 };
+
+function isCommForGrade(commId, gradeNum) {
+  const allowed = commGrades[commId.toLowerCase()];
+  return allowed ? allowed.includes(gradeNum) : true;
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -197,39 +205,51 @@ function validateStep(stepNum) {
 function setupPreferredCommitteeSelect() {
   const select = document.getElementById("field-preferred_committee");
   select.innerHTML = '<option value="" disabled selected>Select Committee</option>';
-  committeesList.forEach(comm => {
-    select.innerHTML += `<option value="${comm.id}">${comm.name}</option>`;
-  });
+  
+  // Categorize options into 7th & 8th and 9th & 10th
+  const cat1List = committeesList.filter(c => ["unep", "un-women", "fao"].includes(c.id.toLowerCase()));
+  const cat2List = committeesList.filter(c => ["unhrc", "unicef", "ecosoc"].includes(c.id.toLowerCase()));
+
+  if (cat1List.length > 0) {
+    let group1 = `<optgroup label="7th & 8th Grade Committees">`;
+    cat1List.forEach(comm => {
+      group1 += `<option value="${comm.id}">${comm.name}</option>`;
+    });
+    group1 += `</optgroup>`;
+    select.innerHTML += group1;
+  }
+
+  if (cat2List.length > 0) {
+    let group2 = `<optgroup label="9th & 10th Grade Committees">`;
+    cat2List.forEach(comm => {
+      group2 += `<option value="${comm.id}">${comm.name}</option>`;
+    });
+    group2 += `</optgroup>`;
+    select.innerHTML += group2;
+  }
 
   select.addEventListener("change", () => {
     const commId = select.value.toLowerCase();
-    const autoGrade = commGrades[commId];
-    const currentGrade = document.getElementById("field-grade").value;
-    if (autoGrade) {
-      if (autoGrade === 8 && currentGrade === "7") {
-        // Keep Grade 7 for ECOSOC/UNEP
-      } else {
-        document.getElementById("field-grade").value = autoGrade.toString();
-      }
+    const allowedGrades = commGrades[commId];
+    const currentGrade = parseInt(document.getElementById("field-grade").value);
+    if (allowedGrades && (!currentGrade || !allowedGrades.includes(currentGrade))) {
+      document.getElementById("field-grade").value = allowedGrades[0].toString();
     }
   });
 
   document.getElementById("field-grade").addEventListener("change", () => {
     let selectedGrade = parseInt(document.getElementById("field-grade").value);
     if (!selectedGrade) return;
-    if (selectedGrade === 7) {
-      selectedGrade = 8;
-    }
 
     const currentComm = select.value.toLowerCase();
-    if (currentComm && commGrades[currentComm] !== selectedGrade) {
+    if (currentComm && !isCommForGrade(currentComm, selectedGrade)) {
       select.value = "";
     }
 
     Array.from(select.options).forEach(opt => {
       if (!opt.value) return;
       const optCommId = opt.value.toLowerCase();
-      if (commGrades[optCommId] === selectedGrade) {
+      if (isCommForGrade(optCommId, selectedGrade)) {
         opt.disabled = false;
         opt.style.display = "block";
       } else {
@@ -246,14 +266,11 @@ function setupPreferredCommitteeSelect() {
       select.value = found.id;
       select.disabled = true;
       
-      const autoGrade = commGrades[lowercaseCommVal];
-      if (autoGrade) {
-        const currentGrade = document.getElementById("field-grade").value;
-        if (autoGrade === 8 && currentGrade === "7") {
-          // Keep Grade 7
-        } else {
-          document.getElementById("field-grade").value = autoGrade.toString();
-          document.getElementById("field-grade").disabled = true;
+      const allowedGrades = commGrades[lowercaseCommVal];
+      if (allowedGrades) {
+        const currentGrade = parseInt(document.getElementById("field-grade").value);
+        if (!currentGrade || !allowedGrades.includes(currentGrade)) {
+          document.getElementById("field-grade").value = allowedGrades[0].toString();
         }
       }
     }
@@ -270,17 +287,19 @@ function renderCountryPanels() {
   const name = commObj ? commObj.name : commId.toUpperCase();
   
   const commCountries = countriesList.filter(c => c.committee_id && c.committee_id.toLowerCase() === commId.toLowerCase());
+  const availableCount = commCountries.filter(c => !c.assigned_to && c.available !== false).length;
   
   let selectHtml = `
     <div class="form-group" style="grid-column: span 5;">
-      <label for="field-c-1">Country Preference *</label>
+      <label for="field-c-1">Country Preference * <span style="font-weight: normal; color: var(--color-podar-blue); font-size: 0.82rem;">(${availableCount} / ${commCountries.length} countries available)</span></label>
       <select id="field-c-1" class="input-field c-pref" data-index="1" required style="width: 100%;">
         <option value="" disabled selected>Choose Country</option>
-        \${commCountries.map(c => {
-          if (c.assigned_to) {
-            return `<option value="\${c.country_name}" disabled>\${c.country_name} (Registered)</option>`;
+        ${commCountries.map(c => {
+          const isTaken = c.assigned_to || c.available === false;
+          if (isTaken) {
+            return `<option value="${c.country_name}" disabled style="color: var(--color-text-muted); font-style: italic;">${c.country_name} — Already Taken</option>`;
           } else {
-            return `<option value="\${c.country_name}">\${c.country_name}</option>`;
+            return `<option value="${c.country_name}">${c.country_name}</option>`;
           }
         }).join("")}
       </select>
@@ -295,9 +314,9 @@ function renderCountryPanels() {
   panel.style.border = "1px solid var(--color-border)";
   panel.innerHTML = `
     <h4 style="font-family: var(--font-serif); color: var(--color-navy); margin: 0 0 0.5rem 0; font-size: 1.15rem; font-weight: 700;">
-      Preferences for: \${name}
+      Country Assignment for: ${name}
     </h4>
-    <p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 1.25rem 0;">Topic: \${commAgendas[commId.toLowerCase()] || 'Topic not found'}</p>
+    <p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 1.25rem 0;">Topic: ${commAgendas[commId.toLowerCase()] || 'Topic not found'}</p>
     
     <!-- Search filter box -->
     <div style="margin-bottom: 1rem; position: relative;">
@@ -305,7 +324,7 @@ function renderCountryPanels() {
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-      \${selectHtml}
+      ${selectHtml}
     </div>
   `;
   wrapper.appendChild(panel);

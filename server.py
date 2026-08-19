@@ -654,10 +654,16 @@ def api_register():
         return jsonify({"error": "Exactly one country preference is required."}), 400
 
     # Validate that selected countries belong to preferred committee's pool
-    valid_countries = [c["country_name"].lower() for c in db_get_countries() if c["committee_id"].lower() == preferred_committee.lower()]
+    all_countries = db_get_countries()
+    valid_countries = [c["country_name"].lower() for c in all_countries if c["committee_id"].lower() == preferred_committee.lower()]
     for c in country_prefs:
         if c.lower() not in valid_countries:
             return jsonify({"error": f"Invalid country preference '{c}' for committee '{preferred_committee}'."}), 400
+
+    # Check if selected country is already taken by another delegate
+    pref_c_obj = next((c for c in all_countries if c["committee_id"].lower() == preferred_committee.lower() and c["country_name"].lower() == country_prefs[0].lower()), None)
+    if pref_c_obj and (pref_c_obj.get("assigned_to") or not pref_c_obj.get("available", True)):
+        return jsonify({"error": f"The country '{country_prefs[0]}' in '{preferred_committee.upper()}' has already been taken by another delegate. Please select a different country."}), 400
 
     # Construct clean payload to prevent mass assignment exploits
     unique_num = int(time.time() * 1000) % 10000
