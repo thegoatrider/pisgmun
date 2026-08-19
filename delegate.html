@@ -134,13 +134,28 @@
         <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif;">PODAR INTERNATIONAL SCHOOL</span>
       </div>
     </div>
-    <nav style="display: flex; gap: 2rem;">
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav" style="display: flex; gap: 2rem;">
       <a href="index.html" class="public-nav-link">HOME</a>
       <a href="delegate.html?tab=about&public=true" class="public-nav-link" id="pub-link-about">ABOUT PMUN</a>
       <a href="delegate.html?tab=committees&public=true" class="public-nav-link" id="pub-link-committees">COMMITTEES</a>
       <a href="delegate.html?tab=rules&public=true" class="public-nav-link" id="pub-link-rules">RULES & GUIDELINES</a>
       <a href="delegate.html?tab=contact&public=true" class="public-nav-link" id="pub-link-contact">CONTACT</a>
     </nav>
+
+    <!-- Mobile Dropdown Navigation -->
+    <div class="mobile-nav-wrapper">
+      <button class="mobile-dropdown-trigger" onclick="toggleMobileNav(this)">
+        <span>MENU ▾</span>
+      </button>
+      <div class="mobile-dropdown-menu">
+        <a href="index.html" class="mobile-dropdown-item">HOME</a>
+        <a href="delegate.html?tab=about&public=true" class="mobile-dropdown-item">ABOUT PMUN</a>
+        <a href="delegate.html?tab=committees&public=true" class="mobile-dropdown-item">COMMITTEES</a>
+        <a href="delegate.html?tab=rules&public=true" class="mobile-dropdown-item">RULES & GUIDELINES</a>
+        <a href="delegate.html?tab=contact&public=true" class="mobile-dropdown-item">CONTACT</a>
+      </div>
+    </div>
   </header>
 
   <div class="delegate-layout" style="background-color: #f7f9fc;">
@@ -261,160 +276,193 @@
         </div>
         <h2 style="font-family: var(--font-serif); font-size: 2.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">Select Your Committee</h2>
         <p style="color: var(--color-text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">
-          Explore the committees tailored for each grade level.<br>Click on your grade to learn more.
+          Explore the UN committees divided into grade categories.<br>Select your committee to register.
         </p>
       </div>
 
-      <!-- Cards Grid -->
-      <div class="grade-cards-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; margin: 0 auto 3rem auto; padding: 0 1rem;">
-        <!-- Card 1: ECOSOC -->
-        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
-          <div style="width: 100%;">
-            <!-- Tree Logo -->
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
-            </div>
-            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">ECOSOC</h3>
-            <!-- Divider -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-            </div>
-            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Food Supply Chains in the Age of Online Commerce</p>
+      <!-- CATEGORY 1: 7th & 8th -->
+      <div style="max-width: 1100px; margin: 0 auto 3.5rem auto; padding: 0 1rem;">
+        <div style="background: linear-gradient(135deg, rgba(0, 32, 74, 0.04) 0%, rgba(12, 86, 179, 0.08) 100%); border-left: 5px solid var(--color-podar-blue); padding: 1.25rem 1.75rem; border-radius: 12px; margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+              Category: 7th &amp; 8th
+            </h3>
+            <p style="margin: 0; color: var(--color-text-muted); font-size: 0.9rem; font-weight: 500;">Committees tailored for Grade 7 and Grade 8 delegates.</p>
           </div>
-          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=ecosoc'">
-            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <!-- Layered Curved wave at bottom -->
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+          <span style="background-color: var(--color-navy); color: white; padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;">3 COMMITTEES</span>
         </div>
 
-        <!-- Card 2: UN Women -->
-        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
-          <div style="width: 100%;">
-            <!-- Tree Logo -->
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+        <div class="grade-cards-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+          <!-- Card 1: UNEP -->
+          <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.25rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 440px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 700;">UNEP</h3>
+              <!-- Live Counter -->
+              <div class="live-counter-pill" id="counter-unep" style="background: rgba(12, 86, 179, 0.08); border: 1px solid rgba(12, 86, 179, 0.2); color: var(--color-navy); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin: 0.5rem auto 1rem auto; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span style="color: #10b981; font-size: 0.8rem;">●</span> <span class="counter-text">Live: 0 Registrations</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+                <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              </div>
+              <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">Equitable Access to Solar Energy</p>
             </div>
-            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UN Women</h3>
-            <!-- Divider -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-            </div>
-            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Women's Rights and Empowerment</p>
+            <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unep'">
+              Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
           </div>
-          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=un-women'">
-            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <!-- Layered Curved wave at bottom -->
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+
+          <!-- Card 2: UN Women -->
+          <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.25rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 440px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 700;">UN Women</h3>
+              <!-- Live Counter -->
+              <div class="live-counter-pill" id="counter-un-women" style="background: rgba(12, 86, 179, 0.08); border: 1px solid rgba(12, 86, 179, 0.2); color: var(--color-navy); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin: 0.5rem auto 1rem auto; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span style="color: #10b981; font-size: 0.8rem;">●</span> <span class="counter-text">Live: 0 Registrations</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+                <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              </div>
+              <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">Women's Rights and Empowerment</p>
+            </div>
+            <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=un-women'">
+              Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+          </div>
+
+          <!-- Card 3: FAO -->
+          <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.25rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 440px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 700;">FAO</h3>
+              <!-- Live Counter -->
+              <div class="live-counter-pill" id="counter-fao" style="background: rgba(12, 86, 179, 0.08); border: 1px solid rgba(12, 86, 179, 0.2); color: var(--color-navy); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin: 0.5rem auto 1rem auto; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span style="color: #10b981; font-size: 0.8rem;">●</span> <span class="counter-text">Live: 0 Registrations</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+                <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              </div>
+              <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">Food Insecurity in Conflict Areas</p>
+            </div>
+            <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=fao'">
+              Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATEGORY 2: 9th and 10th -->
+      <div style="max-width: 1100px; margin: 0 auto 3rem auto; padding: 0 1rem;">
+        <div style="background: linear-gradient(135deg, rgba(0, 32, 74, 0.04) 0%, rgba(12, 86, 179, 0.08) 100%); border-left: 5px solid var(--color-navy); padding: 1.25rem 1.75rem; border-radius: 12px; margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+              Category: 9th and 10th
+            </h3>
+            <p style="margin: 0; color: var(--color-text-muted); font-size: 0.9rem; font-weight: 500;">Advanced committees tailored for Grade 9 and Grade 10 delegates.</p>
+          </div>
+          <span style="background-color: var(--color-navy); color: white; padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;">3 COMMITTEES</span>
         </div>
 
-        <!-- Card 3: UNHRC -->
-        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
-          <div style="width: 100%;">
-            <!-- Tree Logo -->
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+        <div class="grade-cards-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+          <!-- Card 4: UNHRC -->
+          <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.25rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 440px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 700;">UNHRC</h3>
+              <!-- Live Counter -->
+              <div class="live-counter-pill" id="counter-unhrc" style="background: rgba(12, 86, 179, 0.08); border: 1px solid rgba(12, 86, 179, 0.2); color: var(--color-navy); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin: 0.5rem auto 1rem auto; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span style="color: #10b981; font-size: 0.8rem;">●</span> <span class="counter-text">Live: 0 Registrations</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+                <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              </div>
+              <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">Protecting Digital Rights during Conflicts</p>
             </div>
-            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNHRC</h3>
-            <!-- Divider -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-            </div>
-            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Protecting Digital Rights during Conflicts</p>
+            <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unhrc'">
+              Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
           </div>
-          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unhrc'">
-            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <!-- Layered Curved wave at bottom -->
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
-        </div>
 
-        <!-- Card 4: FAO -->
-        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
-          <div style="width: 100%;">
-            <!-- Tree Logo -->
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+          <!-- Card 5: UNICEF -->
+          <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.25rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 440px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 700;">UNICEF</h3>
+              <!-- Live Counter -->
+              <div class="live-counter-pill" id="counter-unicef" style="background: rgba(12, 86, 179, 0.08); border: 1px solid rgba(12, 86, 179, 0.2); color: var(--color-navy); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin: 0.5rem auto 1rem auto; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span style="color: #10b981; font-size: 0.8rem;">●</span> <span class="counter-text">Live: 0 Registrations</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+                <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              </div>
+              <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">Foreign Aid Reductions and Child Healthcare</p>
             </div>
-            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">FAO</h3>
-            <!-- Divider -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-            </div>
-            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Food Insecurity in Conflict Areas</p>
+            <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unicef'">
+              Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
           </div>
-          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=fao'">
-            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <!-- Layered Curved wave at bottom -->
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
-        </div>
 
-        <!-- Card 5: UNEP -->
-        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
-          <div style="width: 100%;">
-            <!-- Tree Logo -->
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+          <!-- Card 6: ECOSOC -->
+          <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.25rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 440px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.25rem 0; font-weight: 700;">ECOSOC</h3>
+              <!-- Live Counter -->
+              <div class="live-counter-pill" id="counter-ecosoc" style="background: rgba(12, 86, 179, 0.08); border: 1px solid rgba(12, 86, 179, 0.2); color: var(--color-navy); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin: 0.5rem auto 1rem auto; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span style="color: #10b981; font-size: 0.8rem;">●</span> <span class="counter-text">Live: 0 Registrations</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+                <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
+                <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
+              </div>
+              <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">Food Supply Chains in the Age of Online Commerce</p>
             </div>
-            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNEP</h3>
-            <!-- Divider -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-            </div>
-            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Equitable Access to Solar Energy</p>
+            <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=ecosoc'">
+              Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
           </div>
-          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unep'">
-            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <!-- Layered Curved wave at bottom -->
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
-        </div>
-
-        <!-- Card 6: UNICEF -->
-        <div class="grade-card-new" style="background: var(--color-white); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; box-shadow: var(--shadow-md); display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 410px; position: relative; overflow: hidden; border: 1px solid var(--color-border);">
-          <div style="width: 100%;">
-            <!-- Tree Logo -->
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-              <img src="resources/podar_tree_olive_logo.png" loading="lazy" alt="Podar Logo" style="width: 64px; height: 64px; object-fit: contain;">
-            </div>
-            <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-navy); margin: 0 0 0.5rem 0; font-weight: 700;">UNICEF</h3>
-            <!-- Divider -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-              <span style="color: var(--color-podar-blue); font-size: 0.6rem;">◆</span>
-              <div style="height: 1px; width: 40px; background-color: var(--color-border);"></div>
-            </div>
-            <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">Foreign Aid Reductions and Child Healthcare</p>
-          </div>
-          <button class="btn-primary" style="background-color: var(--color-navy); border: none; padding: 0.75rem 2rem; border-radius: 30px; font-weight: 700; width: 85%; font-size: 0.95rem; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; z-index: 5;" onclick="window.location.href='register.html?committee=unicef'">
-            Register Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <!-- Layered Curved wave at bottom -->
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 35px; background: linear-gradient(135deg, #0056b3 0%, #002f5c 100%); border-radius: 0 0 24px 24px;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(80% 90% at 30% 100%); opacity: 0.85;"></div>
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 37px; background: linear-gradient(135deg, #002347 0%, #001226 100%); border-radius: 0 0 24px 24px; clip-path: ellipse(70% 80% at 50% 100%);"></div>
         </div>
       </div>
 

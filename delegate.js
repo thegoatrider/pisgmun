@@ -1,3 +1,16 @@
+function toggleMobileNav(btn) {
+  const menu = btn.nextElementSibling;
+  if (menu) {
+    menu.classList.toggle("open");
+  }
+}
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".mobile-nav-wrapper")) {
+    document.querySelectorAll(".mobile-dropdown-menu.open").forEach(m => m.classList.remove("open"));
+  }
+});
+
 // Route Auth Guard
     (async () => {
       const isPublic = new URLSearchParams(window.location.search).get("public") === "true";

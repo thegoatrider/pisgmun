@@ -178,13 +178,28 @@
         <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif; white-space: nowrap;">PODAR INTERNATIONAL SCHOOL</span>
       </div>
     </div>
-    <nav style="display: flex; gap: 2rem;">
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav" style="display: flex; gap: 2rem;">
       <a href="index.html" class="nav-link active">HOME</a>
       <a href="delegate.html?tab=about&public=true" class="nav-link">ABOUT PMUN</a>
       <a href="delegate.html?tab=committees&public=true" class="nav-link">COMMITTEES</a>
       <a href="delegate.html?tab=rules&public=true" class="nav-link">RULES & GUIDELINES</a>
       <a href="delegate.html?tab=contact&public=true" class="nav-link">CONTACT</a>
     </nav>
+
+    <!-- Mobile Dropdown Navigation -->
+    <div class="mobile-nav-wrapper">
+      <button class="mobile-dropdown-trigger" onclick="toggleMobileNav(this)">
+        <span>MENU ▾</span>
+      </button>
+      <div class="mobile-dropdown-menu">
+        <a href="index.html" class="mobile-dropdown-item active">HOME</a>
+        <a href="delegate.html?tab=about&public=true" class="mobile-dropdown-item">ABOUT PMUN</a>
+        <a href="delegate.html?tab=committees&public=true" class="mobile-dropdown-item">COMMITTEES</a>
+        <a href="delegate.html?tab=rules&public=true" class="mobile-dropdown-item">RULES & GUIDELINES</a>
+        <a href="delegate.html?tab=contact&public=true" class="mobile-dropdown-item">CONTACT</a>
+      </div>
+    </div>
   </header>
 
   <!-- HERO SECTION WITH THE EXACT CLEAN MOCKUP BACKGROUND BANNER -->
@@ -217,7 +232,7 @@
       
       <h2 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #00204a; font-weight: 700; margin: 0 0 1.5rem 0; letter-spacing: 0.5px;">PIS MUN PORTAL</h2>
       <p style="font-size: 1.05rem; line-height: 1.7; color: #4a5568; margin-bottom: 2rem; font-weight: 500;">
-        Welcome to the official PIS Model United Nations portal.<br>
+        Welcome to the PIS Godhani Model United Nations portal.<br>
         Engage. Debate. Collaborate.<br>
         Empowering future leaders through diplomacy.
       </p>

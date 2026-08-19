@@ -1,3 +1,16 @@
+function toggleMobileNav(btn) {
+  const menu = btn.nextElementSibling;
+  if (menu) {
+    menu.classList.toggle("open");
+  }
+}
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".mobile-nav-wrapper")) {
+    document.querySelectorAll(".mobile-dropdown-menu.open").forEach(m => m.classList.remove("open"));
+  }
+});
+
 function selectRole(role) {
   if (role === 'delegate') {
     localStorage.setItem("pmun_session_role", "delegate");
