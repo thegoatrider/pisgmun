@@ -239,9 +239,11 @@ function setupPreferredCommitteeSelect() {
       const gradeNum = parseInt(opt.value);
       if (!allowedGrades || allowedGrades.includes(gradeNum)) {
         opt.disabled = false;
-        opt.style.display = "block";
+        opt.hidden = false;
+        opt.style.display = "";
       } else {
         opt.disabled = true;
+        opt.hidden = true;
         opt.style.display = "none";
       }
     });
@@ -253,6 +255,8 @@ function setupPreferredCommitteeSelect() {
       }
     }
   }
+
+  updateGradeOptions(select.value);
 
   select.addEventListener("change", () => {
     updateGradeOptions(select.value);
