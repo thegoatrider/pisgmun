@@ -612,38 +612,12 @@
         fao: 'resources/fao_background_guide.pdf',
         unhrc: 'resources/unhrc_background_guide.pdf',
         'un-women': 'resources/un_women_background_guide.pdf',
-        ecosoc: '#'
+        ecosoc: 'resources/fao_background_guide.pdf'
       };
-      const pdfUrl = pdfMapping[committeeId.toLowerCase()] || '#';
+      const pdfUrl = pdfMapping[committeeId.toLowerCase()] || 'resources/rules_of_procedure.pdf';
 
       // Parse resources
-      let resourcesHtml = `<p class="no-data-msg" style="color:var(--color-text-muted);">No preparation resources uploaded yet.</p>`;
-      if (isPublic) {
-        resourcesHtml = `
-          <div class="locked-resources-card" style="text-align: center; padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8fafc; border: 1px dashed var(--color-border); border-radius: 8px; margin: 1rem 0;">
-            <span style="font-size: 2.2rem; margin-bottom: 0.75rem;">🔒</span>
-            <h4 style="color: var(--color-navy); font-family: var(--font-sans); margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">Locked Resources</h4>
-            <p style="color: var(--color-text-muted); font-size: 0.88rem; max-width: 420px; margin: 0 auto 1.25rem auto; line-height: 1.5;">
-              The background guide and preparation PDF manuals for this committee are exclusive to registered delegates. Please log in or register to access them.
-            </p>
-            <div style="display: flex; gap: 0.75rem; justify-content: center;">
-              <a href="login.html?role=delegate" class="btn-continue" style="background-color: var(--color-navy); color: #ffffff; text-decoration: none; padding: 0.55rem 1.1rem; font-size: 0.82rem; border-radius: 4px; font-weight: 600; transition: background-color 0.2s;">
-                Log In
-              </a>
-              <a href="register.html?committee=${committeeId}" class="btn-continue" style="background-color: var(--color-podar-blue); color: #ffffff; text-decoration: none; padding: 0.55rem 1.1rem; font-size: 0.82rem; border-radius: 4px; font-weight: 600; transition: background-color 0.2s;">
-                Register Now
-              </a>
-            </div>
-          </div>
-        `;
-      } else if (committee.resources && Array.isArray(committee.resources) && committee.resources.length > 0) {
-        resourcesHtml = `<ul class="resources-list" style="line-height:2.2;">` + 
-          committee.resources.map(res => {
-            const mappedUrl = (res.url === '#' && pdfMapping[committee.id.toLowerCase()]) ? pdfMapping[committee.id.toLowerCase()] : res.url;
-            return `<li><a href="${mappedUrl}" target="_blank">${res.title}</a></li>`;
-          }).join("") + 
-          `</ul>`;
-      }
+      let resourcesHtml = `<div style="text-align: center; padding: 1.5rem;"><a href="${pdfUrl}" target="_blank" class="btn-continue" style="background-color: var(--color-podar-blue); color: #ffffff; text-decoration: none; padding: 0.75rem 1.5rem; font-size: 0.9rem; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem;">📄 Open Official ${committee.name} Background Guide (PDF)</a></div>`;
 
       // Format schedule
       const scheduleLines = committee.schedule ? committee.schedule.split("|").map(line => `<li style="margin-bottom:0.5rem;">${line.trim()}</li>`).join("") : "<li>Schedule details will be updated shortly.</li>";
