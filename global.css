@@ -1494,6 +1494,169 @@ textarea.input-field {
 }
 
 @media (max-width: 768px) {
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box !important;
+    max-width: 100%;
+  }
+
+  img, svg, video, iframe {
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  /* Table overflow control for mobile devices */
+  .table-container, .table-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  table, .dashboard-table {
+    min-width: 550px;
+    width: 100% !important;
+  }
+
+  /* Override headers and nav bars */
+  header, .dashboard-header, #public-header {
+    padding: 0.75rem 1rem !important;
+    height: auto !important;
+    min-height: 56px !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+  }
+
+  header nav, #public-header nav {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    gap: 0.75rem !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding-bottom: 0.25rem !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  header nav a, #public-header nav a, .public-nav-link {
+    font-size: 0.78rem !important;
+    padding: 0.4rem 0.65rem !important;
+    flex-shrink: 0;
+  }
+
+  /* Hero section responsiveness */
+  #hero-section {
+    padding: 2rem 1.25rem !important;
+    min-height: auto !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+
+  #hero-content {
+    max-width: 100% !important;
+  }
+
+  #hero-content h1 {
+    font-size: 3.2rem !important;
+  }
+
+  #hero-content div[style*="letter-spacing: 5px"] {
+    white-space: normal !important;
+    letter-spacing: 2px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Grid column resets for mobile */
+  .role-cards-grid,
+  .grade-cards-grid,
+  .eb-grid,
+  .kpi-grid,
+  .filter-bar,
+  .incharge-select-grid,
+  .analytics-grid,
+  div[style*="grid-template-columns: repeat(3,"],
+  div[style*="grid-template-columns: repeat(4,"],
+  div[style*="grid-template-columns: repeat(5,"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  /* Stats bar 2x2 grid on mobile */
+  section div[style*="grid-template-columns: repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+
+  section div[style*="grid-template-columns: repeat(4, 1fr)"] > div {
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem !important;
+  }
+
+  /* Flex column stacking for sidebars and split views */
+  div[style*="display: flex"][style*="gap: 2rem"],
+  div[style*="display: flex"][style*="min-height: 400px"],
+  div[style*="display: flex"][style*="gap: 1.5rem"] {
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+  }
+
+  div[style*="width: 25%"],
+  div[style*="width: 30%"],
+  div[style*="width: 70%"],
+  div[style*="width: 75%"] {
+    width: 100% !important;
+    min-height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border);
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    padding-bottom: 1rem !important;
+  }
+
+  /* General padding resets */
+  .delegate-layout,
+  .dashboard-main,
+  .selection-container,
+  section,
+  div[style*="padding: 2.5rem"],
+  div[style*="padding: 4rem"],
+  div[style*="padding: 3rem"] {
+    padding: 1.25rem 1rem !important;
+  }
+
+  .delegate-header > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 1rem !important;
+  }
+
+  .delegate-header div[style*="opacity: 0.08"] {
+    display: none !important;
+  }
+
+  .nav-links {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    justify-content: flex-start !important;
+    padding: 0.5rem 0.75rem !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-links li {
+    flex-shrink: 0;
+  }
+
+  .nav-links li[style*="margin-left: 2rem"] {
+    margin-left: 0.5rem !important;
+  }
+
   .role-cards-grid {
     grid-template-columns: 1fr;
     max-width: 400px;
@@ -1559,117 +1722,28 @@ textarea.input-field {
     gap: 1rem;
   }
   
-  .nav-links {
-    flex-wrap: wrap;
-    padding: 0.5rem 1rem;
-  }
-  
-  .nav-links li a {
-    padding: 0.5rem 0.8rem;
-  }
-  
-  .nav-register-btn {
-    margin: 0.5rem 0.8rem;
-    width: calc(100% - 1.6rem);
-    text-align: center;
-  }
-  
   .grade-detail-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
     padding: 2rem;
   }
-}
 
-/* =========================================================================
-   Official Branding & Alignment CSS
-   ========================================================================= */
-.brand-block.centered {
-  text-align: center;
-  margin-top: 1.5rem;
-}
-
-.brand-main {
-  font-family: var(--font-sans);
-  font-size: 3.6rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: var(--color-podar-blue);
-  line-height: 1.05;
-}
-
-.brand-sub {
-  font-family: var(--font-sans);
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--color-navy);
-  margin-top: 0.3rem;
-  text-transform: uppercase;
-  line-height: 1.25;
-}
-
-.brand-sub.accent {
-  color: var(--color-podar-blue);
-  margin-top: 0.1rem;
-}
-
-/* Header Stack Alignment styling */
-.official-logo-combined {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.logo-tree-small {
-  width: 58px;
-  height: 58px;
-  fill: var(--color-podar-blue);
-}
-
-.brand-text-stack {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-left: 2px solid var(--color-border);
-  padding-left: 0.75rem;
-  line-height: 1.15;
-  text-align: left;
-}
-
-.brand-stack-main {
-  font-family: var(--font-sans);
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--color-podar-blue);
-  letter-spacing: 0.5px;
-}
-
-.brand-stack-sub {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--color-navy);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.brand-stack-sub.accent {
-  color: var(--color-podar-blue);
-}
-
-.header-tagline {
-  font-family: var(--font-serif);
-  font-style: italic;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
-}
-
-/* Adjust combined logo wrap in media queries */
-@media (max-width: 768px) {
   .official-logo-combined {
     margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #hero-content h1 {
+    font-size: 2.5rem !important;
+  }
+
+  .brand-main {
+    font-size: 2.2rem !important;
+  }
+
+  section div[style*="grid-template-columns: repeat(4, 1fr)"] {
+    grid-template-columns: 1fr !important;
   }
 }
