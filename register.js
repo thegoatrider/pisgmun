@@ -84,7 +84,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("field-grade").disabled = false;
     document.getElementById("field-preferred_committee").disabled = false;
 
+    const regId = "PIS-2026-" + Math.floor(1000 + Math.random() * 9000);
     const formData = {
+      id: regId,
       name: document.getElementById("field-name").value.trim(),
       grade: parseInt(document.getElementById("field-grade").value),
       section: document.getElementById("field-section").value.trim(),

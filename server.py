@@ -389,6 +389,10 @@ def db_submit_registration(reg_data):
     preferred_committee = reg_data.get("preferred_committee", "")
     country_prefs = reg_data.get("country_preferences", [])
     reg_id = reg_data.get("id")
+    if not reg_id:
+        import random
+        reg_id = f"PIS-2026-{random.randint(1000, 9999)}"
+        reg_data["id"] = reg_id
     
     preferred_country = country_prefs[0] if country_prefs else None
         

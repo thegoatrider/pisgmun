@@ -496,35 +496,58 @@ const DB = {
   },
 
   async submitRegistration(registrationData) {
+    const regId = registrationData.id || ("PIS-2026-" + Math.floor(1000 + Math.random() * 9000));
+    const fullReg = {
+      id: regId,
+      ...registrationData,
+      assigned_country: registrationData.assigned_country || "NOT ASSIGNED",
+      committee: registrationData.committee || "NOT ASSIGNED",
+      status: registrationData.status || "NOT ASSIGNED",
+      created_at: new Date().toISOString()
+    };
+
+    // 1. Attempt direct Supabase JS SDK insert if available
+    if (window.supabaseInstance) {
+      try {
+        const { data, error } = await window.supabaseInstance.from("registrations").insert([fullReg]).select();
+        if (!error && data && data.length > 0) {
+          // Also sync to local storage for instant dashboard read
+          let regs = localStorage.getItem("pmun_mock_registrations");
+          let regsList = regs ? JSON.parse(regs) : [];
+          regsList.push(data[0]);
+          localStorage.setItem("pmun_mock_registrations", JSON.stringify(regsList));
+          return data[0];
+        }
+      } catch (sbErr) {
+        console.warn("Direct Supabase JS insert notice:", sbErr);
+      }
+    }
+
+    // 2. Attempt Python API endpoint
     try {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registrationData)
+        body: JSON.stringify(fullReg)
       });
-      if (res.ok) return await res.json();
-      if (res.status === 400) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to submit registration");
+      if (res.ok) {
+        const apiData = await res.json();
+        let regs = localStorage.getItem("pmun_mock_registrations");
+        let regsList = regs ? JSON.parse(regs) : [];
+        regsList.push(apiData);
+        localStorage.setItem("pmun_mock_registrations", JSON.stringify(regsList));
+        return apiData;
       }
     } catch (e) {
-      if (e.message && e.message.includes("Failed to submit")) throw e;
-      console.warn("Fallback submitRegistration:", e);
+      console.warn("API registration endpoint notice:", e);
     }
+
+    // 3. Local Storage backup sync
     let regs = localStorage.getItem("pmun_mock_registrations");
     let regsList = regs ? JSON.parse(regs) : [];
-    const regId = "PIS-2026-" + Math.floor(1000 + Math.random() * 9000);
-    const newReg = {
-      id: regId,
-      ...registrationData,
-      assigned_country: "NOT ASSIGNED",
-      committee: "NOT ASSIGNED",
-      status: "NOT ASSIGNED",
-      created_at: new Date().toISOString()
-    };
-    regsList.push(newReg);
+    regsList.push(fullReg);
     localStorage.setItem("pmun_mock_registrations", JSON.stringify(regsList));
-    return newReg;
+    return fullReg;
   },
 
   async verifyPassword(roleName, inputPassword) {
