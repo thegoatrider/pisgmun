@@ -185,17 +185,65 @@ document.addEventListener("click", function(e) {
     const isPublic = urlParams.get("public") === "true";
     const activeTab = urlParams.get("tab") || (isPublic ? "committees" : "home");
 
-    document.addEventListener("DOMContentLoaded", async () => {
+    // Function to calculate and update live registration counters per committee
+    async function updateLiveCounters() {
+      try {
+        const regs = await DB.getRegistrations();
+        if (!Array.isArray(regs)) return;
+        const comms = ["unep", "un-women", "fao", "unhrc", "unicef", "ecosoc"];
+        comms.forEach(commId => {
+          const count = regs.filter(r => r && r.preferred_committee && r.preferred_committee.toLowerCase() === commId.toLowerCase()).length;
+          const counterEl = document.getElementById(`counter-${commId}`);
+          if (counterEl) {
+            const textEl = counterEl.querySelector(".counter-text");
+            if (textEl) {
+              textEl.innerText = `Live: ${count} Registration${count === 1 ? '' : 's'}`;
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Error updating live counters:", err);
+      }
+    }
 
-      if (isPublic) {
-        // Load database details for database-driven features
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Synchronously show the active tab immediately
+      let targetTab = activeTab;
+      if (activeTab === "rules") {
+        targetTab = "resources";
+      }
+
+      document.querySelectorAll(".tab-content").forEach(el => {
+        el.classList.remove("active");
+      });
+      const target = document.getElementById(`${targetTab}-tab`);
+      if (target) {
+        target.classList.add("active");
+      }
+
+      if (activeTab === "rules") {
+        switchResourceChapter('rules');
+      }
+
+      // 2. Asynchronously load DB data & live counters in background without blocking tab display
+      (async () => {
         try {
           await DB.init();
           await AppState.loadData();
-        } catch (e) {
-          console.warn("Public view data fetch error", e);
+          await updateLiveCounters();
+          const myRegId = localStorage.getItem("pmun_registration_id");
+          if (myRegId && activeTab === "home") {
+            const myReg = AppState.registrations.find(r => r.id === myRegId);
+            if (myReg) {
+              renderAssignmentCard(myReg);
+            }
+          }
+        } catch (err) {
+          console.warn("Background data load error:", err);
         }
+      })();
 
+      if (isPublic) {
         // Hide navigation bar container
         const nav = document.querySelector(".nav-container");
         if (nav) nav.style.display = "none";
@@ -239,61 +287,11 @@ document.addEventListener("click", function(e) {
           rulesPdfBtn.removeAttribute("target");
           rulesPdfBtn.style.backgroundColor = "#718096";
           rulesPdfBtn.style.cursor = "not-allowed";
-    // Function to calculate and update live registration counters per committee
-    async function updateLiveCounters() {
-      try {
-        const regs = await DB.getRegistrations();
-        const comms = ["unep", "un-women", "fao", "unhrc", "unicef", "ecosoc"];
-        comms.forEach(commId => {
-          const count = regs.filter(r => r.preferred_committee && r.preferred_committee.toLowerCase() === commId.toLowerCase()).length;
-          const counterEl = document.getElementById(`counter-${commId}`);
-          if (counterEl) {
-            const textEl = counterEl.querySelector(".counter-text");
-            if (textEl) {
-              textEl.innerText = `Live: ${count} Registration${count === 1 ? '' : 's'}`;
-            }
-          }
-        });
-      } catch (err) {
-        console.error("Error updating live counters:", err);
-      }
-    }
-
-    if (activeTab === "home") {
-      try {
-        await DB.init();
-        await AppState.loadData();
-        await updateLiveCounters();
-        const myRegId = localStorage.getItem("pmun_registration_id");
-        if (myRegId) {
-          const myReg = AppState.registrations.find(r => r.id === myRegId);
-          if (myReg) {
-            renderAssignmentCard(myReg);
-          }
+          rulesPdfBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            alert("The official Rules of Procedure PDF Manual is restricted to registered delegates. Please register or log in to view and download study guides.");
+          });
         }
-      } catch (err) {
-        console.error("Error setting up delegate status card:", err);
-      }
-    }
-
-
-      // Map rules parameter to resources tab content
-      let targetTab = activeTab;
-      if (activeTab === "rules") {
-        targetTab = "resources";
-      }
-
-      // Hide all tabs, show the active one
-      document.querySelectorAll(".tab-content").forEach(el => {
-        el.classList.remove("active");
-      });
-      const target = document.getElementById(`${targetTab}-tab`);
-      if (target) {
-        target.classList.add("active");
-      }
-
-      if (activeTab === "rules") {
-        switchResourceChapter('rules');
       }
 
       // Programmatic listeners to replace inline onclick attributes:
