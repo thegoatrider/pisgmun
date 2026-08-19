@@ -217,6 +217,20 @@
             window.location.href = 'index.html';
           });
         }
+
+        // Restrict rules PDF manual download in public view
+        const rulesPdfBtn = document.getElementById("rules-pdf-download-btn");
+        if (rulesPdfBtn) {
+          rulesPdfBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:0.25rem;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> PDF Locked`;
+          rulesPdfBtn.setAttribute("href", "#");
+          rulesPdfBtn.removeAttribute("target");
+          rulesPdfBtn.style.backgroundColor = "#718096";
+          rulesPdfBtn.style.cursor = "not-allowed";
+          rulesPdfBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            alert("The official Rules of Procedure PDF Manual is restricted to registered delegates. Please register or log in to view and download study guides.");
+          });
+        }
       }
  else {
         // Verify registration status to render portfolio status cards
