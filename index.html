@@ -169,48 +169,36 @@
   </div>
 
   <!-- NAVIGATION HEADER -->
-  <header class="site-header">
-    <div id="navbar-brand" class="brand-container">
+  <header style="background-color: #00204a; padding: 1rem 3rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15);">
+    <div style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;" id="navbar-brand">
       <!-- Clean Podar Tree Logo beside school name -->
-      <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" class="brand-logo">
+      <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
       <!-- Podar International School text -->
-      <div class="brand-divider">
-        <span class="brand-title">PODAR INTERNATIONAL SCHOOL</span>
+      <div style="display: flex; align-items: center; color: #ffffff; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 0.75rem; height: 32px;">
+        <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif; white-space: nowrap;">PODAR INTERNATIONAL SCHOOL</span>
       </div>
     </div>
     
-    <!-- Desktop Navigation Links -->
-    <nav class="desktop-nav">
+    <!-- Top Navigation Links -->
+    <nav class="top-nav-links">
       <a href="index.html" class="nav-link active">HOME</a>
       <a href="delegate.html?tab=about&public=true" class="nav-link">ABOUT PMUN</a>
       <a href="delegate.html?tab=committees&public=true" class="nav-link">COMMITTEES</a>
       <a href="delegate.html?tab=rules&public=true" class="nav-link">RULES & GUIDELINES</a>
       <a href="delegate.html?tab=contact&public=true" class="nav-link">CONTACT</a>
     </nav>
-
-    <!-- Mobile Dropdown Navigation Bar -->
-    <div class="mobile-nav-wrapper">
-      <select class="mobile-nav-select" aria-label="Navigation Menu" onchange="if(this.value) window.location.href=this.value;">
-        <option value="" disabled selected>MENU ▾</option>
-        <option value="index.html">HOME</option>
-        <option value="delegate.html?tab=about&public=true">ABOUT PMUN</option>
-        <option value="delegate.html?tab=committees&public=true">COMMITTEES</option>
-        <option value="delegate.html?tab=rules&public=true">RULES & GUIDELINES</option>
-        <option value="delegate.html?tab=contact&public=true">CONTACT</option>
-      </select>
-    </div>
   </header>
 
   <!-- HERO SECTION WITH THE EXACT CLEAN MOCKUP BACKGROUND BANNER -->
-  <section id="hero-section" style="background-image: linear-gradient(to right, #d2e2f8 35%, rgba(210, 226, 248, 0) 65%), url('hero-banner-raw_v6.png'); background-color: #d2e2f8; background-size: cover, contain; background-position: center center, right center; background-repeat: no-repeat, no-repeat; padding: 3rem 6rem; display: flex; align-items: center; min-height: 310px; position: relative; overflow: hidden; transition: opacity 0.15s ease-out, transform 0.15s ease-out; will-change: opacity, transform;">
+  <section id="hero-section" style="background-image: linear-gradient(to right, #d2e2f8 35%, rgba(210, 226, 248, 0) 65%), url('hero-banner-raw_v6.png'); background-color: #d2e2f8; background-size: cover, contain; background-position: center center, right center; background-repeat: no-repeat, no-repeat; padding: 3rem 6rem; display: flex; align-items: center; min-height: 310px; position: relative; overflow: hidden; opacity: 1;">
     
     <!-- Hero content -->
-    <div id="hero-content" style="max-width: 50%; z-index: 2; transition: opacity 0.15s ease-out, transform 0.15s ease-out;">
+    <div id="hero-content" style="max-width: 50%; z-index: 2; opacity: 1;">
       <!-- Giant Logo/Header Branding Block -->
       <div style="display: flex; flex-direction: column; width: fit-content; margin-bottom: 1.5rem;">
         <!-- Top Row: Crest Logo + PMUN Heading -->
         <div style="display: flex; align-items: center; gap: 1.5rem;">
-          <!-- UN detailed oak tree crest logo (size increased to 84px and multiply blended for seamless background) -->
+          <!-- UN detailed oak tree crest logo -->
           <img src="hero-logo-navy_v9.png" loading="lazy" alt="PMUN Crest" style="height: 84px; width: 84px; object-fit: contain; mix-blend-mode: multiply;">
           <h1 style="font-family: 'Playfair Display', serif; font-size: 5.2rem; font-weight: 500; color: #00204a; margin: 0; line-height: 0.9; letter-spacing: 2px;">PMUN</h1>
         </div>
@@ -242,8 +230,8 @@
     </div>
   </section>
 
-  <!-- ABOUT SECTION WITH SCROLL TRANSITION BASE STYLE -->
-  <section id="about-section" style="padding: 4rem 4rem 1.5rem 4rem; text-align: center; background-color: #ffffff; opacity: 0; transform: translateY(35px); transition: opacity 0.2s ease-out, transform 0.2s ease-out; will-change: opacity, transform;">
+  <!-- ABOUT SECTION -->
+  <section id="about-section" style="padding: 4rem 4rem 1.5rem 4rem; text-align: center; background-color: #ffffff; opacity: 1;">
     <h2 style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.8rem; color: #00204a; margin: 0 0 0.5rem 0; letter-spacing: 1px;">ABOUT PMUN</h2>
     <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
       <div style="height: 1px; width: 40px; background-color: #e2e8f0;"></div>
