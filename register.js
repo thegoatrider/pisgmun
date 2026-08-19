@@ -228,13 +228,34 @@ function setupPreferredCommitteeSelect() {
     select.innerHTML += group2;
   }
 
-  select.addEventListener("change", () => {
-    const commId = select.value.toLowerCase();
-    const allowedGrades = commGrades[commId];
-    const currentGrade = parseInt(document.getElementById("field-grade").value);
-    if (allowedGrades && (!currentGrade || !allowedGrades.includes(currentGrade))) {
-      document.getElementById("field-grade").value = allowedGrades[0].toString();
+  function updateGradeOptions(commId) {
+    const gradeSelect = document.getElementById("field-grade");
+    if (!gradeSelect) return;
+    const cleanComm = commId ? commId.toLowerCase() : "";
+    const allowedGrades = commGrades[cleanComm];
+
+    Array.from(gradeSelect.options).forEach(opt => {
+      if (!opt.value) return;
+      const gradeNum = parseInt(opt.value);
+      if (!allowedGrades || allowedGrades.includes(gradeNum)) {
+        opt.disabled = false;
+        opt.style.display = "block";
+      } else {
+        opt.disabled = true;
+        opt.style.display = "none";
+      }
+    });
+
+    if (allowedGrades) {
+      const currentGrade = parseInt(gradeSelect.value);
+      if (!currentGrade || !allowedGrades.includes(currentGrade)) {
+        gradeSelect.value = allowedGrades[0].toString();
+      }
     }
+  }
+
+  select.addEventListener("change", () => {
+    updateGradeOptions(select.value);
   });
 
   document.getElementById("field-grade").addEventListener("change", () => {
@@ -265,14 +286,7 @@ function setupPreferredCommitteeSelect() {
     if (found) {
       select.value = found.id;
       select.disabled = true;
-      
-      const allowedGrades = commGrades[lowercaseCommVal];
-      if (allowedGrades) {
-        const currentGrade = parseInt(document.getElementById("field-grade").value);
-        if (!currentGrade || !allowedGrades.includes(currentGrade)) {
-          document.getElementById("field-grade").value = allowedGrades[0].toString();
-        }
-      }
+      updateGradeOptions(lowercaseCommVal);
     }
   }
 }
