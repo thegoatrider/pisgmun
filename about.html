@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About PMUN — Podar Model United Nations</title>
+  <link rel="stylesheet" href="global.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <style>
+    .public-nav-link {
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .public-nav-link:hover, .public-nav-link.active {
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+    @media (max-width: 768px) {
+      body, html { overflow-x: hidden !important; }
+      .main-container { padding: 0.5rem 0.5rem 2rem 0.5rem !important; }
+      .content-card { padding: 1.25rem 0.85rem !important; margin: 0.5rem auto !important; width: 100% !important; box-sizing: border-box !important; border-radius: 12px !important; }
+      h1 { font-size: 1.6rem !important; line-height: 1.25 !important; word-break: normal !important; overflow-wrap: break-word !important; text-align: center !important; }
+      h2 { font-size: 1.25rem !important; line-height: 1.3 !important; word-break: normal !important; overflow-wrap: break-word !important; }
+      h3 { font-size: 1.1rem !important; }
+      h4 { font-size: 1rem !important; }
+      header { padding: 1rem !important; flex-direction: column !important; gap: 0.75rem !important; }
+      header nav { gap: 0.5rem 0.75rem !important; flex-wrap: wrap !important; justify-content: center !important; }
+      .table-container { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+      table { min-width: 480px !important; font-size: 0.78rem !important; }
+      th, td { padding: 0.5rem 0.6rem !important; white-space: normal !important; }
+    }
+  </style>
+</head>
+<body class="theme-light" style="background-color: #f7f9fc; margin: 0; padding: 0;">
+
+  <!-- PUBLIC HEADER -->
+  <header style="background-color: #00204a; padding: 1rem 3rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15);">
+    <div onclick="window.location.href='index.html'" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+      <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="height: 34px; width: 34px; object-fit: contain; border-radius: 50%; background-color: #ffffff; padding: 2px;">
+      <div style="display: flex; flex-direction: column; justify-content: center; color: #ffffff; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 0.75rem;">
+        <span style="font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; font-family: 'Playfair Display', serif; white-space: nowrap; line-height: 1.1;">PODAR INTERNATIONAL SCHOOL</span>
+        <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 1px; color: rgba(255,255,255,0.75); font-family: 'Montserrat', sans-serif; text-transform: uppercase; margin-top: 2px;">Godhani, Nagpur</span>
+      </div>
+    </div>
+    
+    <nav style="display: flex; align-items: center; gap: 1.5rem;">
+      <a href="index.html" class="public-nav-link">HOME</a>
+      <a href="about.html" class="public-nav-link active">ABOUT PMUN</a>
+      <a href="committees.html" class="public-nav-link">COMMITTEES</a>
+      <a href="rules.html" class="public-nav-link">RULES & GUIDELINES</a>
+      <a href="contact.html" class="public-nav-link">CONTACT</a>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <div class="main-container" style="max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem;">
+    <div class="content-card" style="padding: 3rem; background-color: #ffffff; border: 1px solid var(--color-border); border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+      
+      <!-- Handbook Title Header -->
+      <div style="text-align: center; border-bottom: 2px solid #edf2f7; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <img src="resources/podar_tree_logo.png" loading="lazy" alt="Podar Logo" style="width: 52px; height: 52px; object-fit: contain;">
+        </div>
+        <h1 style="font-family: var(--font-serif); font-size: 2.6rem; color: var(--color-navy); margin-bottom: 0.25rem; font-weight: 700; letter-spacing: 0.5px;">ALL ABOUT MUN</h1>
+        <p style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500; max-width: 750px; margin: 0 auto;">Official Delegate Handbook & Conference Guide — PMUN 2026-27</p>
+      </div>
+
+      <!-- Section A: About United Nations -->
+      <section style="margin-bottom: 3rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
+          <span style="font-size: 1.25rem;">🏛️</span>
+          <h2 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--color-navy); margin: 0; font-weight: 700;">A. About the United Nations</h2>
+        </div>
+        
+        <p style="margin-bottom: 1.25rem; font-size: 0.95rem; color: var(--color-text-dark); line-height: 1.7;">
+          The <strong>United Nations (UN)</strong> is an international organisation founded in 1945 in the aftermath of World War II. It began with 51 countries collaborating to create a platform dedicated to maintaining global peace and stability. Over the years, more nations have joined, and today the UN boasts <strong>193 member states</strong>. Its headquarters are located in New York City, USA.
+        </p>
+        
+        <h4 style="font-family: var(--font-sans); color: var(--color-navy); font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem;">Key UN Organs & Bodies:</h4>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+            <h5 style="color: var(--color-podar-blue); font-size: 1rem; margin: 0 0 0.4rem 0; font-weight: 700;">1. General Assembly (UNGA)</h5>
+            <p style="font-size: 0.88rem; color: var(--color-text-dark); margin: 0; line-height: 1.5;">Main deliberative body of the UN where all 193 member states discuss and coordinate on international issues and policies.</p>
+          </div>
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+            <h5 style="color: var(--color-podar-blue); font-size: 1rem; margin: 0 0 0.4rem 0; font-weight: 700;">2. Security Council (UNSC)</h5>
+            <p style="font-size: 0.88rem; color: var(--color-text-dark); margin: 0; line-height: 1.5;">Responsible for maintaining international peace and security, consisting of 15 members including 5 permanent ones (P5).</p>
+          </div>
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+            <h5 style="color: var(--color-podar-blue); font-size: 1rem; margin: 0 0 0.4rem 0; font-weight: 700;">3. Economic & Social Council (ECOSOC)</h5>
+            <p style="font-size: 0.88rem; color: var(--color-text-dark); margin: 0; line-height: 1.5;">Coordinates economic, social, and environmental work, as well as global policy recommendations.</p>
+          </div>
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+            <h5 style="color: var(--color-podar-blue); font-size: 1rem; margin: 0 0 0.4rem 0; font-weight: 700;">4. Trusteeship Council</h5>
+            <p style="font-size: 0.88rem; color: var(--color-text-dark); margin: 0; line-height: 1.5;">Originally established to oversee trust territories; currently inactive since all territories gained self-governance.</p>
+          </div>
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+            <h5 style="color: var(--color-podar-blue); font-size: 1rem; margin: 0 0 0.4rem 0; font-weight: 700;">5. International Court of Justice (ICJ)</h5>
+            <p style="font-size: 0.88rem; color: var(--color-text-dark); margin: 0; line-height: 1.5;">Settles legal disputes between sovereign countries and provides advisory opinions on international law.</p>
+          </div>
+          <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem;">
+            <h5 style="color: var(--color-podar-blue); font-size: 1rem; margin: 0 0 0.4rem 0; font-weight: 700;">6. UN Secretariat</h5>
+            <p style="font-size: 0.88rem; color: var(--color-text-dark); margin: 0; line-height: 1.5;">Carries out the day-to-day administrative work of the UN, headed by the Secretary-General.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section B: Topics for PMUN 2026-27 -->
+      <section style="margin-bottom: 3rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
+          <span style="font-size: 1.25rem;">📜</span>
+          <h2 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--color-navy); margin: 0; font-weight: 700;">B. Topics for PMUN 2026-27</h2>
+        </div>
+        
+        <p style="margin-bottom: 1.25rem; font-size: 0.95rem; color: var(--color-text-dark);">
+          For <strong>Podar Model United Nations 2026-27</strong>, six core topics are assigned across our specialized committees.
+        </p>
+
+        <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: 8px; padding: 1.5rem;">
+          <ol style="margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.92rem; color: var(--color-navy); font-weight: 600;">
+            <li>Ensuring Transparency and Sustainability in Food Supply Chains in the Age of Online Commerce <span style="font-weight: normal; color: var(--color-text-muted);">(ECOSOC)</span></li>
+            <li>Addressing Challenges to Women’s Rights and Empowerment <span style="font-weight: normal; color: var(--color-text-muted);">(UN Women)</span></li>
+            <li>Protecting Digital Rights during Conflicts <span style="font-weight: normal; color: var(--color-text-muted);">(UNHRC)</span></li>
+            <li>Addressing the Crisis of Food Insecurity in Conflict Areas <span style="font-weight: normal; color: var(--color-text-muted);">(FAO)</span></li>
+            <li>Harnessing Solar Energy for Equitable Access and Clean Air <span style="font-weight: normal; color: var(--color-text-muted);">(UNEP)</span></li>
+            <li>Impact of Foreign Aid Reductions on Global Child Healthcare <span style="font-weight: normal; color: var(--color-text-muted);">(UNICEF)</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Section C: Model United Nations & Purpose -->
+      <section style="margin-bottom: 3rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
+          <span style="font-size: 1.25rem;">🎯</span>
+          <h2 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--color-navy); margin: 0; font-weight: 700;">C. Model United Nations (MUN) & Its Purpose</h2>
+        </div>
+        
+        <p style="margin-bottom: 1.5rem; font-size: 0.95rem; color: var(--color-text-dark); line-height: 1.7;">
+          <strong>MUN</strong> is an educational simulation that replicates the process of an actual UN conference. It provides students an invaluable opportunity to take on the role of a UN delegate and acquire skills such as conflict management and global cooperation.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+            <h4 style="color: var(--color-podar-blue); font-family: var(--font-sans); font-size: 1.1rem; margin: 0 0 1rem 0; font-weight: 700;">What does PMUN offer students?</h4>
+            <ul style="margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--color-text-dark);">
+              <li>A chance to explore real global issues through research, dialogue, and diplomacy.</li>
+              <li>A platform to practise leadership, negotiation, and teamwork.</li>
+              <li>Builds problem-solving, decision-making, and collaborative skills.</li>
+              <li>Encourages students to think deeply and speak confidently.</li>
+            </ul>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+            <h4 style="color: var(--color-navy); font-family: var(--font-sans); font-size: 1.1rem; margin: 0 0 1rem 0; font-weight: 700;">Why should a school conduct MUN?</h4>
+            <ul style="margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: var(--color-text-dark);">
+              <li><strong>Thought Leadership:</strong> Demonstrates commitment to global education.</li>
+              <li><strong>Prestige & Visibility:</strong> Attracts attention from educators and peer schools.</li>
+              <li><strong>Student Leadership:</strong> Roles for student organizers and chairs.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="background-color: #00204a; color: #ffffff; padding: 3rem 2rem 1.5rem 2rem; font-size: 0.85rem; margin-top: 3rem;">
+    <div style="max-width: 1100px; margin: 0 auto; text-align: center;">
+      <p style="color: rgba(255,255,255,0.7); margin-bottom: 0.5rem;">Podar International School, Godhani, Nagpur — Model United Nations Portal</p>
+      <p style="color: rgba(255,255,255,0.5); font-size: 0.78rem;">© PMUN 2026-27. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -839,7 +839,7 @@
       if (backBtn) {
         backBtn.removeAttribute("onclick");
         backBtn.addEventListener("click", () => {
-          window.location.href = `delegate.html?tab=committees${isPublic ? '&public=true' : ''}`;
+          window.location.href = "committees.html";
         });
       }
 
