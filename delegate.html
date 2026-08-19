@@ -66,14 +66,84 @@
   
     /* Mobile/Tablet Responsiveness Overrides for Public and Dashboard viewports */
     @media (max-width: 768px) {
+      body, html {
+        overflow-x: hidden !important;
+      }
+      
+      .delegate-layout {
+        padding: 0.5rem 0.5rem 2rem 0.5rem !important;
+      }
+
+      .settings-section-card {
+        padding: 1.25rem 0.85rem !important;
+        margin: 0.5rem auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        border-radius: 12px !important;
+      }
+
+      #about-tab h1, .settings-section-card h1 {
+        font-size: 1.6rem !important;
+        letter-spacing: 0.5px !important;
+        line-height: 1.25 !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        text-align: center !important;
+      }
+
+      #about-tab h2, .settings-section-card h2 {
+        font-size: 1.25rem !important;
+        line-height: 1.3 !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+      }
+
+      #about-tab h3, .settings-section-card h3 {
+        font-size: 1.1rem !important;
+        line-height: 1.35 !important;
+      }
+
+      #about-tab h4, .settings-section-card h4 {
+        font-size: 1rem !important;
+        line-height: 1.35 !important;
+      }
+
+      /* Fix section title icon alignment */
+      div[style*="border-bottom"][style*="display: flex"],
+      section div[style*="display: flex"][style*="gap: 0.5rem"] {
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+      }
+
+      /* Fix Table Overflow */
+      .table-container, div[style*="overflow-x: auto"] {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px !important;
+        margin-bottom: 1rem !important;
+      }
+
+      table, .dashboard-table {
+        min-width: 480px !important;
+        font-size: 0.78rem !important;
+      }
+
+      th, td {
+        padding: 0.5rem 0.6rem !important;
+        white-space: normal !important;
+      }
+
       #public-header {
-        padding: 1rem 1.5rem !important;
+        padding: 1rem 1rem !important;
         flex-direction: column !important;
         height: auto !important;
         gap: 0.75rem !important;
       }
       #public-header nav {
-        gap: 1rem !important;
+        gap: 0.5rem 0.75rem !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
       }
@@ -84,11 +154,11 @@
       }
       .grade-cards-grid {
         grid-template-columns: 1fr !important;
-        padding: 0 1rem !important;
+        padding: 0 !important;
       }
       .grade-card-new {
         min-height: auto !important;
-        padding: 2rem 1.5rem !important;
+        padding: 1.5rem 1rem !important;
       }
       /* Dashboard Header and forms */
       .delegate-header {
