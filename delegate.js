@@ -13,7 +13,12 @@ document.addEventListener("click", function(e) {
 
 // Route Auth Guard
     (async () => {
-      const isPublic = new URLSearchParams(window.location.search).get("public") === "true";
+      const urlParams = new URLSearchParams(window.location.search);
+      const activeTab = urlParams.get("tab");
+      const isPublicParam = urlParams.get("public") === "true";
+      const publicTabs = ["about", "committees", "rules", "resources", "contact"];
+      const isPublic = isPublicParam || (activeTab && publicTabs.includes(activeTab.toLowerCase()));
+
       if (isPublic) return;
       
       await DB.init();
@@ -182,8 +187,9 @@ document.addEventListener("click", function(e) {
 
     // Tab Controller based on URL Query Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const isPublic = urlParams.get("public") === "true";
-    const activeTab = urlParams.get("tab") || (isPublic ? "committees" : "home");
+    const activeTab = urlParams.get("tab") || "home";
+    const publicTabsList = ["about", "committees", "rules", "resources", "contact"];
+    const isPublic = urlParams.get("public") === "true" || publicTabsList.includes(activeTab.toLowerCase());
 
     // Function to calculate and update live registration counters per committee
     async function updateLiveCounters() {
