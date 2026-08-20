@@ -139,13 +139,17 @@
         </div>
       </div>
 
-      <!-- IFrame Container with Smartphone Fallback -->
-      <div class="iframe-wrapper">
-        <iframe id="pdf-iframe" src="about:blank" title="PDF Document Viewer"></iframe>
+      <!-- Responsive PDF Container -->
+      <div id="pdf-viewer-wrapper" class="iframe-wrapper">
+        <object id="pdf-object" data="about:blank" type="application/pdf" style="width: 100%; height: 650px;">
+          <iframe id="pdf-iframe" src="about:blank" style="width: 100%; height: 650px; border: none;" title="PDF Document Viewer">
+            <p style="padding: 2rem; text-align: center;">Your browser cannot render embedded PDFs directly. <a id="link-direct-failover" href="#" target="_blank">Click here to open or download the PDF file</a>.</p>
+          </iframe>
+        </object>
       </div>
 
       <div style="margin-top: 0.85rem; text-align: center; font-size: 0.82rem; color: #64748b;">
-        Having trouble viewing on your smartphone? <a id="link-gdocs-fallback" href="#" target="_blank" style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Click here to open in Mobile Google PDF Viewer</a> or <a id="link-download-fallback" href="#" download style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Download Direct File</a>.
+        Having trouble viewing? <a id="link-gdocs-fallback" href="#" target="_blank" style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Open in Mobile Google PDF Viewer</a> or <a id="link-download-fallback" href="#" download style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Download Direct PDF File</a>.
       </div>
     </div>
   </div>
@@ -153,10 +157,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
-      let file = urlParams.get("file") || "resources/unep_background_guide.pdf";
+      let file = urlParams.get("file") || "/resources/unep_background_guide.pdf";
       let title = urlParams.get("title") || "Background Guide";
 
-      // Ensure root relative path
       if (!file.startsWith("/")) {
         file = "/" + file;
       }
@@ -165,28 +168,26 @@
       document.getElementById("pdf-title").innerText = cleanTitle;
       document.title = `${cleanTitle} — PMUN 2026`;
 
-      // Absolute Vercel URL for Google Docs Viewer compatibility
       const fullVercelUrl = `https://pisgmun.vercel.app${file}`;
       const gdocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullVercelUrl)}&embedded=true`;
 
-      // Detect mobile device
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-      const iframe = document.getElementById("pdf-iframe");
-      
-      // On mobile browsers (iOS Safari / Android Chrome), use Google Docs viewer embed for 100% reliable inline rendering
-      if (isMobile) {
-        iframe.src = gdocsViewerUrl;
-      } else {
-        iframe.src = file;
+      const pdfObject = document.getElementById("pdf-object");
+      const pdfIframe = document.getElementById("pdf-iframe");
+
+      if (pdfObject) pdfObject.data = file;
+      if (pdfIframe) {
+        pdfIframe.src = isMobile ? gdocsViewerUrl : file;
       }
 
-      // Action links
+      // Update links
       document.getElementById("nav-direct-download").href = file;
       document.getElementById("btn-direct-download").href = file;
       document.getElementById("btn-raw-file").href = file;
       document.getElementById("link-gdocs-fallback").href = gdocsViewerUrl;
       document.getElementById("link-download-fallback").href = file;
+      document.getElementById("link-direct-failover").href = file;
     });
   </script>
 
