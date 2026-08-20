@@ -1,4 +1,17 @@
 {
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
   "headers": [
     {
       "source": "/resources/fao_background_guide.pdf",
@@ -55,24 +68,8 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/dist/assets/$1"
-    },
-    {
-      "source": "/favicon.svg",
-      "destination": "/dist/favicon.svg"
-    },
-    {
-      "source": "/icons.svg",
-      "destination": "/dist/icons.svg"
-    },
-    {
-      "source": "/resources/(.*)",
-      "destination": "/dist/resources/$1"
-    },
-    {
-      "source": "/((?!api/|dist/|assets/|favicon.svg|icons.svg|resources/).*)",
-      "destination": "/dist/index.html"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
