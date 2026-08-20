@@ -4,10 +4,12 @@ import re
 import json
 import time
 
-# Resolve dependencies from workspace packages directory if needed
-packages_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages')
-if os.path.exists(packages_path):
-    sys.path.insert(0, packages_path)
+# Resolve dependencies from workspace packages directory if running locally
+# (Vercel builds packages for its own Linux runtime from requirements.txt, loading local macOS packages will crash the serverless function)
+if 'VERCEL' not in os.environ:
+    packages_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages')
+    if os.path.exists(packages_path):
+        sys.path.insert(0, packages_path)
 
 import bcrypt
 import requests
