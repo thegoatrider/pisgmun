@@ -1,7 +1,14 @@
 import os
+import sys
 import re
 import json
 import time
+
+# Resolve dependencies from workspace packages directory if needed
+packages_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages')
+if os.path.exists(packages_path):
+    sys.path.insert(0, packages_path)
+
 import bcrypt
 import requests
 from flask import Flask, request, jsonify, session, send_from_directory
@@ -341,27 +348,71 @@ def db_update_committee(comm_id, update_data):
         return res.status_code in (200, 204)
 
 def db_get_countries():
+    # 1. Fetch countries
     if IS_DEMO_MODE:
-        return read_mock().get("countries", [])
+        countries = read_mock().get("countries", [])
     else:
         url = f"{SUPABASE_URL}/rest/v1/countries"
         res = requests.get(url, headers=get_supabase_headers())
         if res.status_code == 200 and res.json():
-            return res.json()
-        # Seed countries
-        seed = get_default_countries()
-        formatted = [{
-            "committee_id": c["committee_id"],
-            "country_name": c["country_name"],
-            "category": c["category"],
-            "available": True,
-            "assigned_to": None,
-            "preference_count": 0
-        } for c in seed]
-        requests.post(url, headers=get_supabase_headers(), json=formatted)
-        # Fetch again
-        res = requests.get(url, headers=get_supabase_headers())
-        return res.json() if res.status_code == 200 else []
+            countries = res.json()
+        else:
+            # Seed countries
+            seed = get_default_countries()
+            formatted = [{
+                "committee_id": c["committee_id"],
+                "country_name": c["country_name"],
+                "category": c["category"],
+                "available": True,
+                "assigned_to": None,
+                "preference_count": 0
+            } for c in seed]
+            requests.post(url, headers=get_supabase_headers(), json=formatted)
+            # Fetch again
+            res = requests.get(url, headers=get_supabase_headers())
+            countries = res.json() if res.status_code == 200 else []
+
+    # 2. Fetch all registrations to dynamically calculate availability
+    if IS_DEMO_MODE:
+        registrations = read_mock().get("registrations", [])
+    else:
+        url_regs = f"{SUPABASE_URL}/rest/v1/registrations"
+        res_regs = requests.get(url_regs, headers=get_supabase_headers())
+        registrations = res_regs.json() if res_regs.status_code == 200 and isinstance(res_regs.json(), list) else []
+
+    # 3. Filter active registrations (ignoring REJECTED ones)
+    active_regs = [r for r in registrations if r.get("status") != "REJECTED"]
+
+    # 4. Map taken countries: key=(committee_id.lower(), country_name.lower()) -> registration_id
+    taken_countries = {}
+    for r in active_regs:
+        reg_id = r.get("id")
+        assigned_c = r.get("assigned_country")
+        assigned_comm = r.get("committee")
+
+        if assigned_c and assigned_c != "NOT ASSIGNED":
+            comm = assigned_comm or r.get("preferred_committee", "")
+            if comm:
+                taken_countries[(comm.lower(), assigned_c.lower())] = reg_id
+        else:
+            prefs = r.get("country_preferences", [])
+            pref_comm = r.get("preferred_committee", "")
+            if prefs and pref_comm:
+                pref_c = prefs[0]
+                taken_countries[(pref_comm.lower(), pref_c.lower())] = reg_id
+
+    # 5. Dynamically calculate availability for each country
+    for c in countries:
+        comm_id = c.get("committee_id", "").lower()
+        c_name = c.get("country_name", "").lower()
+        if (comm_id, c_name) in taken_countries:
+            c["available"] = False
+            c["assigned_to"] = taken_countries[(comm_id, c_name)]
+        else:
+            c["available"] = True
+            c["assigned_to"] = None
+
+    return countries
 
 def db_update_country(country_id, update_data):
     if IS_DEMO_MODE:
@@ -416,10 +467,15 @@ def db_submit_registration(reg_data):
             # Mark preferred country as taken/registered in Supabase countries table
             if preferred_country and preferred_committee:
                 try:
-                    c_url = f"{SUPABASE_URL}/rest/v1/countries?committee_id=eq.{preferred_committee.lower()}&country_name=eq.{preferred_country}"
+                    c_url = f"{SUPABASE_URL}/rest/v1/countries"
+                    params = {
+                        "committee_id": f"eq.{preferred_committee.lower()}",
+                        "country_name": f"eq.{preferred_country}"
+                    }
                     requests.patch(
                         c_url, 
                         headers=get_supabase_headers(), 
+                        params=params,
                         json={"assigned_to": reg_id, "available": False}
                     )
                 except Exception as ex:
@@ -607,10 +663,16 @@ def api_update_country(country_id):
 @app.route('/api/registrations', methods=['GET'])
 def api_registrations():
     role = session.get('role')
-    if not role:
-        return jsonify({"error": "Unauthenticated"}), 401
-
     regs = db_get_registrations()
+
+    if not role:
+        # Unauthenticated guests get stripped records for dynamic counters
+        stripped = [{
+            "id": r.get("id"),
+            "preferred_committee": r.get("preferred_committee"),
+            "status": r.get("status")
+        } for r in regs]
+        return jsonify(stripped)
 
     if role == 'coordinator':
         return jsonify(regs)
@@ -622,8 +684,19 @@ def api_registrations():
 
     if role == 'delegate':
         reg_id = session.get('registration_id')
-        filtered = [r for r in regs if r["id"] == reg_id]
-        return jsonify(filtered)
+        # Return full details for the logged-in delegate's own registration,
+        # but stripped/anonymous details for all other registrations so they can calculate counts.
+        result = []
+        for r in regs:
+            if r.get("id") == reg_id:
+                result.append(r)
+            else:
+                result.append({
+                    "id": r.get("id"),
+                    "preferred_committee": r.get("preferred_committee"),
+                    "status": r.get("status")
+                })
+        return jsonify(result)
 
     return jsonify({"error": "Unauthorized"}), 403
 
