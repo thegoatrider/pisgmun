@@ -55,8 +55,24 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "source": "/assets/(.*)",
+      "destination": "/dist/assets/$1"
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": "/dist/favicon.svg"
+    },
+    {
+      "source": "/icons.svg",
+      "destination": "/dist/icons.svg"
+    },
+    {
+      "source": "/resources/(.*)",
+      "destination": "/dist/resources/$1"
+    },
+    {
+      "source": "/((?!api/|dist/|assets/|favicon.svg|icons.svg|resources/).*)",
+      "destination": "/dist/index.html"
     }
   ]
 }
