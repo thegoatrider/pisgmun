@@ -1,62 +1,46 @@
 {
-  "headers": [
+  "builds": [
     {
-      "source": "/resources/fao_background_guide.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     },
     {
-      "source": "/resources/rules_of_procedure.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
-      "source": "/resources/un_women_background_guide.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
-      "source": "/resources/unep_background_guide.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
-      "source": "/resources/unhrc_background_guide.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
-      "source": "/resources/unicef_background_guide.pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/favicon.svg",
+      "dest": "/favicon.svg"
+    },
+    {
+      "src": "/icons.svg",
+      "dest": "/icons.svg"
+    },
+    {
+      "src": "/resources/(.*)",
+      "headers": {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "inline",
+        "Access-Control-Allow-Origin": "*"
+      },
+      "dest": "/resources/$1"
+    },
+    {
+      "src": "/((?!api/).*)",
+      "dest": "/index.html"
     }
   ]
 }
