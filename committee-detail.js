@@ -630,6 +630,7 @@
       const rootPdfUrl = rawPdfPath.startsWith('/') ? rawPdfPath : '/' + rawPdfPath;
       const fullVercelPdfUrl = `https://pisgmun.vercel.app${rootPdfUrl}`;
       const googleDocsPdfUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullVercelPdfUrl)}&embedded=true`;
+      const viewPdfPageUrl = `view-pdf.html?file=${encodeURIComponent(rootPdfUrl)}&title=${encodeURIComponent(committee.name + ' Background Guide')}`;
 
       // Inject Layout
       container.innerHTML = `
@@ -653,23 +654,23 @@
               <p style="color: var(--color-text-muted); font-size: 0.88rem; margin: 0.25rem 0 0 0;">View or download the official conference preparation manual below.</p>
             </div>
             <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
-              <a href="${rootPdfUrl}" target="_blank" rel="noopener" style="background-color: var(--color-podar-blue); color: #ffffff; padding: 0.65rem 1.1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
-                ↗ Open PDF in Browser
+              <a href="${viewPdfPageUrl}" style="background-color: var(--color-podar-blue); color: #ffffff; padding: 0.65rem 1.1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
+                📄 Open Fullscreen PDF Guide
               </a>
               <a href="${rootPdfUrl}" download="${committeeId}_background_guide.pdf" style="background-color: #f1f5f9; color: var(--color-navy); border: 1px solid var(--color-border); padding: 0.65rem 1.1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
-                ⬇ Download PDF File
+                ⬇ Download Direct PDF
               </a>
             </div>
           </div>
 
           <!-- Embedded Responsive PDF Container -->
           <div style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background-color: #f8fafc;">
-            <iframe src="${rootPdfUrl}" style="width: 100%; height: 580px; border: none;" title="${committee.name} Background Guide PDF">
-              <p style="padding: 1.5rem; text-align: center;">Your browser does not support embedded PDFs. <a href="${rootPdfUrl}" target="_blank">Click here to open PDF directly</a>.</p>
+            <iframe src="${googleDocsPdfUrl}" style="width: 100%; height: 580px; border: none;" title="${committee.name} Background Guide PDF">
+              <p style="padding: 1.5rem; text-align: center;">Your browser does not support embedded PDFs. <a href="${viewPdfPageUrl}">Click here to open PDF directly</a>.</p>
             </iframe>
           </div>
           <div style="margin-top: 0.85rem; text-align: center; font-size: 0.82rem; color: var(--color-text-muted);">
-            Mobile user? If the preview above is slow to load, <a href="${googleDocsPdfUrl}" target="_blank" style="color: var(--color-podar-blue); font-weight: 700; text-decoration: underline;">Click here to view via Mobile PDF Viewer</a> or <a href="${rootPdfUrl}" target="_blank" style="color: var(--color-podar-blue); font-weight: 700; text-decoration: underline;">Download Direct File</a>.
+            Having trouble viewing? <a href="${viewPdfPageUrl}" style="color: var(--color-podar-blue); font-weight: 700; text-decoration: underline;">Click here to open in Mobile & Desktop Reader</a> or <a href="${rootPdfUrl}" download style="color: var(--color-podar-blue); font-weight: 700; text-decoration: underline;">Download Direct File</a>.
           </div>
         </div>
 
