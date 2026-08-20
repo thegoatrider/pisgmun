@@ -11,16 +11,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js?v=4"></script>
   <script>
-    // Route Auth Guard
     (async () => {
       try {
         await DB.init();
         await AppState.loadData();
-        if (!AppState.checkAuth("delegate")) {
-          window.location.href = "login.html?role=delegate";
-        }
       } catch (err) {
-        console.error("Auth guard error:", err);
+        console.error("DB init error:", err);
       }
     })();
   </script>
@@ -78,10 +74,6 @@
               <label for="field-grade">Class / Grade *</label>
               <select id="field-grade" class="input-field" required>
                 <option value="" disabled selected>Select Grade</option>
-                <option value="7">Grade 7</option>
-                <option value="8">Grade 8</option>
-                <option value="9">Grade 9</option>
-                <option value="10">Grade 10</option>
               </select>
             </div>
 
@@ -119,6 +111,54 @@
               </select>
               <input type="text" id="field-preferred_committee-locked" class="input-field" readonly style="display: none; background-color: #f1f5f9; color: #00204a; font-weight: 700;">
             </div>
+
+            <script>
+              (function() {
+                try {
+                  const params = new URLSearchParams(window.location.search);
+                  const comm = params.get("committee");
+                  if (comm) {
+                    const clean = comm.toLowerCase();
+                    const commGradesMap = {
+                      "unep": [7, 8], "un-women": [7, 8], "unwomen": [7, 8], "fao": [7, 8],
+                      "unhrc": [9, 10], "unicef": [9, 10], "ecosoc": [9, 10]
+                    };
+                    const commNamesMap = {
+                      "unep": "UNEP — UN Environment Programme",
+                      "un-women": "UN Women — Entity for Gender Equality",
+                      "unwomen": "UN Women — Entity for Gender Equality",
+                      "fao": "FAO — Food & Agriculture Organization",
+                      "unhrc": "UNHRC — Human Rights Council",
+                      "unicef": "UNICEF — Children's Fund",
+                      "ecosoc": "ECOSOC — Economic & Social Council"
+                    };
+                    const allowed = commGradesMap[clean] || [7, 8, 9, 10];
+                    const gradeEl = document.getElementById("field-grade");
+                    if (gradeEl) {
+                      gradeEl.innerHTML = '<option value="" disabled>Select Grade</option>';
+                      allowed.forEach(function(g) {
+                        const opt = document.createElement("option");
+                        opt.value = g.toString();
+                        opt.textContent = "Grade " + g;
+                        gradeEl.appendChild(opt);
+                      });
+                      gradeEl.value = allowed[0].toString();
+                    }
+                    const selectEl = document.getElementById("field-preferred_committee");
+                    const lockedEl = document.getElementById("field-preferred_committee-locked");
+                    if (selectEl && lockedEl) {
+                      selectEl.innerHTML = '<option value="' + clean + '" selected>' + (commNamesMap[clean] || clean.toUpperCase()) + '</option>';
+                      selectEl.value = clean;
+                      selectEl.style.display = "none";
+                      lockedEl.value = commNamesMap[clean] || clean.toUpperCase();
+                      lockedEl.style.display = "block";
+                    }
+                  }
+                } catch(e) {
+                  console.warn("Inline committee setup:", e);
+                }
+              })();
+            </script>
 
             <div class="form-group">
               <label for="field-portfolio_preference">Preferred Position *</label>
@@ -175,6 +215,6 @@
 
   </div>
 
-  <script src="register.js?v=4"></script>
+  <script src="register.js?v=10"></script>
 </body>
 </html>
