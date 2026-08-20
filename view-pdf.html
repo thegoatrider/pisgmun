@@ -6,15 +6,18 @@
   <title>View PDF — PMUN 2026</title>
   <link rel="stylesheet" href="global.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     body, html {
       margin: 0;
       padding: 0;
       width: 100%;
-      height: 100%;
+      min-height: 100%;
       background-color: #f7f9fc;
       font-family: 'Montserrat', sans-serif;
-      overflow-x: hidden;
     }
     .pdf-viewer-header {
       background-color: #00204a;
@@ -45,7 +48,7 @@
       background: rgba(255,255,255,0.3);
     }
     .pdf-container {
-      max-width: 1100px;
+      max-width: 900px;
       margin: 1.5rem auto;
       padding: 0 1rem;
     }
@@ -82,25 +85,30 @@
     .btn-download:hover {
       background-color: #09428b;
     }
-    .iframe-wrapper {
+    #pdf-pages-container {
       width: 100%;
-      height: 75vh;
-      min-height: 500px;
-      border: 1px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f1f5f9;
+      padding: 1rem;
       border-radius: 8px;
-      overflow: hidden;
-      background-color: #f8fafc;
+      box-sizing: border-box;
+      min-height: 400px;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+      margin-bottom: 1.25rem;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      background-color: #ffffff;
     }
     @media (max-width: 768px) {
       .pdf-viewer-header { padding: 0.75rem 1rem; }
-      .pdf-container { margin: 0.75rem auto; padding: 0 0.5rem; }
-      .pdf-card { padding: 1rem 0.75rem; border-radius: 8px; }
-      .iframe-wrapper { height: 70vh; min-height: 420px; }
+      .pdf-container { margin: 0.5rem auto; padding: 0 0.4rem; }
+      .pdf-card { padding: 1rem 0.6rem; border-radius: 8px; }
+      #pdf-pages-container { padding: 0.5rem; }
       h2 { font-size: 1.2rem !important; }
     }
   </style>
@@ -131,7 +139,7 @@
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <a id="btn-raw-file" href="#" target="_blank" rel="noopener" class="btn-download" style="background-color: #f1f5f9; color: #00204a; border: 1px solid #cbd5e1;">
-            ↗ Open Raw File
+            ↗ Open Direct File
           </a>
           <a id="btn-direct-download" href="#" download class="btn-download">
             ⬇ Download PDF
@@ -139,20 +147,22 @@
         </div>
       </div>
 
-      <!-- Responsive PDF Container -->
-      <div id="pdf-viewer-wrapper" class="iframe-wrapper">
-        <object id="pdf-object" data="about:blank" type="application/pdf" style="width: 100%; height: 650px;">
-          <iframe id="pdf-iframe" src="about:blank" style="width: 100%; height: 650px; border: none;" title="PDF Document Viewer">
-            <p style="padding: 2rem; text-align: center;">Your browser cannot render embedded PDFs directly. <a id="link-direct-failover" href="#" target="_blank">Click here to open or download the PDF file</a>.</p>
-          </iframe>
-        </object>
-      </div>
-
-      <div style="margin-top: 0.85rem; text-align: center; font-size: 0.82rem; color: #64748b;">
-        Having trouble viewing? <a id="link-gdocs-fallback" href="#" target="_blank" style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Open in Mobile Google PDF Viewer</a> or <a id="link-download-fallback" href="#" download style="color: #0c56b3; font-weight: 700; text-decoration: underline;">Download Direct PDF File</a>.
+      <!-- PDF Canvas Container -->
+      <div id="pdf-pages-container">
+        <div id="pdf-loading-state" style="text-align: center; padding: 3rem 1rem;">
+          <div style="display: inline-block; width: 36px; height: 36px; border: 3px solid #cbd5e1; border-top-color: #0c56b3; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+          <p style="color: #64748b; margin-top: 1rem; font-weight: 600; font-size: 0.9rem;">Loading PDF document for mobile viewer...</p>
+        </div>
       </div>
     </div>
   </div>
+
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -168,28 +178,59 @@
       document.getElementById("pdf-title").innerText = cleanTitle;
       document.title = `${cleanTitle} — PMUN 2026`;
 
-      const fullVercelUrl = `https://pisgmun.vercel.app${file}`;
-      const gdocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullVercelUrl)}&embedded=true`;
-
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-      const pdfObject = document.getElementById("pdf-object");
-      const pdfIframe = document.getElementById("pdf-iframe");
-
-      if (pdfObject) pdfObject.data = file;
-      if (pdfIframe) {
-        pdfIframe.src = isMobile ? gdocsViewerUrl : file;
-      }
-
-      // Update links
+      // Download links
       document.getElementById("nav-direct-download").href = file;
       document.getElementById("btn-direct-download").href = file;
       document.getElementById("btn-raw-file").href = file;
-      document.getElementById("link-gdocs-fallback").href = gdocsViewerUrl;
-      document.getElementById("link-download-fallback").href = file;
-      document.getElementById("link-direct-failover").href = file;
+
+      // Configure PDF.js worker
+      if (typeof pdfjsLib !== "undefined") {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        const container = document.getElementById("pdf-pages-container");
+
+        pdfjsLib.getDocument(file).promise.then(pdf => {
+          container.innerHTML = ""; // Clear loader
+
+          const renderPage = (pageNum) => {
+            pdf.getPage(pageNum).then(page => {
+              const scale = window.innerWidth < 768 ? 1.4 : 1.6;
+              const viewport = page.getViewport({ scale: scale });
+
+              const canvas = document.createElement("canvas");
+              const context = canvas.getContext("2d");
+              canvas.height = viewport.height;
+              canvas.width = viewport.width;
+
+              container.appendChild(canvas);
+
+              const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+              };
+              page.render(renderContext);
+
+              if (pageNum < pdf.numPages) {
+                renderPage(pageNum + 1);
+              }
+            });
+          };
+
+          renderPage(1);
+        }).catch(err => {
+          console.error("PDF.js render error:", err);
+          container.innerHTML = `
+            <div style="text-align: center; padding: 2.5rem 1rem;">
+              <p style="color: #00204a; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;">PDF Document Reader</p>
+              <p style="color: #64748b; margin-bottom: 1.5rem;">Click the button below to view or download the document directly.</p>
+              <a href="${file}" target="_blank" class="btn-download" style="padding: 0.85rem 1.75rem; font-size: 1rem;">
+                📄 Open PDF File Direct
+              </a>
+            </div>
+          `;
+        });
+      }
     });
   </script>
-
 </body>
 </html>
