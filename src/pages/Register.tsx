@@ -280,6 +280,7 @@ export const Register: React.FC = () => {
                 {step > item.s ? '✓' : item.icon}
               </div>
               <span
+                className="step-label"
                 style={{
                   fontSize: '0.72rem',
                   fontWeight: 700,
@@ -287,6 +288,7 @@ export const Register: React.FC = () => {
                   color: step >= item.s ? 'var(--color-primary)' : 'var(--color-text-muted)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
+                  textAlign: 'center',
                 }}
               >
                 {item.label}
@@ -587,6 +589,10 @@ export const Register: React.FC = () => {
           .grid-responsive {
             grid-template-columns: 1fr !important;
             gap: 1rem !important;
+          }
+          .step-label {
+            font-size: 0.65rem !important;
+            letter-spacing: 0.2px !important;
           }
         }
       `}</style>

@@ -26,6 +26,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header
+      className="navbar-header"
       style={{
         backgroundColor: 'var(--color-primary)',
         padding: '0.75rem 2rem',
@@ -69,6 +70,7 @@ export const Navbar: React.FC = () => {
           }}
         >
           <span
+            className="brand-title"
             style={{
               fontSize: '0.85rem',
               fontWeight: 800,
@@ -179,6 +181,20 @@ export const Navbar: React.FC = () => {
           }
           .mobile-toggle {
             display: block !important;
+          }
+          .navbar-header {
+            padding: 0.75rem 1rem !important;
+          }
+          .brand-title {
+            font-size: 0.75rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .navbar-header {
+            padding: 0.75rem 0.5rem !important;
+          }
+          .brand-title {
+            font-size: 0.65rem !important;
           }
         }
       `}</style>
