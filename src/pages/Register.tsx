@@ -377,26 +377,28 @@ export const Register: React.FC = () => {
                     >
                       <option value="">Select Committee</option>
                       {/* Grouping by grade eligibility */}
-                      <optgroup label="Grades 7 & 8 Committees">
-                        {committees
-                          .filter((c) => ['unep', 'un-women', 'fao'].includes(c.id.toLowerCase()))
-                          .filter((c) => !grade || isCommForGrade(c.id, parseInt(grade)))
-                          .map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
-                            </option>
-                          ))}
-                      </optgroup>
-                      <optgroup label="Grades 9 & 10 Committees">
-                        {committees
-                          .filter((c) => ['unhrc', 'unicef', 'ecosoc'].includes(c.id.toLowerCase()))
-                          .filter((c) => !grade || isCommForGrade(c.id, parseInt(grade)))
-                          .map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
-                            </option>
-                          ))}
-                      </optgroup>
+                      {(!grade || ['7', '8'].includes(grade)) && (
+                        <optgroup label="Grades 7 & 8 Committees">
+                          {committees
+                            .filter((c) => ['unep', 'un-women', 'fao'].includes(c.id.toLowerCase()))
+                            .map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </optgroup>
+                      )}
+                      {(!grade || ['9', '10'].includes(grade)) && (
+                        <optgroup label="Grades 9 & 10 Committees">
+                          {committees
+                            .filter((c) => ['unhrc', 'unicef', 'ecosoc'].includes(c.id.toLowerCase()))
+                            .map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </optgroup>
+                      )}
                     </select>
                     {fieldErrors.preferredCommittee && <span className="text-error" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{fieldErrors.preferredCommittee}</span>}
                   </div>
