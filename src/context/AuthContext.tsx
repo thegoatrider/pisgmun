@@ -58,18 +58,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const storedRole = localStorage.getItem('pmun_session_role');
       const storedRegId = localStorage.getItem('pmun_registration_id');
 
-      if (session.role) {
-        setRole(session.role);
-        localStorage.setItem('pmun_session_role', session.role);
-        if (session.registration_id) {
-          setRegistrationId(session.registration_id);
-          localStorage.setItem('pmun_registration_id', session.registration_id);
-        }
-      } else if (storedRole) {
-        setRole(storedRole);
-        if (storedRegId) {
-          setRegistrationId(storedRegId);
-        }
+      const activeRole = session.role || storedRole;
+      const activeRegId = session.registration_id || storedRegId;
+
+      if (activeRole) {
+        setRole(activeRole);
+        localStorage.setItem('pmun_session_role', activeRole);
+      }
+      if (activeRegId) {
+        setRegistrationId(activeRegId);
+        localStorage.setItem('pmun_registration_id', activeRegId);
       }
       
       // Load initial datasets
