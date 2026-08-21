@@ -118,74 +118,102 @@ DB_DEFAULT_COMMITTEES = {
 
 # Load static 180 countries array
 def get_default_countries():
-    # Helper to generate the static list of 180 countries
+    # Helper to generate the static list of 30 identical countries for all 6 committees
     countries = []
-    # UNEP
-    for c in ["Germany", "France", "Norway", "Denmark", "Australia", "Japan"]:
-        countries.append({"committee_id": "unep", "country_name": c, "category": "Renewable-energy leaders / potential technical donors"})
-    for c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
-        countries.append({"committee_id": "unep", "country_name": c, "category": "Developing countries seeking greater energy access"})
-    for c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
-        countries.append({"committee_id": "unep", "country_name": c, "category": "Emerging / large stakeholder countries"})
-    for c in ["USA", "Saudi Arabia", "Russia", "UAE", "Canada", "Iraq"]:
-        countries.append({"committee_id": "unep", "country_name": c, "category": "Fossil-fuel heavy / transition challenge countries"})
-    for c in ["Switzerland", "New Zealand", "Singapore", "Costa Rica", "Iceland", "Sweden"]:
-        countries.append({"committee_id": "unep", "country_name": c, "category": "Neutral / technology observer countries"})
-    # UNICEF
-    for c in ["USA", "UK", "Sweden", "Japan", "Norway", "Germany", "France"]:
-        countries.append({"committee_id": "unicef", "country_name": c, "category": "Major donor countries"})
-    for c in ["India", "Nigeria", "Pakistan", "Ethiopia", "Bangladesh", "Kenya"]:
-        countries.append({"committee_id": "unicef", "country_name": c, "category": "Large recipient / implementation countries"})
-    for c in ["Yemen", "South Sudan", "Syria", "Afghanistan", "Somalia", "Haiti"]:
-        countries.append({"committee_id": "unicef", "country_name": c, "category": "Aid-dependent / highly vulnerable countries"})
-    for c in ["South Africa", "Brazil", "Egypt", "Indonesia", "Vietnam", "Ghana"]:
-        countries.append({"committee_id": "unicef", "country_name": c, "category": "Developing / transition-risk countries"})
-    for c in ["Switzerland", "Singapore", "New Zealand", "Canada", "Australia", "Austria"]:
-        countries.append({"committee_id": "unicef", "country_name": c, "category": "Balancing / neutral observers"})
-    # FAO
-    for c in ["USA", "Canada", "France", "Germany", "Australia", "Netherlands"]:
-        countries.append({"committee_id": "fao", "country_name": c, "category": "Major agricultural exporters / aid donors"})
-    for c in ["Yemen", "South Sudan", "Syria", "Afghanistan", "Somalia", "Sudan"]:
-        countries.append({"committee_id": "fao", "country_name": c, "category": "Conflict-affected / food crisis zones"})
-    for c in ["Egypt", "Nigeria", "Pakistan", "Bangladesh", "Ethiopia", "Kenya"]:
-        countries.append({"committee_id": "fao", "country_name": c, "category": "Net food-importing developing nations"})
-    for c in ["India", "China", "Brazil", "Russia", "Argentina", "Ukraine"]:
-        countries.append({"committee_id": "fao", "country_name": c, "category": "Major global producers / supply stakeholders"})
-    for c in ["Switzerland", "New Zealand", "Japan", "Singapore", "Norway", "Sweden"]:
-        countries.append({"committee_id": "fao", "country_name": c, "category": "Neutral / policy observers"})
-    # UNHRC
-    for c in ["USA", "UK", "France", "Germany", "Japan", "Canada"]:
-        countries.append({"committee_id": "unhrc", "country_name": c, "category": "Western / tech regulation advocates"})
-    for c in ["Russia", "China", "Iran", "North Korea", "Syria", "Venezuela"]:
-        countries.append({"committee_id": "unhrc", "country_name": c, "category": "State sovereignty / strict digital control advocates"})
-    for c in ["Ukraine", "Palestine", "Taiwan", "Yemen", "Myanmar", "Sudan"]:
-        countries.append({"committee_id": "unhrc", "country_name": c, "category": "Active conflict / human rights focus zones"})
-    for c in ["India", "Brazil", "South Africa", "Nigeria", "Indonesia", "Mexico"]:
-        countries.append({"committee_id": "unhrc", "country_name": c, "category": "Global South / balancing voices"})
-    for c in ["Switzerland", "Sweden", "Norway", "New Zealand", "Singapore", "Finland"]:
-        countries.append({"committee_id": "unhrc", "country_name": c, "category": "Neutral / civil rights advocates"})
-    # UN Women
-    for c in ["Sweden", "Norway", "Finland", "Denmark", "Canada", "Iceland"]:
-        countries.append({"committee_id": "un-women", "country_name": c, "category": "Feminist foreign policy / donor nations"})
-    for c in ["Afghanistan", "Yemen", "Somalia", "South Sudan", "Sudan", "DR Congo"]:
-        countries.append({"committee_id": "un-women", "country_name": c, "category": "Conflict / high gender disparity zones"})
-    for c in ["India", "Nigeria", "Pakistan", "Bangladesh", "Egypt", "Ethiopia"]:
-        countries.append({"committee_id": "un-women", "country_name": c, "category": "Developing countries with gender reform agendas"})
-    for c in ["Brazil", "South Africa", "Mexico", "Indonesia", "Vietnam", "Ghana"]:
-        countries.append({"committee_id": "un-women", "country_name": c, "category": "Emerging / regional policy leaders"})
-    for c in ["Switzerland", "New Zealand", "Singapore", "Australia", "Austria", "Ireland"]:
-        countries.append({"committee_id": "un-women", "country_name": c, "category": "Neutral / human rights advocates"})
-    # ECOSOC
-    for c in ["USA", "Germany", "UK", "Japan", "France", "China"]:
-        countries.append({"committee_id": "ecosoc", "country_name": c, "category": "Global ecommerce / digital trade giants"})
-    for c in ["India", "Brazil", "South Africa", "Nigeria", "Indonesia", "Vietnam"]:
-        countries.append({"committee_id": "ecosoc", "country_name": c, "category": "Emerging economies / transition logistics hubs"})
-    for c in ["Kenya", "Bangladesh", "Ethiopia", "Ghana", "Peru", "Morocco"]:
-        countries.append({"committee_id": "ecosoc", "country_name": c, "category": "Developing nations scaling ecommerce networks"})
-    for c in ["Yemen", "South Sudan", "Afghanistan", "Haiti", "Somalia", "Nepal"]:
-        countries.append({"committee_id": "ecosoc", "country_name": c, "category": "LDCs facing supply chain exclusion"})
-    for c in ["Switzerland", "Singapore", "Norway", "New Zealand", "Denmark", "Austria"]:
-        countries.append({"committee_id": "ecosoc", "country_name": c, "category": "Neutral / regulatory standards observers"})
+    
+    # Unified list of 30 countries
+    unified_list = [
+        "Germany", "France", "Norway", "Denmark", "Australia", "Japan",
+        "Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh",
+        "India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam",
+        "USA", "Saudi Arabia", "Russia", "UAE", "Canada", "Iraq",
+        "Switzerland", "New Zealand", "Singapore", "Costa Rica", "Iceland", "Sweden"
+    ]
+    
+    committees = ["unep", "un-women", "fao", "unhrc", "unicef", "ecosoc"]
+    
+    for comm in committees:
+        for c in unified_list:
+            category = ""
+            # Determine suitable categories based on the country and committee
+            if comm == "unep":
+                if c in ["Germany", "France", "Norway", "Denmark", "Australia", "Japan"]:
+                    category = "Renewable-energy leaders / potential technical donors"
+                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
+                    category = "Developing countries seeking greater energy access"
+                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
+                    category = "Emerging / large stakeholder countries"
+                elif c in ["USA", "Saudi Arabia", "Russia", "UAE", "Canada", "Iraq"]:
+                    category = "Fossil-fuel heavy / transition challenge countries"
+                else:
+                    category = "Neutral / technology observer countries"
+                    
+            elif comm == "un-women":
+                if c in ["Germany", "France", "Norway", "Denmark", "Australia", "Sweden", "Iceland"]:
+                    category = "Feminist foreign policy / donor nations"
+                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
+                    category = "Developing countries with gender reform agendas"
+                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
+                    category = "Emerging / regional policy leaders"
+                elif c in ["USA", "Saudi Arabia", "Russia", "UAE", "Canada", "Iraq", "Japan"]:
+                    category = "States addressing gender transition challenges"
+                else:
+                    category = "Neutral / human rights advocates"
+                    
+            elif comm == "fao":
+                if c in ["Germany", "France", "Australia", "Denmark", "Canada", "USA"]:
+                    category = "Major agricultural exporters / aid donors"
+                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
+                    category = "Agrarian nations / food security improvement areas"
+                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam", "Russia"]:
+                    category = "Major global producers / supply stakeholders"
+                elif c in ["Saudi Arabia", "UAE", "Iraq", "Japan", "Norway", "Sweden"]:
+                    category = "Net food-importing / supply challenge countries"
+                else:
+                    category = "Neutral / policy observers"
+                    
+            elif comm == "unhrc":
+                if c in ["Germany", "France", "Norway", "Denmark", "Australia", "Canada", "Sweden", "USA", "Japan"]:
+                    category = "Western / tech regulation advocates"
+                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
+                    category = "Developing nations expanding digital infrastructure"
+                elif c in ["India", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
+                    category = "Global South / balancing voices"
+                elif c in ["Russia", "China", "Saudi Arabia", "UAE", "Iraq"]:
+                    category = "Digital sovereignty / strict security advocates"
+                else:
+                    category = "Neutral / civil rights advocates"
+                    
+            elif comm == "unicef":
+                if c in ["Germany", "France", "Norway", "Denmark", "Australia", "Japan", "Sweden", "Canada", "USA", "Iceland"]:
+                    category = "Major donor countries"
+                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
+                    category = "Large recipient / implementation countries"
+                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
+                    category = "Developing / transition-risk countries"
+                elif c in ["Iraq", "Saudi Arabia", "UAE", "Russia"]:
+                    category = "Aid-dependent / conflict transition zones"
+                else:
+                    category = "Balancing / neutral observers"
+                    
+            elif comm == "ecosoc":
+                if c in ["Germany", "France", "Japan", "USA", "Canada", "Sweden", "Australia", "Denmark", "Norway"]:
+                    category = "Global ecommerce / digital trade giants"
+                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
+                    category = "Developing nations scaling ecommerce networks"
+                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
+                    category = "Emerging economies / transition logistics hubs"
+                elif c in ["Russia", "Saudi Arabia", "UAE", "Iraq"]:
+                    category = "Supply-chain vulnerable / transition economies"
+                else:
+                    category = "Neutral / regulatory standards observers"
+            
+            countries.append({
+                "committee_id": comm,
+                "country_name": c,
+                "category": category
+            })
+            
     return countries
 
 # Default passwords hashes
