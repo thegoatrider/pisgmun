@@ -900,18 +900,23 @@ export const CoordinatorDashboard: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Metadata Briefing */}
             <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.25rem', fontSize: '0.88rem' }} className="grid-responsive">
-                <div><strong>Reg ID:</strong> {selectedReg.id}</div>
-                <div><strong>Grade & Sec:</strong> Grade {selectedReg.grade} - {selectedReg.section}</div>
-                <div><strong>School Campus:</strong> {selectedReg.school}</div>
-                <div><strong>Phone Number:</strong> {selectedReg.phone}</div>
-                <div style={{ gridColumn: 'span 2' }}><strong>Email:</strong> {selectedReg.email}</div>
-                <div style={{ gridColumn: 'span 2' }}><strong>Portfolio Pref:</strong> {selectedReg.portfolio_preference.replace('_', ' ')}</div>
-                <div style={{ gridColumn: 'span 2' }}><strong>Preferred Committee:</strong> {selectedReg.preferred_committee.toUpperCase()}</div>
-                <div style={{ gridColumn: 'span 2' }}><strong>Preferred Country Choice:</strong> {selectedReg.country_preferences && selectedReg.country_preferences[0]}</div>
-                <div style={{ gridColumn: 'span 2' }}><strong>Previous Experience:</strong> {selectedReg.mun_experience}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem 1.25rem', fontSize: '0.88rem' }} className="grid-responsive">
+                <div style={{ minWidth: 0, overflowWrap: 'break-word' }}><strong>Reg ID:</strong> {selectedReg.id}</div>
+                <div style={{ minWidth: 0, overflowWrap: 'break-word' }}><strong>Grade & Sec:</strong> Grade {selectedReg.grade} - {selectedReg.section}</div>
+                <div style={{ minWidth: 0, overflowWrap: 'break-word' }}><strong>School Campus:</strong> {selectedReg.school}</div>
+                <div style={{ minWidth: 0, overflowWrap: 'break-word' }}><strong>Phone Number:</strong> {selectedReg.phone}</div>
+                <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-all' }}><strong>Email:</strong> {selectedReg.email}</div>
+                <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}><strong>Portfolio Pref:</strong> {(selectedReg.portfolio_preference || '').replace('_', ' ')}</div>
+                <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}><strong>Preferred Committee:</strong> {(selectedReg.preferred_committee || '').toUpperCase()}</div>
+                <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}>
+                  <strong>Preferred Country Choices:</strong>{' '}
+                  {selectedReg.country_preferences && selectedReg.country_preferences.length > 0
+                    ? selectedReg.country_preferences.join(', ')
+                    : 'None'}
+                </div>
+                <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}><strong>Previous Experience:</strong> {selectedReg.mun_experience || 'None'}</div>
                 {selectedReg.additional_info && (
-                  <div style={{ gridColumn: 'span 2' }}><strong>Dietary / Add. Info:</strong> {selectedReg.additional_info}</div>
+                  <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}><strong>Dietary / Add. Info:</strong> {selectedReg.additional_info}</div>
                 )}
               </div>
             </div>
@@ -924,8 +929,8 @@ export const CoordinatorDashboard: React.FC = () => {
               </div>
               
               {selectedReg.committee !== 'NOT ASSIGNED' && (
-                <div style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', fontSize: '0.85rem' }}>
-                  Allocated: <strong>{selectedReg.assigned_country}</strong> under committee <strong>{selectedReg.committee.toUpperCase()}</strong>
+                <div style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', fontSize: '0.85rem', overflowWrap: 'break-word' }}>
+                  Allocated: <strong>{selectedReg.assigned_country}</strong> under committee <strong>{(selectedReg.committee || '').toUpperCase()}</strong>
                 </div>
               )}
             </div>
@@ -937,7 +942,7 @@ export const CoordinatorDashboard: React.FC = () => {
               </h4>
 
               <p style={{ fontSize: '0.88rem', margin: '0 0 1.25rem 0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
-                Approve or reject this registration. Approving will automatically assign their preferred committee (<strong>{selectedReg.preferred_committee.toUpperCase()}</strong>) and country (<strong>{selectedReg.country_preferences && selectedReg.country_preferences[0]}</strong>).
+                Approve or reject this registration. Approving will automatically assign their preferred committee (<strong>{(selectedReg.preferred_committee || '').toUpperCase()}</strong>) and country (<strong>{selectedReg.country_preferences && selectedReg.country_preferences[0]}</strong>).
               </p>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>
