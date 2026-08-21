@@ -75,10 +75,16 @@ export const API = {
   },
 
   async verifyPassword(role: string, inputPassword: string): Promise<boolean> {
+    const payload: Record<string, any> = { role };
+    if (role === 'delegate') {
+      payload.registration_id = inputPassword;
+    } else {
+      payload.password = inputPassword;
+    }
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, password: inputPassword })
+      body: JSON.stringify(payload)
     });
     const data = await handleResponse(res);
     return !!data.success;

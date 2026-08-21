@@ -6,7 +6,7 @@ interface AuthContextType {
   registrationId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (role: string, password: string) => Promise<boolean>;
+  login: (role: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   
   // Dynamic Datasets (Shared Application State)
@@ -54,26 +54,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const session = await API.getSession();
       
-      // Fallback local storage checks (similar to supabase-client.js fallback)
-      const storedRole = localStorage.getItem('pmun_session_role');
-      const storedRegId = localStorage.getItem('pmun_registration_id');
-
-      const activeRole = session.role || storedRole;
-      const activeRegId = session.registration_id || storedRegId;
-
-      if (activeRole) {
-        setRole(activeRole);
-        localStorage.setItem('pmun_session_role', activeRole);
+      if (session.role) {
+        setRole(session.role);
+        localStorage.setItem('pmun_session_role', session.role);
+      } else {
+        setRole(null);
+        localStorage.removeItem('pmun_session_role');
+        localStorage.removeItem('pmun_session_incharge_grade');
       }
-      if (activeRegId) {
-        setRegistrationId(activeRegId);
-        localStorage.setItem('pmun_registration_id', activeRegId);
+
+      if (session.registration_id) {
+        setRegistrationId(session.registration_id);
+        localStorage.setItem('pmun_registration_id', session.registration_id);
+      } else {
+        setRegistrationId(null);
+        localStorage.removeItem('pmun_registration_id');
       }
       
       // Load initial datasets
       await refreshData();
     } catch (e) {
       console.error('Error initializing authentication:', e);
+      setRole(null);
+      setRegistrationId(null);
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [initializeAuth]);
 
   // Login handler
-  const login = async (inputRole: string, password: string): Promise<boolean> => {
+  const login = async (inputRole: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const success = await API.verifyPassword(inputRole, password);
       if (success) {
@@ -105,12 +108,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Load the updated datasets
         await refreshData();
-        return true;
+        return { success: true };
       }
-      return false;
-    } catch (e) {
+      return { success: false, error: 'Invalid credentials.' };
+    } catch (e: any) {
       console.error('Login error:', e);
-      return false;
+      return { success: false, error: e.message || 'Login failed. Please try again.' };
     }
   };
 

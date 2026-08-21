@@ -520,6 +520,7 @@ def require_auth(roles):
 
 @app.route('/api/auth/login', methods=['POST'])
 def api_login():
+    session.clear()
     payload = request.json or {}
     role = payload.get('role')
     password = payload.get('password')
@@ -533,15 +534,21 @@ def api_login():
         if not reg_id:
             return jsonify({"error": "Registration ID is required for delegates."}), 400
         
-        # Verify delegate ID exists in registrations
+        # Verify delegate ID exists in registrations (case-insensitive check)
         regs = db_get_registrations()
-        matched = next((r for r in regs if r["id"] == reg_id), None)
+        matched = next((r for r in regs if r.get("id", "").strip().upper() == reg_id.strip().upper()), None)
         if not matched:
             return jsonify({"error": "Invalid credentials."}), 401
         
+        # Keep the feature of blocking rejected applications
+        if matched.get('status') == 'REJECTED':
+            return jsonify({"error": "Your registration has been rejected. Access denied."}), 403
+        
+        # Store canonical ID in session
+        canonical_id = matched["id"]
         session['role'] = 'delegate'
-        session['registration_id'] = reg_id
-        return jsonify({"success": True, "role": "delegate", "registration_id": reg_id})
+        session['registration_id'] = canonical_id
+        return jsonify({"success": True, "role": "delegate", "registration_id": canonical_id})
 
     # Coordinator / Incharge credentials checks
     if not password:
@@ -669,8 +676,8 @@ def api_registrations():
 
     if not role:
         # Unauthenticated guests get stripped records for dynamic counters
+        # Strip ID to prevent Registration ID credential leakage
         stripped = [{
-            "id": r.get("id"),
             "preferred_committee": r.get("preferred_committee"),
             "status": r.get("status")
         } for r in regs]
@@ -688,13 +695,13 @@ def api_registrations():
         reg_id = session.get('registration_id')
         # Return full details for the logged-in delegate's own registration,
         # but stripped/anonymous details for all other registrations so they can calculate counts.
+        # Strip other delegates' IDs to prevent credential leakage
         result = []
         for r in regs:
             if r.get("id") == reg_id:
                 result.append(r)
             else:
                 result.append({
-                    "id": r.get("id"),
                     "preferred_committee": r.get("preferred_committee"),
                     "status": r.get("status")
                 })

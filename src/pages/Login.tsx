@@ -32,14 +32,20 @@ export const Login: React.FC = () => {
     }
   }, [searchParams]);
 
-  // If already authenticated, redirect immediately
+  // If already authenticated, redirect immediately if it matches the active portal context
   useEffect(() => {
     if (!authLoading && sessionRole) {
-      if (sessionRole === 'delegate') navigate('/dashboard/delegate');
-      else if (sessionRole === 'in_charge') navigate('/dashboard/in-charge');
-      else if (sessionRole === 'coordinator') navigate('/dashboard/coordinator');
+      const urlRole = searchParams.get('role') || 'delegate';
+      const isMatch = (urlRole === 'delegate' && sessionRole === 'delegate') ||
+                      (urlRole === 'coordinator' && sessionRole === 'coordinator') ||
+                      (urlRole === 'in_charge' && sessionRole === 'in_charge');
+      if (isMatch) {
+        if (sessionRole === 'delegate') navigate('/dashboard/delegate');
+        else if (sessionRole === 'in_charge') navigate('/dashboard/in-charge');
+        else if (sessionRole === 'coordinator') navigate('/dashboard/coordinator');
+      }
     }
-  }, [sessionRole, authLoading, navigate]);
+  }, [sessionRole, authLoading, navigate, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +63,14 @@ export const Login: React.FC = () => {
       ? `in_charge_${inChargeGrade}` 
       : selectedRole;
 
-    const success = await login(activeRole, password.trim());
+    const formattedPassword = selectedRole === 'delegate' 
+      ? password.trim().toUpperCase() 
+      : password.trim();
+
+    const result = await login(activeRole, formattedPassword);
     setIsSubmitting(false);
 
-    if (success) {
+    if (result.success) {
       if (activeRole.startsWith('in_charge_')) {
         navigate('/dashboard/in-charge');
       } else if (activeRole === 'delegate') {
@@ -70,9 +80,9 @@ export const Login: React.FC = () => {
       }
     } else {
       setError(
-        selectedRole === 'delegate'
+        result.error || (selectedRole === 'delegate'
           ? 'Invalid Registration ID. Please check the ID and try again.'
-          : 'Incorrect passcode/password. Please try again.'
+          : 'Incorrect passcode/password. Please try again.')
       );
       setPassword('');
     }
