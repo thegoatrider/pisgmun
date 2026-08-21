@@ -7,7 +7,7 @@ import { Input } from '../../components/UI/Input';
 import { Button } from '../../components/UI/Button';
 import { Badge } from '../../components/UI/Badge';
 import { Modal } from '../../components/UI/Modal';
-import { Loader2, Download, Search, Settings, BookOpen, KeyRound, Save, CheckCircle, XCircle, Trash2, Edit3, LogOut } from 'lucide-react';
+import { Loader2, Download, Search, Settings, BookOpen, KeyRound, Save, CheckCircle, XCircle, Trash2, Edit3, LogOut, FileText } from 'lucide-react';
 
 export const CoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -65,6 +65,68 @@ export const CoordinatorDashboard: React.FC = () => {
     status: 'OPEN' as 'OPEN' | 'CLOSED',
   });
   const [isCommSaving, setIsCommSaving] = useState(false);
+
+  // Position Papers states & API functions
+  const [positionPapers, setPositionPapers] = useState<any[]>([]);
+  const [isPPLoading, setIsPPLoading] = useState(false);
+  const [activePPPreview, setActivePPPreview] = useState<any>(null);
+
+  const fetchPositionPapers = async () => {
+    setIsPPLoading(true);
+    try {
+      const res = await fetch('/api/coordinator/position-papers');
+      if (res.ok) {
+        const data = await res.json();
+        setPositionPapers(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsPPLoading(false);
+    }
+  };
+
+  const handleCoordinatorDeletePP = async (ppId: string) => {
+    if (!window.confirm('Are you sure you want to delete this position paper from the system?')) return;
+    try {
+      const res = await fetch(`/api/coordinator/position-paper/${ppId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        alert('Position paper deleted successfully!');
+        if (activePPPreview?.id === ppId) setActivePPPreview(null);
+        fetchPositionPapers();
+      } else {
+        alert('Failed to delete position paper.');
+      }
+    } catch (e) {
+      alert('Delete failed.');
+    }
+  };
+
+  const getFileBlobUrl = (dataURI: string) => {
+    try {
+      const parts = dataURI.split(',');
+      const byteString = atob(parts[1]);
+      const mimeString = parts[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeString });
+      return URL.createObjectURL(blob);
+    } catch (e) {
+      console.error(e);
+      return '#';
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'position_papers') {
+      fetchPositionPapers();
+    }
+  }, [activeTab]);
 
   const formatIST = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
@@ -604,6 +666,7 @@ export const CoordinatorDashboard: React.FC = () => {
     { id: 'roster', label: `Roster File (${filteredRegs.length})` },
     { id: 'committees', label: 'Committees Config' },
     { id: 'passwords', label: 'Portal Passwords' },
+    { id: 'position_papers', label: 'Position Papers' },
   ];
 
   if (contextLoading) {
@@ -1139,6 +1202,144 @@ export const CoordinatorDashboard: React.FC = () => {
                   <Save size={14} /> Update Passcodes
                 </Button>
               </form>
+             </Card>
+          )}
+
+          {/* TAB 5: POSITION PAPERS */}
+          {activeTab === 'position_papers' && (
+            <Card elevation="md" style={{ padding: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                <BookOpen size={20} style={{ color: 'var(--color-secondary)' }} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  Submitted Position Papers
+                </h3>
+              </div>
+
+              {isPPLoading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+                  <Loader2 className="spin" size={28} style={{ color: 'var(--color-secondary)' }} />
+                </div>
+              ) : positionPapers.length === 0 ? (
+                <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', fontStyle: 'italic', textAlign: 'center', margin: '2rem 0' }}>
+                  No position papers have been uploaded by delegates yet.
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {/* Preview pane if one is selected */}
+                  {activePPPreview && (
+                    <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-primary)' }}>
+                          Viewing: {activePPPreview.delegate_name} ({activePPPreview.committee.toUpperCase()}) - {activePPPreview.filename}
+                        </span>
+                        <Button variant="outline" size="sm" onClick={() => setActivePPPreview(null)}>Close Preview</Button>
+                      </div>
+                      {activePPPreview.file_type === 'application/pdf' ? (
+                        <iframe
+                          src={getFileBlobUrl(activePPPreview.file_data)}
+                          width="100%"
+                          height="450px"
+                          style={{ border: 'none', borderRadius: 'var(--radius-sm)' }}
+                        />
+                      ) : (
+                        <div style={{ padding: '2rem', textAlign: 'center' }}>
+                          <FileText size={40} style={{ color: 'var(--color-secondary)', margin: '0 auto 1rem auto' }} />
+                          <p style={{ fontSize: '0.88rem', fontWeight: 600 }}>Word Document Viewer is not natively supported in browser.</p>
+                          <a
+                            href={getFileBlobUrl(activePPPreview.file_data)}
+                            download={activePPPreview.filename}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              backgroundColor: 'var(--color-primary)',
+                              color: '#ffffff',
+                              padding: '0.5rem 1rem',
+                              borderRadius: 'var(--radius-sm)',
+                              fontSize: '0.8rem',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              marginTop: '1rem'
+                            }}
+                          >
+                            <Download size={14} /> Download Word Document
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* List of submissions */}
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)', fontWeight: 800 }}>
+                          <th style={{ padding: '0.75rem 1rem' }}>Delegate Name</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Committee</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Filename</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Uploaded At</th>
+                          <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {positionPapers.map((pp) => (
+                          <tr
+                            key={pp.id}
+                            style={{
+                              borderBottom: '1px solid var(--color-border)',
+                              backgroundColor: pp.deleted_by_delegate ? 'rgba(239, 68, 68, 0.04)' : 'transparent'
+                            }}
+                          >
+                            <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+                              {pp.delegate_name}
+                              {pp.deleted_by_delegate && (
+                                <span style={{ fontSize: '0.68rem', color: '#c62828', marginLeft: '6px', backgroundColor: 'rgba(198, 40, 40, 0.08)', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                  DELETED BY DELEGATE
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: 'var(--color-secondary)' }}>
+                              {pp.committee.toUpperCase()}
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)' }}>
+                              {pp.filename}
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem' }}>
+                              {formatIST(pp.uploaded_at)}
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                <Button variant="outline" size="sm" onClick={() => setActivePPPreview(pp)}>
+                                  View
+                                </Button>
+                                <button
+                                  onClick={() => handleCoordinatorDeletePP(pp.id)}
+                                  style={{
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    color: '#c62828',
+                                    cursor: 'pointer',
+                                    padding: '6px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 'var(--radius-sm)',
+                                    transition: 'background-color 0.2s',
+                                  }}
+                                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(198, 40, 40, 0.1)'}
+                                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </Card>
           )}
         </div>

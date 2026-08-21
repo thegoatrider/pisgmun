@@ -351,6 +351,30 @@ def db_save_passwords(passwords_val):
         res = requests.post(url, headers=get_supabase_headers(), json=payload)
         return res.status_code in (200, 201)
 
+def db_get_position_papers():
+    if IS_DEMO_MODE:
+        return read_mock().get("position_papers", [])
+    else:
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.position_papers"
+        res = requests.get(url, headers=get_supabase_headers())
+        if res.status_code == 200 and res.json():
+            return res.json()[0].get("value", [])
+        return []
+
+def db_save_position_papers(pp_list):
+    if IS_DEMO_MODE:
+        data = read_mock()
+        data["position_papers"] = pp_list
+        write_mock(data)
+        return True
+    else:
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.position_papers"
+        payload = {"key": "position_papers", "value": pp_list, "updated_at": "now()"}
+        headers = get_supabase_headers()
+        headers["Prefer"] = "resolution=merge-duplicates"
+        res = requests.post(url, headers=headers, json=payload)
+        return res.status_code in (200, 201)
+
 def db_get_committees():
     if IS_DEMO_MODE:
         return read_mock().get("committees", [])
@@ -864,6 +888,120 @@ def api_modify_registration(reg_id):
         if db_update_registration(reg_id, safe_data):
             return jsonify({"success": True})
         return jsonify({"error": "Failed to update registration."}), 500
+
+
+@app.route('/api/delegate/position-paper', methods=['GET', 'POST', 'DELETE'])
+def api_delegate_position_paper():
+    # Only delegates are authorized
+    reg_id = session.get('registration_id')
+    role = session.get('role')
+    if not reg_id or role != 'delegate':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    pp_list = db_get_position_papers()
+
+    if request.method == 'GET':
+        # Find active position paper (not deleted by delegate)
+        active_pp = None
+        for pp in pp_list:
+            if pp.get('registration_id') == reg_id and not pp.get('deleted_by_delegate', False):
+                active_pp = pp
+                break
+        return jsonify(active_pp)
+
+    elif request.method == 'POST':
+        payload = request.json or {}
+        filename = payload.get('filename', '').strip()
+        file_type = payload.get('file_type', '').strip()
+        file_data = payload.get('file_data', '').strip()
+
+        if not filename or not file_data:
+            return jsonify({"error": "Missing file data."}), 400
+
+        # Validate file extension
+        ext = filename.split('.')[-1].lower()
+        if ext not in ['pdf', 'doc', 'docx']:
+            return jsonify({"error": "Only PDF and Word (.doc, .docx) files are supported."}), 400
+
+        # Fetch delegate details (name, committee)
+        regs = db_get_registrations()
+        delegate = next((r for r in regs if r.get('id') == reg_id), None)
+        if not delegate:
+            return jsonify({"error": "Delegate registration not found."}), 404
+
+        delegate_name = delegate.get('name', 'Unknown')
+        committee = delegate.get('committee', 'NOT ASSIGNED')
+
+        # Mark all previous papers for this delegate as deleted_by_delegate = True
+        for pp in pp_list:
+            if pp.get('registration_id') == reg_id:
+                pp['deleted_by_delegate'] = True
+
+        # Append new paper record
+        new_pp = {
+            "id": f"pp_{int(time.time() * 1000)}",
+            "registration_id": reg_id,
+            "delegate_name": delegate_name,
+            "committee": committee,
+            "filename": filename,
+            "file_type": file_type,
+            "file_data": file_data,
+            "uploaded_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            "deleted_by_delegate": False,
+            "deleted_by_coordinator": False
+        }
+        pp_list.append(new_pp)
+
+        if db_save_position_papers(pp_list):
+            return jsonify({"success": True, "paper": new_pp})
+        return jsonify({"error": "Failed to save position paper."}), 500
+
+    elif request.method == 'DELETE':
+        # Delegate deletes paper: set deleted_by_delegate = True
+        updated = False
+        for pp in pp_list:
+            if pp.get('registration_id') == reg_id and not pp.get('deleted_by_delegate', False):
+                pp['deleted_by_delegate'] = True
+                updated = True
+        
+        if updated:
+            if db_save_position_papers(pp_list):
+                return jsonify({"success": True})
+            return jsonify({"error": "Failed to delete position paper."}), 500
+        return jsonify({"error": "No active position paper found."}), 404
+
+
+@app.route('/api/coordinator/position-papers', methods=['GET'])
+def api_coordinator_position_papers():
+    # Only coordinator authorized
+    if session.get('role') != 'coordinator':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    pp_list = db_get_position_papers()
+    # Filter out papers deleted by coordinator
+    active_pps = [pp for pp in pp_list if not pp.get('deleted_by_coordinator', False)]
+    return jsonify(active_pps)
+
+
+@app.route('/api/coordinator/position-paper/<pp_id>', methods=['DELETE'])
+def api_coordinator_delete_position_paper(pp_id):
+    # Only coordinator authorized
+    if session.get('role') != 'coordinator':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    pp_list = db_get_position_papers()
+    updated = False
+    for pp in pp_list:
+        if pp.get('id') == pp_id:
+            pp['deleted_by_coordinator'] = True
+            updated = True
+            break
+
+    if updated:
+        if db_save_position_papers(pp_list):
+            return jsonify({"success": True})
+        return jsonify({"error": "Failed to delete position paper."}), 500
+    return jsonify({"error": "Position paper not found."}), 404
 
 
 # --- SECURITY HEADERS INJECTION ---

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/UI/Card';
 import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
-import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus } from 'lucide-react';
+import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2 } from 'lucide-react';
 import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer';
 
 export const DelegateDashboard: React.FC = () => {
@@ -26,6 +26,105 @@ export const DelegateDashboard: React.FC = () => {
       }
     }
   }, [registrationId, registrations]);
+
+  // Position Paper state & API functions
+  const [positionPaper, setPositionPaper] = useState<any>(null);
+  const [isPPUploading, setIsPPUploading] = useState(false);
+
+  const fetchPositionPaper = async () => {
+    try {
+      const res = await fetch('/api/delegate/position-paper');
+      if (res.ok) {
+        const data = await res.json();
+        setPositionPaper(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (delegateReg) {
+      fetchPositionPaper();
+    }
+  }, [delegateReg]);
+
+  const getFileBlobUrl = (dataURI: string) => {
+    try {
+      const parts = dataURI.split(',');
+      const byteString = atob(parts[1]);
+      const mimeString = parts[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeString });
+      return URL.createObjectURL(blob);
+    } catch (e) {
+      console.error(e);
+      return '#';
+    }
+  };
+
+  const handlePPUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext !== 'pdf' && ext !== 'doc' && ext !== 'docx') {
+      alert('Only PDF and Word (.doc, .docx) files are supported for Position Papers.');
+      return;
+    }
+
+    setIsPPUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64Data = event.target?.result as string;
+      try {
+        const res = await fetch('/api/delegate/position-paper', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            filename: file.name,
+            file_type: file.type || 'application/pdf',
+            file_data: base64Data
+          })
+        });
+        if (res.ok) {
+          alert('Position Paper uploaded successfully!');
+          fetchPositionPaper();
+        } else {
+          const err = await res.json();
+          alert(err.error || 'Failed to upload Position Paper.');
+        }
+      } catch (err) {
+        alert('Upload failed.');
+      } finally {
+        setIsPPUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePPDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete your Position Paper? This will remove it from your dashboard.')) return;
+    try {
+      const res = await fetch('/api/delegate/position-paper', {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        alert('Position Paper deleted successfully!');
+        setPositionPaper(null);
+      } else {
+        alert('Failed to delete Position Paper.');
+      }
+    } catch (e) {
+      alert('Delete failed.');
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -428,6 +527,91 @@ export const DelegateDashboard: React.FC = () => {
                     <Lock size={12} /> Locked
                   </button>
                 )}
+              </div>
+
+              {/* Position Paper upload option */}
+              <div style={{ display: 'flex', alignItems: 'center', padding: '1rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-main)', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <FileText size={20} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
+                  <div>
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem', display: 'block', color: 'var(--color-primary)' }}>
+                      Position Paper
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>
+                      {positionPaper ? positionPaper.filename : 'Not Submitted (PDF or Word)'}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  {positionPaper ? (
+                    <>
+                      <a
+                        href={getFileBlobUrl(positionPaper.data)}
+                        download={positionPaper.filename}
+                        style={{
+                          backgroundColor: 'var(--color-primary)',
+                          color: '#ffffff',
+                          padding: '0.45rem 0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <Download size={12} /> Get
+                      </a>
+                      <button
+                        onClick={handlePPDelete}
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: '#c62828',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'var(--radius-sm)',
+                          transition: 'background-color 0.2s',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(198, 40, 40, 0.1)'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <label
+                        style={{
+                          backgroundColor: 'var(--color-secondary)',
+                          color: '#ffffff',
+                          padding: '0.45rem 0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        {isPPUploading ? 'Uploading...' : 'Upload'}
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handlePPUpload}
+                          disabled={isPPUploading}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </Card>

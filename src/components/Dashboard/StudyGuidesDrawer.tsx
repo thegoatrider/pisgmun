@@ -111,6 +111,8 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteTitle, setNoteTitle] = useState('');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+  const [renamingNoteId, setRenamingNoteId] = useState<string | null>(null);
+  const [renamingTitle, setRenamingTitle] = useState('');
 
   // Editor states
   const editorRef = useRef<HTMLDivElement>(null);
@@ -246,6 +248,25 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
       setTimeout(() => setSaveSuccessMsg(false), 3000);
     } catch (err) {
       alert('Failed to save note.');
+    }
+  };
+
+  const handleSaveRename = async (note: any) => {
+    if (!renamingTitle.trim()) {
+      setRenamingNoteId(null);
+      return;
+    }
+    const updatedNote = {
+      ...note,
+      title: renamingTitle.trim(),
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await saveNoteToDB(updatedNote);
+      setRenamingNoteId(null);
+      await loadSavedData();
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -589,23 +610,27 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
                                 {file.name}
                               </span>
                             </div>
-                            <button
-                              onClick={(e) => handleDeleteFile(file.id, e)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: 'var(--color-text-muted)',
-                                cursor: 'pointer',
-                                padding: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                              onMouseOver={(e) => e.currentTarget.style.color = 'var(--color-error)'}
-                              onMouseOut={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                             <button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleDeleteFile(file.id, e);
+                               }}
+                               style={{
+                                 background: 'none',
+                                 border: 'none',
+                                 color: '#c62828',
+                                 cursor: 'pointer',
+                                 padding: '6px',
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 justifyContent: 'center',
+                                 borderRadius: 'var(--radius-sm)'
+                               }}
+                               onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(198, 40, 40, 0.1)'}
+                               onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                             >
+                               <Trash2 size={14} />
+                             </button>
                           </div>
                         ))}
                       </div>
@@ -849,52 +874,105 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
                     </p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      {notes.map((note) => (
-                        <div
-                          key={note.id}
-                          onClick={() => handleOpenNote(note)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '0.85rem 1rem',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 'var(--radius-md)',
-                            backgroundColor: '#ffffff',
-                            cursor: 'pointer',
-                            transition: 'box-shadow var(--transition-fast)'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-sm)'}
-                          onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
-                        >
-                          <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {note.title}
-                            </span>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
-                              Last saved: {new Date(note.updatedAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
-                            </span>
-                          </div>
-                          
-                          <button
-                            onClick={(e) => handleDeleteNote(note.id, e)}
+                      {notes.map((note) => {
+                        let touchTimeout: any = null;
+                        return (
+                          <div
+                            key={note.id}
+                            onClick={() => {
+                              if (renamingNoteId !== note.id) {
+                                handleOpenNote(note);
+                              }
+                            }}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              setRenamingNoteId(note.id);
+                              setRenamingTitle(note.title);
+                            }}
+                            onTouchStart={() => {
+                              touchTimeout = setTimeout(() => {
+                                setRenamingNoteId(note.id);
+                                setRenamingTitle(note.title);
+                              }, 600);
+                            }}
+                            onTouchEnd={() => {
+                              if (touchTimeout) clearTimeout(touchTimeout);
+                            }}
+                            onTouchMove={() => {
+                              if (touchTimeout) clearTimeout(touchTimeout);
+                            }}
                             style={{
-                              background: 'none',
-                              border: 'none',
-                              color: 'var(--color-text-muted)',
-                              cursor: 'pointer',
-                              padding: '4px',
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center'
+                              justifyContent: 'space-between',
+                              padding: '0.85rem 1rem',
+                              border: '1px solid var(--color-border)',
+                              borderRadius: 'var(--radius-md)',
+                              backgroundColor: '#ffffff',
+                              cursor: 'pointer',
+                              transition: 'box-shadow var(--transition-fast)'
                             }}
-                            onMouseOver={(e) => e.currentTarget.style.color = 'var(--color-error)'}
-                            onMouseOut={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
+                            onMouseOver={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-sm)'}
+                            onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
                           >
+                            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, marginRight: '8px' }}>
+                              {renamingNoteId === note.id ? (
+                                <input
+                                  type="text"
+                                  value={renamingTitle}
+                                  onChange={(e) => setRenamingTitle(e.target.value)}
+                                  onBlur={() => handleSaveRename(note)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveRename(note);
+                                    if (e.key === 'Escape') setRenamingNoteId(null);
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  autoFocus
+                                  style={{
+                                    fontSize: '0.85rem',
+                                    fontWeight: 700,
+                                    color: 'var(--color-primary)',
+                                    border: '1px solid var(--color-secondary)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '2px 6px',
+                                    outline: 'none',
+                                    width: '90%',
+                                  }}
+                                />
+                              ) : (
+                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {note.title}
+                                </span>
+                              )}
+                              <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
+                                Last saved: {new Date(note.updatedAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
+                              </span>
+                            </div>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNote(note.id, e);
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#c62828',
+                                cursor: 'pointer',
+                                padding: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 'var(--radius-sm)'
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(198, 40, 40, 0.1)'}
+                              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                             >
                             <Trash2 size={14} />
                           </button>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
