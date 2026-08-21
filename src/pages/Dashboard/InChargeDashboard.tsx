@@ -24,6 +24,20 @@ export const InChargeDashboard: React.FC = () => {
     }
   }, [logout, navigate]);
 
+  const formatIST = (dateStr?: string) => {
+    if (!dateStr) return 'N/A';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/');
@@ -271,7 +285,12 @@ export const InChargeDashboard: React.FC = () => {
             {filteredRegs.map((reg) => (
               <tr key={reg.id}>
                 <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
-                <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</td>
+                <td>
+                  <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                    Reg At: {formatIST(reg.created_at)}
+                  </div>
+                </td>
                 <td>{reg.section}</td>
                 <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
                 <td style={{ fontSize: '0.82rem' }}>

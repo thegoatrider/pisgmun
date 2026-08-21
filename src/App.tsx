@@ -46,7 +46,14 @@ const ProtectedRoute: React.FC<GuardProps> = ({ children, allowedRoles }) => {
   }
 
   // Coordinator bypasses all guards, otherwise check if role is allowed
-  if (role !== 'coordinator' && !allowedRoles.includes(role)) {
+  const hasAccess = allowedRoles.some(allowed => {
+    if (allowed === 'in_charge') {
+      return role === 'in_charge' || role.startsWith('in_charge_');
+    }
+    return role === allowed;
+  });
+
+  if (role !== 'coordinator' && !hasAccess) {
     return <Navigate to="/" replace />;
   }
 

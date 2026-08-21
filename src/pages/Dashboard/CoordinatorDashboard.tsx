@@ -64,6 +64,20 @@ export const CoordinatorDashboard: React.FC = () => {
   });
   const [isCommSaving, setIsCommSaving] = useState(false);
 
+  const formatIST = (dateStr?: string) => {
+    if (!dateStr) return 'N/A';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   // Sync config state
   useEffect(() => {
     if (config) {
@@ -677,6 +691,9 @@ export const CoordinatorDashboard: React.FC = () => {
                         <td>
                           <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{reg.email}</div>
+                          <div style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                            Reg At: {formatIST(reg.created_at)}
+                          </div>
                         </td>
                         <td>{reg.grade} - {reg.section}</td>
                         <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
@@ -906,6 +923,7 @@ export const CoordinatorDashboard: React.FC = () => {
                 <div style={{ minWidth: 0, overflowWrap: 'break-word' }}><strong>School Campus:</strong> {selectedReg.school}</div>
                 <div style={{ minWidth: 0, overflowWrap: 'break-word' }}><strong>Phone Number:</strong> {selectedReg.phone}</div>
                 <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-all' }}><strong>Email:</strong> {selectedReg.email}</div>
+                <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}><strong>Registration Time (IST):</strong> {formatIST(selectedReg.created_at)}</div>
                 <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}><strong>Portfolio Pref:</strong> {(selectedReg.portfolio_preference || '').replace('_', ' ')}</div>
                 <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}><strong>Preferred Committee:</strong> {(selectedReg.preferred_committee || '').toUpperCase()}</div>
                 <div style={{ gridColumn: 'span 2', minWidth: 0, overflowWrap: 'break-word' }}>
