@@ -34,6 +34,7 @@ export const CoordinatorDashboard: React.FC = () => {
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
 
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [selectedRegIds, setSelectedRegIds] = useState<string[]>([]);
 
   // Configuration Form State
   const [configStatus, setConfigStatus] = useState<'OPEN' | 'CLOSED'>('OPEN');
@@ -102,6 +103,11 @@ export const CoordinatorDashboard: React.FC = () => {
       setSelectedCommId(committees[0].id);
     }
   }, [committees, selectedCommId]);
+
+  // Reset selection when tab or filters change
+  useEffect(() => {
+    setSelectedRegIds([]);
+  }, [activeTab, searchQuery, gradeFilter, committeeFilter, statusFilter]);
 
   // Sync committee editor form
   useEffect(() => {
@@ -426,6 +432,160 @@ export const CoordinatorDashboard: React.FC = () => {
     return matchesSearch && matchesGrade && matchesComm && matchesStatus;
   });
 
+  const isAllSelected = filteredRegs.length > 0 && filteredRegs.every(r => selectedRegIds.includes(r.id));
+  const isSomeSelected = filteredRegs.length > 0 && filteredRegs.some(r => selectedRegIds.includes(r.id));
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      const filteredIds = filteredRegs.map(r => r.id);
+      setSelectedRegIds(prev => prev.filter(id => !filteredIds.includes(id)));
+    } else {
+      const filteredIds = filteredRegs.map(r => r.id);
+      setSelectedRegIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelectedRegIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBatchApprove = async () => {
+    const selectedRegs = registrations.filter(r => selectedRegIds.includes(r.id));
+    if (selectedRegs.length === 0) return;
+
+    const unapprovedRegs = selectedRegs.filter(r => r.status !== 'APPROVED');
+    if (unapprovedRegs.length === 0) {
+      alert('All selected registrations are already approved.');
+      return;
+    }
+
+    const takenWarnings: string[] = [];
+    const selectionConflicts = new Set<string>();
+    const allocatedMap = new Map<string, string>();
+
+    for (const reg of unapprovedRegs) {
+      const prefComm = reg.preferred_committee;
+      const prefCountry = reg.country_preferences && reg.country_preferences[0];
+      if (!prefComm || !prefCountry) continue;
+
+      const key = `${prefComm.toLowerCase()}_${prefCountry.toLowerCase()}`;
+      
+      const isTakenInDb = countries.some(
+        (c) =>
+          c.committee_id.toLowerCase() === prefComm.toLowerCase() &&
+          c.country_name.toLowerCase() === prefCountry.toLowerCase() &&
+          c.assigned_to &&
+          c.assigned_to !== reg.id &&
+          !selectedRegIds.includes(c.assigned_to)
+      );
+
+      if (isTakenInDb) {
+        takenWarnings.push(`${reg.name} (${prefCountry} under ${prefComm.toUpperCase()})`);
+      }
+
+      if (allocatedMap.has(key)) {
+        selectionConflicts.add(`${prefCountry} under ${prefComm.toUpperCase()}`);
+      } else {
+        allocatedMap.set(key, reg.id);
+      }
+    }
+
+    if (takenWarnings.length > 0) {
+      alert(`The following allocations are already taken by other approved delegates in the database. Please resolve them first:\n- ${takenWarnings.join('\n- ')}`);
+      return;
+    }
+
+    if (selectionConflicts.size > 0) {
+      alert(`Multiple selected delegates have requested the same country allocations. Please resolve these conflicts before batch approving:\n- ${Array.from(selectionConflicts).join('\n- ')}`);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to batch APPROVE the ${unapprovedRegs.length} selected registration(s)?`)) return;
+
+    setIsActionLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const reg of unapprovedRegs) {
+      const prefComm = reg.preferred_committee;
+      const prefCountry = reg.country_preferences && reg.country_preferences[0];
+      if (!prefComm || !prefCountry) continue;
+
+      try {
+        await API.updateRegistration(reg.id, {
+          committee: prefComm,
+          assigned_country: prefCountry,
+          status: 'APPROVED',
+        });
+
+        const countryObj = countries.find(
+          (c) =>
+            c.committee_id.toLowerCase() === prefComm.toLowerCase() &&
+            c.country_name.toLowerCase() === prefCountry.toLowerCase()
+        );
+        if (countryObj) {
+          await API.updateCountry(countryObj.id, { assigned_to: reg.id, available: false });
+        }
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to approve registration ${reg.id}:`, err);
+        failCount++;
+      }
+    }
+
+    alert(`Batch approval completed! Approved: ${successCount}, Failed: ${failCount}`);
+    setSelectedRegIds([]);
+    await refreshData();
+    setIsActionLoading(false);
+  };
+
+  const handleBatchReject = async () => {
+    const selectedRegs = registrations.filter(r => selectedRegIds.includes(r.id));
+    if (selectedRegs.length === 0) return;
+
+    const unrejectedRegs = selectedRegs.filter(r => r.status !== 'REJECTED');
+    if (unrejectedRegs.length === 0) {
+      alert('All selected registrations are already rejected.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to batch REJECT the ${unrejectedRegs.length} selected registration(s)?`)) return;
+
+    setIsActionLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const reg of unrejectedRegs) {
+      try {
+        await API.updateRegistration(reg.id, {
+          status: 'REJECTED',
+        });
+
+        if (reg.committee !== 'NOT ASSIGNED' && reg.assigned_country !== 'NOT ASSIGNED') {
+          const country = countries.find(
+            (c) =>
+              c.committee_id.toLowerCase() === reg.committee.toLowerCase() &&
+              c.country_name.toLowerCase() === reg.assigned_country.toLowerCase()
+          );
+          if (country && country.assigned_to === reg.id) {
+            await API.updateCountry(country.id, { assigned_to: null, available: true });
+          }
+        }
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to reject registration ${reg.id}:`, err);
+        failCount++;
+      }
+    }
+
+    alert(`Batch rejection completed! Rejected: ${successCount}, Failed: ${failCount}`);
+    setSelectedRegIds([]);
+    await refreshData();
+    setIsActionLoading(false);
+  };
+
   // Calculate overview counts
   const totalCount = registrations.length;
   const approvedCount = registrations.filter((r) => r.status === 'APPROVED').length;
@@ -669,11 +829,74 @@ export const CoordinatorDashboard: React.FC = () => {
                 </div>
               </Card>
 
+              {/* Batch Actions Bar */}
+              {selectedRegIds.length > 0 && (
+                <div
+                  className="fade-in"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0, 32, 74, 0.05)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem 1.5rem',
+                    marginBottom: '1.25rem',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {selectedRegIds.length} candidate{selectedRegIds.length > 1 ? 's' : ''} selected
+                  </span>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleBatchApprove}
+                      loading={isActionLoading}
+                    >
+                      <CheckCircle size={14} /> Approve Selected
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleBatchReject}
+                      loading={isActionLoading}
+                      style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+                    >
+                      <XCircle size={14} /> Reject Selected
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedRegIds([])}
+                      disabled={isActionLoading}
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Roster Table */}
               <div className="table-responsive">
                 <table className="table table-compact">
                   <thead>
                     <tr>
+                      <th style={{ width: '40px', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          ref={(el) => {
+                            if (el) {
+                              el.indeterminate = isSomeSelected && !isAllSelected;
+                            }
+                          }}
+                          onChange={handleSelectAll}
+                          style={{ cursor: 'pointer', transform: 'scale(1.1)' }}
+                        />
+                      </th>
                       <th>ID</th>
                       <th>Candidate Info</th>
                       <th>Grade/Sec</th>
@@ -687,6 +910,14 @@ export const CoordinatorDashboard: React.FC = () => {
                   <tbody>
                     {filteredRegs.map((reg) => (
                       <tr key={reg.id}>
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedRegIds.includes(reg.id)}
+                            onChange={() => handleSelectOne(reg.id)}
+                            style={{ cursor: 'pointer', transform: 'scale(1.1)' }}
+                          />
+                        </td>
                         <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
                         <td>
                           <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
