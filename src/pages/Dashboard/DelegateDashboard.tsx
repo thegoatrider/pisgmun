@@ -4,12 +4,19 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/UI/Card';
 import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
-import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut } from 'lucide-react';
+import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus } from 'lucide-react';
+import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer';
 
 export const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { registrations, committees, registrationId, logout, isLoading } = useAuth();
   const [delegateReg, setDelegateReg] = useState<any>(null);
+
+  // Note taking workspace drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerDefaultTab, setDrawerDefaultTab] = useState<'content' | 'notes'>('content');
+  const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
+  const [triggerUploadCount, setTriggerUploadCount] = useState(0);
 
   useEffect(() => {
     if (registrationId && registrations.length > 0) {
@@ -247,9 +254,86 @@ export const DelegateDashboard: React.FC = () => {
 
           {/* Reference Materials */}
           <Card elevation="md" style={{ padding: '2rem' }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
-              Study Guides & Reference Files
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                Study Guides & Reference Files
+              </h3>
+              <div style={{ position: 'relative' }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
+                >
+                  Add <Plus size={13} />
+                </Button>
+                {isAddDropdownOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '110%',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      boxShadow: 'var(--shadow-md)',
+                      zIndex: 10,
+                      minWidth: '140px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                      padding: '4px 0'
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        setDrawerDefaultTab('notes');
+                        setIsDrawerOpen(true);
+                        setIsAddDropdownOpen(false);
+                      }}
+                      style={{
+                        padding: '0.65rem 1rem',
+                        background: 'none',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: 'var(--color-primary)',
+                        transition: 'background-color 0.15s'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-main)'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      New Note
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDrawerDefaultTab('content');
+                        setTriggerUploadCount(prev => prev + 1);
+                        setIsDrawerOpen(true);
+                        setIsAddDropdownOpen(false);
+                      }}
+                      style={{
+                        padding: '0.65rem 1rem',
+                        background: 'none',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: 'var(--color-primary)',
+                        transition: 'background-color 0.15s'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-main)'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      New File
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.5', marginBottom: '1.5rem' }}>
               Access the official reference manuals to prepare your speeches, country position briefs, and resolution drafts.
             </p>
@@ -349,6 +433,14 @@ export const DelegateDashboard: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      <StudyGuidesDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        defaultTab={drawerDefaultTab}
+        delegateReg={delegateReg}
+        triggerUpload={triggerUploadCount}
+      />
 
       <style>{`
         @media (max-width: 800px) {
