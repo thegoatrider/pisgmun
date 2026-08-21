@@ -120,12 +120,7 @@ export const Footer: React.FC = () => {
                 <Phone size={16} style={{ color: 'var(--color-accent-gold)', flexShrink: 0 }} />
                 <span>+91 712 2667888 / 2667999</span>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <Mail size={16} style={{ color: 'var(--color-accent-gold)', flexShrink: 0 }} />
-                <a href="mailto:admin.nagpur@podar.org" style={{ color: 'rgba(255, 255, 255, 0.85)' }} onMouseOver={(e) => e.currentTarget.style.color = '#ffffff'} onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)'}>
-                  admin.nagpur@podar.org
-                </a>
-              </div>
+
             </div>
           </div>
         </div>

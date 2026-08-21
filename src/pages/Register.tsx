@@ -490,7 +490,7 @@ export const Register: React.FC = () => {
                             fontStyle: isTaken ? 'italic' : 'normal',
                           }}
                         >
-                          {c.country_name} {isTaken ? '— Taken' : ''} ({c.category})
+                          {c.country_name} {isTaken ? '— Taken' : ''}{c.category ? ` (${c.category})` : ''}
                         </option>
                       );
                     })}

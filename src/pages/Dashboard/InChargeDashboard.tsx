@@ -128,7 +128,7 @@ export const InChargeDashboard: React.FC = () => {
   });
 
   return (
-    <div className="container section fade-in">
+    <div className="section fade-in" style={{ width: '100%', maxWidth: '1440px', margin: '0 auto', paddingLeft: 'var(--space-lg)', paddingRight: 'var(--space-lg)' }}>
       {/* Welcome Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }} className="welcome-header">
         <div>
@@ -255,7 +255,7 @@ export const InChargeDashboard: React.FC = () => {
 
       {/* Roster Table */}
       <div className="table-responsive">
-        <table className="table">
+        <table className="table table-compact">
           <thead>
             <tr>
               <th>ID</th>
@@ -273,7 +273,7 @@ export const InChargeDashboard: React.FC = () => {
                 <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
                 <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</td>
                 <td>{reg.section}</td>
-                <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>{reg.school}</td>
+                <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
                 <td style={{ fontSize: '0.82rem' }}>
                   <div style={{ fontWeight: 600 }}>{reg.preferred_committee.toUpperCase()}</div>
                   <div style={{ color: 'var(--color-text-muted)' }}>{reg.country_preferences[0]}</div>

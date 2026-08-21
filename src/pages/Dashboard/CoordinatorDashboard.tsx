@@ -32,8 +32,7 @@ export const CoordinatorDashboard: React.FC = () => {
   // Selected Delegate for Modal
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
-  const [allocatedComm, setAllocatedComm] = useState('');
-  const [allocatedCountry, setAllocatedCountry] = useState('');
+
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   // Configuration Form State
@@ -179,57 +178,60 @@ export const CoordinatorDashboard: React.FC = () => {
   // 4. Open allocation details modal
   const handleOpenAllocation = (reg: Registration) => {
     setSelectedReg(reg);
-    // Preset dropdowns to preferred choices or existing assignments
-    setAllocatedComm(reg.committee !== 'NOT ASSIGNED' ? reg.committee : reg.preferred_committee);
-    setAllocatedCountry(reg.assigned_country !== 'NOT ASSIGNED' ? reg.assigned_country : '');
     setIsAllocationModalOpen(true);
   };
 
-  // 5. Submit Portfolio Assignment
-  const handleSaveAllocation = async () => {
-    if (!selectedReg) return;
-    if (!allocatedComm || !allocatedCountry) {
-      alert('Please select both a Committee and a Country to allocate.');
+  // 5. Approve Delegate Registration
+  const handleApproveRegistration = async (reg: Registration) => {
+    if (!reg) return;
+    const prefComm = reg.preferred_committee;
+    const prefCountry = reg.country_preferences && reg.country_preferences[0];
+
+    if (!prefComm || !prefCountry) {
+      alert('Missing preferred committee or country for this candidate.');
       return;
     }
+
+    // Check if the country is already taken by someone else
+    const isTaken = countries.some(
+      (c) =>
+        c.committee_id.toLowerCase() === prefComm.toLowerCase() &&
+        c.country_name.toLowerCase() === prefCountry.toLowerCase() &&
+        c.assigned_to &&
+        c.assigned_to !== reg.id
+    );
+    if (isTaken) {
+      alert(`The preferred country '${prefCountry}' in '${prefComm.toUpperCase()}' is already taken by another approved delegate.`);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to APPROVE ${reg.name}'s registration?`)) return;
 
     setIsActionLoading(true);
     try {
       // 1. Update Registration Table
-      await API.updateRegistration(selectedReg.id, {
-        committee: allocatedComm,
-        assigned_country: allocatedCountry,
+      await API.updateRegistration(reg.id, {
+        committee: prefComm,
+        assigned_country: prefCountry,
         status: 'APPROVED',
       });
 
-      // 2. Free up old country if applicable
-      if (selectedReg.committee !== 'NOT ASSIGNED' && selectedReg.assigned_country !== 'NOT ASSIGNED') {
-        const oldCountry = countries.find(
-          (c) =>
-            c.committee_id.toLowerCase() === selectedReg.committee.toLowerCase() &&
-            c.country_name.toLowerCase() === selectedReg.assigned_country.toLowerCase()
-        );
-        if (oldCountry && oldCountry.assigned_to === selectedReg.id) {
-          await API.updateCountry(oldCountry.id, { assigned_to: null, available: true });
-        }
-      }
-
-      // 3. Lock new country
-      const newCountry = countries.find(
+      // 2. Lock country in database
+      const countryObj = countries.find(
         (c) =>
-          c.committee_id.toLowerCase() === allocatedComm.toLowerCase() &&
-          c.country_name.toLowerCase() === allocatedCountry.toLowerCase()
+          c.committee_id.toLowerCase() === prefComm.toLowerCase() &&
+          c.country_name.toLowerCase() === prefCountry.toLowerCase()
       );
-      if (newCountry) {
-        await API.updateCountry(newCountry.id, { assigned_to: selectedReg.id, available: false });
+      if (countryObj) {
+        await API.updateCountry(countryObj.id, { assigned_to: reg.id, available: false });
       }
 
-      alert('Portfolio assigned and delegate approved successfully!');
+      alert('Registration approved successfully!');
       setIsAllocationModalOpen(false);
       setSelectedReg(null);
       await refreshData();
     } catch (err: any) {
-      alert(`Allocation failed: ${err.message}`);
+      alert(`Approval failed: ${err.message}`);
     } finally {
       setIsActionLoading(false);
     }
@@ -419,10 +421,7 @@ export const CoordinatorDashboard: React.FC = () => {
   const grade9Count = registrations.filter((r) => r.grade === 9).length;
   const grade10Count = registrations.filter((r) => r.grade === 10).length;
 
-  // Available countries for modal dropdown
-  const availableCountriesForModal = countries.filter(
-    (c) => c.committee_id.toLowerCase() === allocatedComm.toLowerCase() && (c.available || c.assigned_to === selectedReg?.id)
-  );
+
 
   const tabsConfig = [
     { id: 'overview', label: 'Overview & Settings' },
@@ -440,7 +439,7 @@ export const CoordinatorDashboard: React.FC = () => {
   }
 
   return (
-    <div className="container section fade-in">
+    <div className="section fade-in" style={{ width: '100%', maxWidth: '1440px', margin: '0 auto', paddingLeft: 'var(--space-lg)', paddingRight: 'var(--space-lg)' }}>
       {/* Welcome Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }} className="welcome-header">
         <div>
@@ -657,7 +656,7 @@ export const CoordinatorDashboard: React.FC = () => {
 
               {/* Roster Table */}
               <div className="table-responsive">
-                <table className="table">
+                <table className="table table-compact">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -679,7 +678,7 @@ export const CoordinatorDashboard: React.FC = () => {
                           <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{reg.email}</div>
                         </td>
                         <td>{reg.grade} - {reg.section}</td>
-                        <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>{reg.school}</td>
+                        <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
                         <td style={{ fontSize: '0.82rem' }}>
                           <span style={{ fontWeight: 600 }}>{reg.preferred_committee.toUpperCase()}</span>: {reg.country_preferences[0]}
                         </td>
@@ -907,6 +906,8 @@ export const CoordinatorDashboard: React.FC = () => {
                 <div><strong>Phone Number:</strong> {selectedReg.phone}</div>
                 <div style={{ gridColumn: 'span 2' }}><strong>Email:</strong> {selectedReg.email}</div>
                 <div style={{ gridColumn: 'span 2' }}><strong>Portfolio Pref:</strong> {selectedReg.portfolio_preference.replace('_', ' ')}</div>
+                <div style={{ gridColumn: 'span 2' }}><strong>Preferred Committee:</strong> {selectedReg.preferred_committee.toUpperCase()}</div>
+                <div style={{ gridColumn: 'span 2' }}><strong>Preferred Country Choice:</strong> {selectedReg.country_preferences && selectedReg.country_preferences[0]}</div>
                 <div style={{ gridColumn: 'span 2' }}><strong>Previous Experience:</strong> {selectedReg.mun_experience}</div>
                 {selectedReg.additional_info && (
                   <div style={{ gridColumn: 'span 2' }}><strong>Dietary / Add. Info:</strong> {selectedReg.additional_info}</div>
@@ -931,78 +932,33 @@ export const CoordinatorDashboard: React.FC = () => {
             {/* ALLOCATION ACTION BOARD */}
             <Card style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', padding: '1.25rem' }}>
               <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.92rem', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Allocate / Match Portfolio
+                Registration Decision
               </h4>
 
-              {/* Committee select */}
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label className="form-label">Committee Assignment</label>
-                <select
-                  value={allocatedComm}
-                  onChange={(e) => setAllocatedComm(e.target.value)}
-                  disabled={isActionLoading}
-                  className="form-control"
-                >
-                  <option value="">Select Committee</option>
-                  {committees
-                    // Filter committees to fit candidate's grade (ECOSOC/UNICEF/UNHRC for 9-10; UNEP/UN Women/FAO for 7-8)
-                    .filter((c) => {
-                      const id = c.id.toLowerCase();
-                      if (selectedReg.grade === 7 || selectedReg.grade === 8) {
-                        return ['unep', 'un-women', 'fao'].includes(id);
-                      } else {
-                        return ['unhrc', 'unicef', 'ecosoc'].includes(id);
-                      }
-                    })
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} ({c.id.toUpperCase()})
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* Country select */}
-              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                <label className="form-label">Available Country Allocation</label>
-                <select
-                  value={allocatedCountry}
-                  onChange={(e) => setAllocatedCountry(e.target.value)}
-                  disabled={!allocatedComm || isActionLoading}
-                  className="form-control"
-                >
-                  <option value="">Select Country</option>
-                  {availableCountriesForModal.map((c) => (
-                    <option key={c.id} value={c.country_name}>
-                      {c.country_name} ({c.category})
-                    </option>
-                  ))}
-                  {allocatedComm && availableCountriesForModal.length === 0 && (
-                    <option disabled>No countries vacant in this committee</option>
-                  )}
-                </select>
-              </div>
+              <p style={{ fontSize: '0.88rem', margin: '0 0 1.25rem 0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                Approve or reject this registration. Approving will automatically assign their preferred committee (<strong>{selectedReg.preferred_committee.toUpperCase()}</strong>) and country (<strong>{selectedReg.country_preferences && selectedReg.country_preferences[0]}</strong>).
+              </p>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleSaveAllocation}
-                  loading={isActionLoading}
-                  disabled={!allocatedComm || !allocatedCountry}
-                  style={{ flex: 1 }}
-                >
-                  <CheckCircle size={14} /> Allocate & Approve
-                </Button>
-                {selectedReg.status === 'APPROVED' && (
+                {selectedReg.status !== 'APPROVED' ? (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleApproveRegistration(selectedReg)}
+                    loading={isActionLoading}
+                    style={{ flex: 1 }}
+                  >
+                    <CheckCircle size={14} /> Approve Registration
+                  </Button>
+                ) : (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleRevokeAllocation(selectedReg)}
                     loading={isActionLoading}
-                    style={{ color: 'var(--color-warning)', borderColor: 'var(--color-warning)' }}
+                    style={{ flex: 1, color: 'var(--color-warning)', borderColor: 'var(--color-warning)' }}
                   >
-                    <XCircle size={14} /> Revoke
+                    <XCircle size={14} /> Revoke Approval
                   </Button>
                 )}
               </div>
