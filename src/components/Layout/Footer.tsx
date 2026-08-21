@@ -118,7 +118,7 @@ export const Footer: React.FC = () => {
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <Phone size={16} style={{ color: 'var(--color-accent-gold)', flexShrink: 0 }} />
-                <span>+91 712 2667888 / 2667999</span>
+                <span>+91 9373959534</span>
               </div>
 
             </div>
