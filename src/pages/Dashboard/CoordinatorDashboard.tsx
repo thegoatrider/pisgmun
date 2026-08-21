@@ -417,6 +417,7 @@ export const CoordinatorDashboard: React.FC = () => {
   const approvedCount = registrations.filter((r) => r.status === 'APPROVED').length;
   const pendingCount = registrations.filter((r) => r.status === 'PENDING' || r.status === 'NOT ASSIGNED').length;
 
+  const grade7Count = registrations.filter((r) => r.grade === 7).length;
   const grade8Count = registrations.filter((r) => r.grade === 8).length;
   const grade9Count = registrations.filter((r) => r.grade === 9).length;
   const grade10Count = registrations.filter((r) => r.grade === 10).length;
@@ -507,9 +508,9 @@ export const CoordinatorDashboard: React.FC = () => {
                   <strong style={{ fontSize: '1.7rem', color: 'var(--color-warning)', display: 'block', marginTop: '0.25rem' }}>{pendingCount}</strong>
                 </Card>
                 <Card elevation="sm" style={{ padding: '1.25rem', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Grade Roster (8/9/10)</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Grade Roster (7/8/9/10)</span>
                   <strong style={{ fontSize: '1.3rem', color: 'var(--color-primary)', display: 'block', marginTop: '0.4rem', fontFamily: 'monospace' }}>
-                    {grade8Count} • {grade9Count} • {grade10Count}
+                    {grade7Count} • {grade8Count} • {grade9Count} • {grade10Count}
                   </strong>
                 </Card>
               </div>
