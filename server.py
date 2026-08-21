@@ -768,7 +768,7 @@ def api_register():
     if not (name and grade and section and school and email and phone and pref_pos and preferred_committee and country_prefs):
         return jsonify({"error": "Validation failed. Missing required fields."}), 400
 
-    if len(name) > 100 or len(email) > 100 or len(phone) > 20 or len(section) > 5 or len(preferred_committee) > 20:
+    if len(name) > 100 or len(email) > 100 or len(phone) > 100 or len(section) > 30 or len(preferred_committee) > 50:
         return jsonify({"error": "Input length limit exceeded."}), 400
 
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
