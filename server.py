@@ -132,7 +132,7 @@ def get_default_countries():
     for c in ["Switzerland", "New Zealand", "Singapore", "Costa Rica", "Iceland", "Sweden"]:
         countries.append({"committee_id": "unep", "country_name": c, "category": "Neutral / technology observer countries"})
     # UNICEF
-    for c in ["USA", "UK", "Sweden", "Japan", "Norway", "Germany"]:
+    for c in ["USA", "UK", "Sweden", "Japan", "Norway", "Germany", "France"]:
         countries.append({"committee_id": "unicef", "country_name": c, "category": "Major donor countries"})
     for c in ["India", "Nigeria", "Pakistan", "Ethiopia", "Bangladesh", "Kenya"]:
         countries.append({"committee_id": "unicef", "country_name": c, "category": "Large recipient / implementation countries"})
