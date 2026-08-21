@@ -735,6 +735,17 @@ def api_register():
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         return jsonify({"error": "Invalid email address format."}), 400
 
+    # Prevent duplicate registration with same email or phone number
+    regs = db_get_registrations()
+    if any(r.get('email', '').strip().lower() == email.lower() for r in regs):
+        return jsonify({"error": "A delegate registration with this email already exists. If you have already registered, please use your existing Registration ID to access the portal."}), 400
+
+    def clean_phone(p):
+        return re.sub(r'\D', '', p)
+    cleaned_phone = clean_phone(phone)
+    if cleaned_phone and any(clean_phone(r.get('phone', '')) == cleaned_phone for r in regs):
+        return jsonify({"error": "A delegate registration with this phone number already exists. If you have already registered, please use your existing Registration ID to access the portal."}), 400
+
     # Validate that country preferences are exactly 1 unique entry
     if not isinstance(country_prefs, list) or len(country_prefs) != 1:
         return jsonify({"error": "Exactly one country preference is required."}), 400
