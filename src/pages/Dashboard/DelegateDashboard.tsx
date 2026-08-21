@@ -119,7 +119,8 @@ export const DelegateDashboard: React.FC = () => {
         alert('Position Paper deleted successfully!');
         setPositionPaper(null);
       } else {
-        alert('Failed to delete Position Paper.');
+        const err = await res.json().catch(() => ({ error: 'Unknown server error' }));
+        alert(`Failed to delete Position Paper: ${err.error}`);
       }
     } catch (e) {
       alert('Delete failed.');
@@ -547,7 +548,7 @@ export const DelegateDashboard: React.FC = () => {
                   {positionPaper ? (
                     <>
                       <a
-                        href={getFileBlobUrl(positionPaper.data)}
+                        href={getFileBlobUrl(positionPaper.file_data)}
                         download={positionPaper.filename}
                         style={{
                           backgroundColor: 'var(--color-primary)',

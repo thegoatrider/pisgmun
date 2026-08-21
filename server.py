@@ -903,8 +903,10 @@ def api_delegate_position_paper():
     if request.method == 'GET':
         # Find active position paper (not deleted by delegate)
         active_pp = None
+        sess_id = (reg_id or '').strip().upper()
         for pp in pp_list:
-            if pp.get('registration_id') == reg_id and not pp.get('deleted_by_delegate', False):
+            pp_id = (pp.get('registration_id') or '').strip().upper()
+            if pp_id == sess_id and not pp.get('deleted_by_delegate', False):
                 active_pp = pp
                 break
         return jsonify(active_pp)
@@ -925,7 +927,8 @@ def api_delegate_position_paper():
 
         # Fetch delegate details (name, committee)
         regs = db_get_registrations()
-        delegate = next((r for r in regs if r.get('id') == reg_id), None)
+        sess_id = (reg_id or '').strip().upper()
+        delegate = next((r for r in regs if (r.get('id') or '').strip().upper() == sess_id), None)
         if not delegate:
             return jsonify({"error": "Delegate registration not found."}), 404
 
@@ -934,7 +937,8 @@ def api_delegate_position_paper():
 
         # Mark all previous papers for this delegate as deleted_by_delegate = True
         for pp in pp_list:
-            if pp.get('registration_id') == reg_id:
+            pp_id = (pp.get('registration_id') or '').strip().upper()
+            if pp_id == sess_id:
                 pp['deleted_by_delegate'] = True
 
         # Append new paper record
@@ -959,8 +963,10 @@ def api_delegate_position_paper():
     elif request.method == 'DELETE':
         # Delegate deletes paper: set deleted_by_delegate = True
         updated = False
+        sess_id = (reg_id or '').strip().upper()
         for pp in pp_list:
-            if pp.get('registration_id') == reg_id and not pp.get('deleted_by_delegate', False):
+            pp_id = (pp.get('registration_id') or '').strip().upper()
+            if pp_id == sess_id and not pp.get('deleted_by_delegate', False):
                 pp['deleted_by_delegate'] = True
                 updated = True
         
