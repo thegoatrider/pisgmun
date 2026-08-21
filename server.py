@@ -219,6 +219,7 @@ def get_default_countries():
 # Default passwords hashes
 DEFAULT_HASHES = {
     "coordinator": os.environ.get('HASH_COORDINATOR', '$2b$12$w.VDxvOi5zhPNLXYn7YY1uHcEePq/A7ZEEtUyBGoEleoGrUZSdQhK'),
+    "in_charge_7": os.environ.get('HASH_IN_CHARGE_7', '$2b$12$js5aWKP/dAFHEWL4uOCrzeM27vdQDhzX4RcH.NROfMIn.4NHDsuwm'),
     "in_charge_8": os.environ.get('HASH_IN_CHARGE_8', '$2b$12$/ViKaD0luhS1VP8Vjgg7UewRHNGTLkiMLYs5nv/rMyGP40Axtmr1i'),
     "in_charge_9": os.environ.get('HASH_IN_CHARGE_9', '$2b$12$IMYedFHqwK4VABa/RmPzLe700BXkpFO2U5XZqnwaZGta4OjIU/klO'),
     "in_charge_10": os.environ.get('HASH_IN_CHARGE_10', '$2b$12$oH.1Uu3GwZbNRSNfb6IVLOuhWZUK3GJDVyvuHyOvlEYyc6E7aEzXW'),
@@ -307,7 +308,7 @@ def db_get_config():
     if IS_DEMO_MODE:
         return read_mock().get("config", {})
     else:
-        url = f"{SUPABASE_URL}/rest/v1/config?key=eq.global_settings"
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.global_settings"
         res = requests.get(url, headers=get_supabase_headers())
         if res.status_code == 200 and res.json():
             return res.json()[0].get("value", {})
@@ -323,7 +324,7 @@ def db_save_config(config_val):
         write_mock(data)
         return True
     else:
-        url = f"{SUPABASE_URL}/rest/v1/config?key=eq.global_settings"
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.global_settings"
         payload = {"key": "global_settings", "value": config_val, "updated_at": "now()"}
         res = requests.post(url, headers=get_supabase_headers(), json=payload)
         return res.status_code in (200, 201)
@@ -332,7 +333,7 @@ def db_get_passwords():
     if IS_DEMO_MODE:
         return read_mock().get("passwords", {})
     else:
-        url = f"{SUPABASE_URL}/rest/v1/config?key=eq.passwords"
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.passwords"
         res = requests.get(url, headers=get_supabase_headers())
         if res.status_code == 200 and res.json():
             return res.json()[0].get("value", {})
@@ -345,7 +346,7 @@ def db_save_passwords(passwords_val):
         write_mock(data)
         return True
     else:
-        url = f"{SUPABASE_URL}/rest/v1/config?key=eq.passwords"
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.passwords"
         payload = {"key": "passwords", "value": passwords_val, "updated_at": "now()"}
         res = requests.post(url, headers=get_supabase_headers(), json=payload)
         return res.status_code in (200, 201)
@@ -589,8 +590,18 @@ def api_login():
     if not stored_hash:
         return jsonify({"error": "Invalid credentials."}), 401
 
-    # Verify bcrypt
-    if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
+    # Verify bcrypt or plain text fallback
+    is_bcrypt = stored_hash.startswith('$2a$') or stored_hash.startswith('$2b$') or stored_hash.startswith('$2y$')
+    match = False
+    try:
+        if is_bcrypt:
+            match = bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+        else:
+            match = (password == stored_hash)
+    except Exception:
+        match = False
+
+    if match:
         session['role'] = role
         session.pop('registration_id', None)
         return jsonify({"success": True, "role": role})

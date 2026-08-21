@@ -45,6 +45,7 @@ export const CoordinatorDashboard: React.FC = () => {
   // Passwords Form State
   const [passwords, setPasswords] = useState({
     coordinator: '',
+    in_charge_7: '',
     in_charge_8: '',
     in_charge_9: '',
     in_charge_10: '',
@@ -187,7 +188,7 @@ export const CoordinatorDashboard: React.FC = () => {
     try {
       await API.updatePasswords(activePayload);
       alert('Passwords updated successfully!');
-      setPasswords({ coordinator: '', in_charge_8: '', in_charge_9: '', in_charge_10: '' });
+      setPasswords({ coordinator: '', in_charge_7: '', in_charge_8: '', in_charge_9: '', in_charge_10: '' });
     } catch (err: any) {
       alert(`Failed to save passwords: ${err.message}`);
     } finally {
@@ -1087,12 +1088,22 @@ export const CoordinatorDashboard: React.FC = () => {
               <form onSubmit={handleSavePasswords} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="grid-responsive">
                   <Input
+                    label="Grade 7 In-Charge Passcode"
+                    type="text"
+                    placeholder="Leave blank to keep unchanged"
+                    value={passwords.in_charge_7}
+                    onChange={(e) => setPasswords({ ...passwords, in_charge_7: e.target.value })}
+                  />
+                  <Input
                     label="Grade 8 In-Charge Passcode"
                     type="text"
                     placeholder="Leave blank to keep unchanged"
                     value={passwords.in_charge_8}
                     onChange={(e) => setPasswords({ ...passwords, in_charge_8: e.target.value })}
                   />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="grid-responsive">
                   <Input
                     label="Grade 9 In-Charge Passcode"
                     type="text"
@@ -1100,9 +1111,6 @@ export const CoordinatorDashboard: React.FC = () => {
                     value={passwords.in_charge_9}
                     onChange={(e) => setPasswords({ ...passwords, in_charge_9: e.target.value })}
                   />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="grid-responsive">
                   <Input
                     label="Grade 10 In-Charge Passcode"
                     type="text"
@@ -1110,6 +1118,9 @@ export const CoordinatorDashboard: React.FC = () => {
                     value={passwords.in_charge_10}
                     onChange={(e) => setPasswords({ ...passwords, in_charge_10: e.target.value })}
                   />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="grid-responsive">
                   <Input
                     label="MUN Coordinator Password"
                     type="text"

@@ -6,7 +6,7 @@ import { Input } from '../components/UI/Input';
 import { Button } from '../components/UI/Button';
 import { KeyRound, ShieldAlert, Users, Users2, ArrowLeft, LogIn } from 'lucide-react';
 
-type RoleType = 'delegate' | 'in_charge_8' | 'in_charge_9' | 'in_charge_10' | 'coordinator';
+type RoleType = 'delegate' | 'in_charge_7' | 'in_charge_8' | 'in_charge_9' | 'in_charge_10' | 'coordinator';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export const Login: React.FC = () => {
   const { login, role: sessionRole, isLoading: authLoading } = useAuth();
 
   const [selectedRole, setSelectedRole] = useState<RoleType>('delegate');
-  const [inChargeGrade, setInChargeGrade] = useState<'8' | '9' | '10'>('8');
+  const [inChargeGrade, setInChargeGrade] = useState<'7' | '8' | '9' | '10'>('8');
   
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -231,9 +231,10 @@ export const Login: React.FC = () => {
                 <label className="form-label">Assigned Grade</label>
                 <select
                   value={inChargeGrade}
-                  onChange={(e) => setInChargeGrade(e.target.value as '8' | '9' | '10')}
+                  onChange={(e) => setInChargeGrade(e.target.value as '7' | '8' | '9' | '10')}
                   className="form-control"
                 >
+                  <option value="7">Grade 7 In-Charge</option>
                   <option value="8">Grade 8 In-Charge</option>
                   <option value="9">Grade 9 In-Charge</option>
                   <option value="10">Grade 10 In-Charge</option>
