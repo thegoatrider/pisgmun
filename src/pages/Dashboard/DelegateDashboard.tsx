@@ -181,7 +181,7 @@ export const DelegateDashboard: React.FC = () => {
                         <strong>{commObj?.eb_vice_chair || 'TBD'}</strong>
                       </div>
                       <div>
-                        <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>Rapporteur</span>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge</span>
                         <strong>{commObj?.eb_rapporteur || 'TBD'}</strong>
                       </div>
                     </div>

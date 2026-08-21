@@ -779,7 +779,7 @@ export const CoordinatorDashboard: React.FC = () => {
                       required
                     />
                     <Input
-                      label="Rapporteur Name"
+                      label="In-Charge Name"
                       value={commForm.eb_rapporteur}
                       onChange={(e) => setCommForm({ ...commForm, eb_rapporteur: e.target.value })}
                       required

@@ -115,7 +115,7 @@ export const CommitteeDetail: React.FC = () => {
           {[
             { role: 'Chairperson', name: committee.eb_chair },
             { role: 'Vice Chairperson', name: committee.eb_vice_chair },
-            { role: 'Rapporteur', name: committee.eb_rapporteur },
+            { role: 'In-Charge', name: committee.eb_rapporteur },
           ].map((member, i) => (
             <div key={i} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem', textAlign: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>
