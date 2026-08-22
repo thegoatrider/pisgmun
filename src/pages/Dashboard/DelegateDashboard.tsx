@@ -127,6 +127,44 @@ export const DelegateDashboard: React.FC = () => {
     }
   };
 
+  // Message System state & polling
+  const [messages, setMessages] = useState<any[]>([]);
+  const [chatChannel, setChatChannel] = useState<'in_charge' | 'coordinator'>('coordinator');
+
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch('/api/messages');
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      }
+    } catch (e) {
+      console.error('Failed to load messages', e);
+    }
+  };
+
+  useEffect(() => {
+    if (delegateReg) {
+      fetchMessages();
+      const interval = setInterval(fetchMessages, 5000); // Poll every 5s STAT
+      return () => clearInterval(interval);
+    }
+  }, [delegateReg]);
+
+  const formatIST = (dateStr?: string) => {
+    if (!dateStr) return 'N/A';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/');
@@ -614,6 +652,103 @@ export const DelegateDashboard: React.FC = () => {
                   )}
                 </div>
               </div>
+            </div>
+          </Card>
+
+          {/* Chatbox Panel */}
+          <Card elevation="md" style={{ padding: '1.5rem', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', height: '360px' }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+              Announcements & Chat
+            </h3>
+            
+            {/* Channel Tabs */}
+            <div style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--color-bg-main)', padding: '3px', borderRadius: 'var(--radius-md)', marginBottom: '0.75rem' }}>
+              <button
+                type="button"
+                onClick={() => setChatChannel('coordinator')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.25rem',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  backgroundColor: chatChannel === 'coordinator' ? '#ffffff' : 'transparent',
+                  color: chatChannel === 'coordinator' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                  boxShadow: chatChannel === 'coordinator' ? 'var(--shadow-sm)' : 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                Coordinator
+              </button>
+              <button
+                type="button"
+                onClick={() => setChatChannel('in_charge')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.25rem',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  backgroundColor: chatChannel === 'in_charge' ? '#ffffff' : 'transparent',
+                  color: chatChannel === 'in_charge' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                  boxShadow: chatChannel === 'in_charge' ? 'var(--shadow-sm)' : 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                In-Charge (Grade {delegateReg.grade})
+              </button>
+            </div>
+
+            {/* Message History List */}
+            <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {messages.filter(msg => {
+                if (chatChannel === 'coordinator') {
+                  return msg.sender_role === 'coordinator';
+                } else {
+                  return msg.sender_role.startsWith('in_charge_');
+                }
+              }).length === 0 ? (
+                <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
+                  No messages received in this channel yet.
+                </div>
+              ) : (
+                messages
+                  .filter(msg => {
+                    if (chatChannel === 'coordinator') {
+                      return msg.sender_role === 'coordinator';
+                    } else {
+                      return msg.sender_role.startsWith('in_charge_');
+                    }
+                  })
+                  .map(msg => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        alignSelf: 'flex-start',
+                        backgroundColor: 'var(--color-bg-main)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '0.6rem 0.85rem',
+                        maxWidth: '90%',
+                        fontSize: '0.82rem',
+                        color: 'var(--color-text-main)',
+                        lineHeight: '1.4'
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {msg.sender_role === 'coordinator' ? 'MUN Coordinator' : `Grade ${delegateReg.grade} In-Charge`}
+                      </div>
+                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
+                      <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                        {formatIST(msg.sent_at)}
+                      </div>
+                    </div>
+                  ))
+              )}
             </div>
           </Card>
         </div>

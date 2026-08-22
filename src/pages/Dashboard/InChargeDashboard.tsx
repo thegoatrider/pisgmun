@@ -43,6 +43,72 @@ export const InChargeDashboard: React.FC = () => {
     navigate('/');
   };
 
+  // In-Charge Messaging state & handlers
+  const [messages, setMessages] = useState<any[]>([]);
+  const [activeMsgRecipient, setActiveMsgRecipient] = useState<string>('');
+  const [newMsgContent, setNewMsgContent] = useState('');
+  const [isMsgSending, setIsMsgSending] = useState(false);
+
+  // Sync recipient default once grade is loaded
+  useEffect(() => {
+    if (inChargeGrade && !activeMsgRecipient) {
+      setActiveMsgRecipient(`grade_${inChargeGrade}`);
+    }
+  }, [inChargeGrade, activeMsgRecipient]);
+
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch('/api/messages');
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (statusFilter === 'MESSAGES') {
+      fetchMessages();
+      const interval = setInterval(fetchMessages, 5000); // Poll STAT every 5s
+      return () => clearInterval(interval);
+    }
+  }, [statusFilter]);
+
+  const handleSendInChargeMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMsgContent.trim() || !activeMsgRecipient) return;
+    setIsMsgSending(true);
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipient_id: activeMsgRecipient,
+          content: newMsgContent.trim()
+        })
+      });
+      if (res.ok) {
+        setNewMsgContent('');
+        const refreshRes = await fetch('/api/messages');
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          setMessages(data);
+        }
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Failed to send message.' }));
+        alert(err.error);
+      }
+    } catch (err) {
+      alert('Network error.');
+    } finally {
+      setIsMsgSending(false);
+    }
+  };
+
   // Filter registrations for this grade
   const gradeRegistrations = registrations.filter((r) => r.grade === inChargeGrade);
 
@@ -230,21 +296,25 @@ export const InChargeDashboard: React.FC = () => {
       {/* Roster Filters Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem', flexWrap: 'wrap' }} className="filters-header">
         {/* Search */}
-        <div style={{ position: 'relative', width: '320px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--color-text-muted)' }} />
-          <input
-            type="text"
-            placeholder="Search roster..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="form-control"
-            style={{ paddingLeft: '38px', width: '100%' }}
-          />
-        </div>
+        {statusFilter !== 'MESSAGES' ? (
+          <div style={{ position: 'relative', width: '320px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--color-text-muted)' }} />
+            <input
+              type="text"
+              placeholder="Search roster..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="form-control"
+              style={{ paddingLeft: '38px', width: '100%' }}
+            />
+          </div>
+        ) : (
+          <div />
+        )}
 
         {/* Tab Filters */}
         <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--color-border)', padding: '3px', borderRadius: 'var(--radius-md)' }}>
-          {['ALL', 'APPROVED', 'PENDING', 'REJECTED'].map((f) => (
+          {['ALL', 'APPROVED', 'PENDING', 'REJECTED', 'MESSAGES'].map((f) => (
             <button
               key={f}
               onClick={() => setStatusFilter(f)}
@@ -261,67 +331,203 @@ export const InChargeDashboard: React.FC = () => {
                 transition: 'all var(--transition-fast)',
               }}
             >
-              {f}
+              {f === 'MESSAGES' ? 'Messages' : f}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Roster Table */}
-      <div className="table-responsive">
-        <table className="table table-compact">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Sec</th>
-              <th>School</th>
-              <th>Choice (Comm/Country)</th>
-              <th>Allocated Portfolio</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRegs.map((reg) => (
-              <tr key={reg.id}>
-                <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
-                <td>
-                  <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                    Reg At: {formatIST(reg.created_at)}
+      {/* Roster Table or Messages Console */}
+      {statusFilter === 'MESSAGES' ? (
+        <Card elevation="md" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', minHeight: '480px' }}>
+          <div style={{ display: 'flex', gap: '2rem' }} className="grid-responsive">
+            {/* Left side: list of students */}
+            <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--color-border)', paddingRight: '1.5rem', maxHeight: '480px', overflowY: 'auto' }}>
+              <span style={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block' }}>
+                Chat Recipient
+              </span>
+              
+              {/* Broadcast */}
+              <button
+                type="button"
+                onClick={() => setActiveMsgRecipient(`grade_${inChargeGrade}`)}
+                style={{
+                  padding: '0.7rem 0.85rem',
+                  textAlign: 'left',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid',
+                  borderColor: activeMsgRecipient === `grade_${inChargeGrade}` ? 'var(--color-secondary)' : 'var(--color-border)',
+                  backgroundColor: activeMsgRecipient === `grade_${inChargeGrade}` ? 'var(--color-secondary-bg)' : '#ffffff',
+                  color: activeMsgRecipient === `grade_${inChargeGrade}` ? 'var(--color-secondary)' : 'var(--color-primary)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  marginBottom: '0.75rem'
+                }}
+              >
+                📢 Broadcast: Grade {inChargeGrade}
+              </button>
+
+              <span style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.4rem', display: 'block' }}>
+                Grade {inChargeGrade} Students
+              </span>
+              {gradeRegistrations.length === 0 ? (
+                <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>No students registered.</p>
+              ) : (
+                gradeRegistrations.map(reg => (
+                  <button
+                    key={reg.id}
+                    type="button"
+                    onClick={() => setActiveMsgRecipient(reg.id)}
+                    style={{
+                      padding: '0.55rem 0.75rem',
+                      textAlign: 'left',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid',
+                      borderColor: activeMsgRecipient === reg.id ? 'var(--color-primary)' : 'var(--color-border)',
+                      backgroundColor: activeMsgRecipient === reg.id ? 'var(--color-bg-main)' : '#ffffff',
+                      color: 'var(--color-primary)',
+                      cursor: 'pointer',
+                      width: '100%',
+                      marginBottom: '0.4rem',
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}
+                  >
+                    <span style={{ fontWeight: 700 }}>{reg.name}</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>Section {reg.section} • {reg.id}</span>
+                  </button>
+                ))
+              )}
+            </div>
+
+            {/* Right side: Chat list and message sender */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '480px' }}>
+              <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-primary)' }}>
+                  Active Chat:{' '}
+                  {activeMsgRecipient === `grade_${inChargeGrade}`
+                    ? `📢 Grade ${inChargeGrade} Broadcast`
+                    : `👤 ${gradeRegistrations.find(r => r.id === activeMsgRecipient)?.name || activeMsgRecipient}`}
+                </span>
+              </div>
+
+              {/* Chat messages list */}
+              <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                {messages.filter(msg => {
+                  return msg.recipient_id === activeMsgRecipient && msg.sender_role === `in_charge_${inChargeGrade}`;
+                }).length === 0 ? (
+                  <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
+                    No announcements sent yet.
                   </div>
-                </td>
-                <td>{reg.section}</td>
-                <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
-                <td style={{ fontSize: '0.82rem' }}>
-                  <div style={{ fontWeight: 600 }}>{reg.preferred_committee.toUpperCase()}</div>
-                  <div style={{ color: 'var(--color-text-muted)' }}>{reg.country_preferences[0]}</div>
-                </td>
-                <td style={{ fontSize: '0.82rem' }}>
-                  {reg.committee !== 'NOT ASSIGNED' ? (
-                    <div>
-                      <strong style={{ color: 'var(--color-secondary)' }}>{reg.assigned_country}</strong>
-                      <span style={{ color: 'var(--color-text-muted)', marginLeft: '4px' }}>({reg.committee.toUpperCase()})</span>
-                    </div>
-                  ) : (
-                    <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Pending Allocation</span>
-                  )}
-                </td>
-                <td>
-                  <Badge status={reg.status} />
-                </td>
-              </tr>
-            ))}
-            {filteredRegs.length === 0 && (
+                ) : (
+                  messages
+                    .filter(msg => {
+                      return msg.recipient_id === activeMsgRecipient && msg.sender_role === `in_charge_${inChargeGrade}`;
+                    })
+                    .map(msg => (
+                      <div
+                        key={msg.id}
+                        style={{
+                          alignSelf: 'flex-start',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-md)',
+                          padding: '0.6rem 0.85rem',
+                          maxWidth: '80%',
+                          fontSize: '0.8rem',
+                          color: 'var(--color-primary)',
+                          boxShadow: 'var(--shadow-sm)'
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, fontSize: '0.65rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase' }}>
+                          You (Grade {inChargeGrade} In-Charge)
+                        </div>
+                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                          {formatIST(msg.sent_at)}
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              {/* Chat sender input */}
+              <form onSubmit={handleSendInChargeMessage} style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  placeholder="Type your grade announcement here..."
+                  value={newMsgContent}
+                  onChange={(e) => setNewMsgContent(e.target.value)}
+                  className="form-control"
+                  style={{ flex: 1 }}
+                  disabled={isMsgSending}
+                />
+                <Button type="submit" variant="primary" loading={isMsgSending} style={{ padding: '0.65rem 1.5rem' }}>
+                  Send
+                </Button>
+              </form>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-compact">
+            <thead>
               <tr>
-                <td colSpan={7} className="text-center" style={{ padding: '3rem', color: 'var(--color-text-muted)' }}>
-                  No delegates found matching the active search / filters.
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Sec</th>
+                <th>School</th>
+                <th>Choice (Comm/Country)</th>
+                <th>Allocated Portfolio</th>
+                <th>Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredRegs.map((reg) => (
+                <tr key={reg.id}>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
+                  <td>
+                    <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                      Reg At: {formatIST(reg.created_at)}
+                    </div>
+                  </td>
+                  <td>{reg.section}</td>
+                  <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
+                  <td style={{ fontSize: '0.82rem' }}>
+                    <div style={{ fontWeight: 600 }}>{reg.preferred_committee.toUpperCase()}</div>
+                    <div style={{ color: 'var(--color-text-muted)' }}>{reg.country_preferences[0]}</div>
+                  </td>
+                  <td style={{ fontSize: '0.82rem' }}>
+                    {reg.committee !== 'NOT ASSIGNED' ? (
+                      <div>
+                        <strong style={{ color: 'var(--color-secondary)' }}>{reg.assigned_country}</strong>
+                        <span style={{ color: 'var(--color-text-muted)', marginLeft: '4px' }}>({reg.committee.toUpperCase()})</span>
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Pending Allocation</span>
+                    )}
+                  </td>
+                  <td>
+                    <Badge status={reg.status} />
+                  </td>
+                </tr>
+              ))}
+              {filteredRegs.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-center" style={{ padding: '3rem', color: 'var(--color-text-muted)' }}>
+                    No delegates found matching the active search / filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <style>{`
         @media (max-width: 800px) {

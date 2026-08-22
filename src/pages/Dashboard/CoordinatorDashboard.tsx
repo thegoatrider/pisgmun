@@ -128,6 +128,65 @@ export const CoordinatorDashboard: React.FC = () => {
     }
   }, [activeTab]);
 
+  // Coordinator Messages states & API functions
+  const [allMessages, setAllMessages] = useState<any[]>([]);
+  const [activeMsgRecipient, setActiveMsgRecipient] = useState<string>('all');
+  const [newMsgContent, setNewMsgContent] = useState('');
+  const [isMsgSending, setIsMsgSending] = useState(false);
+
+  const fetchAllMessages = async () => {
+    try {
+      const res = await fetch('/api/messages');
+      if (res.ok) {
+        const data = await res.json();
+        setAllMessages(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSendCoordinatorMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMsgContent.trim() || !activeMsgRecipient) return;
+    setIsMsgSending(true);
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipient_id: activeMsgRecipient,
+          content: newMsgContent.trim()
+        })
+      });
+      if (res.ok) {
+        setNewMsgContent('');
+        const fetchRes = await fetch('/api/messages');
+        if (fetchRes.ok) {
+          const data = await fetchRes.json();
+          setAllMessages(data);
+        }
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Failed to send message.' }));
+        alert(err.error);
+      }
+    } catch (err) {
+      alert('Network error.');
+    } finally {
+      setIsMsgSending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'messages') {
+      fetchAllMessages();
+      const interval = setInterval(fetchAllMessages, 5000); // Polling every 5s STAT
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
   const formatIST = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
     try {
@@ -667,6 +726,7 @@ export const CoordinatorDashboard: React.FC = () => {
     { id: 'committees', label: 'Committees Config' },
     { id: 'passwords', label: 'Portal Passwords' },
     { id: 'position_papers', label: 'Position Papers' },
+    { id: 'messages', label: 'Messages' },
   ];
 
   if (contextLoading) {
@@ -1340,6 +1400,190 @@ export const CoordinatorDashboard: React.FC = () => {
                   </div>
                 </div>
               )}
+            </Card>
+          )}
+
+          {/* TAB 6: MESSAGES */}
+          {activeTab === 'messages' && (
+            <Card elevation="md" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', minHeight: '550px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                <BookOpen size={20} style={{ color: 'var(--color-secondary)' }} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  Staff Communication Portal
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', gap: '2rem', flex: 1 }} className="grid-responsive">
+                {/* Left side: Delegate list & search */}
+                <div style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--color-border)', paddingRight: '1.5rem', maxHeight: '550px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block' }}>
+                    Select Chat Recipient
+                  </span>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', flex: 1 }}>
+                    {/* Broadcast choices */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveMsgRecipient('all')}
+                      style={{
+                        padding: '0.75rem 1rem',
+                        textAlign: 'left',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid',
+                        borderColor: activeMsgRecipient === 'all' ? 'var(--color-secondary)' : 'var(--color-border)',
+                        backgroundColor: activeMsgRecipient === 'all' ? 'var(--color-secondary-bg)' : '#ffffff',
+                        color: activeMsgRecipient === 'all' ? 'var(--color-secondary)' : 'var(--color-primary)',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '0.82rem'
+                      }}
+                    >
+                      📢 Broadcast: All Delegates
+                    </button>
+
+                    {['7', '8', '9', '10'].map(g => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setActiveMsgRecipient(`grade_${g}`)}
+                        style={{
+                          padding: '0.65rem 1rem',
+                          textAlign: 'left',
+                          borderRadius: 'var(--radius-md)',
+                          border: '1px solid',
+                          borderColor: activeMsgRecipient === `grade_${g}` ? 'var(--color-secondary)' : 'var(--color-border)',
+                          backgroundColor: activeMsgRecipient === `grade_${g}` ? 'var(--color-secondary-bg)' : '#ffffff',
+                          color: activeMsgRecipient === `grade_${g}` ? 'var(--color-secondary)' : 'var(--color-primary)',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          fontSize: '0.82rem'
+                        }}
+                      >
+                        🎓 Broadcast: Grade {g}
+                      </button>
+                    ))}
+
+                    <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block' }}>
+                        Individual Delegates
+                      </span>
+                      {registrations.length === 0 ? (
+                        <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>No delegates registered.</p>
+                      ) : (
+                        registrations.map(reg => (
+                          <button
+                            key={reg.id}
+                            type="button"
+                            onClick={() => setActiveMsgRecipient(reg.id)}
+                            style={{
+                              padding: '0.6rem 0.85rem',
+                              textAlign: 'left',
+                              borderRadius: 'var(--radius-md)',
+                              border: '1px solid',
+                              borderColor: activeMsgRecipient === reg.id ? 'var(--color-primary)' : 'var(--color-border)',
+                              backgroundColor: activeMsgRecipient === reg.id ? 'var(--color-bg-main)' : '#ffffff',
+                              color: 'var(--color-primary)',
+                              cursor: 'pointer',
+                              width: '100%',
+                              marginBottom: '0.4rem',
+                              fontSize: '0.8rem',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px'
+                            }}
+                          >
+                            <span style={{ fontWeight: 700 }}>{reg.name}</span>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>Grade {reg.grade}-{reg.section} • {reg.id}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side: Chat logs and input */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '550px' }}>
+                  {/* Chat recipient header */}
+                  <div style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-primary)' }}>
+                      Conversation with:{' '}
+                      {activeMsgRecipient === 'all'
+                        ? '📢 All Delegates (Global Broadcast)'
+                        : activeMsgRecipient.startsWith('grade_')
+                        ? `🎓 Grade ${activeMsgRecipient.split('_')[1]} (Grade Broadcast)`
+                        : `👤 ${registrations.find(r => r.id === activeMsgRecipient)?.name || activeMsgRecipient}`}
+                    </span>
+                  </div>
+
+                  {/* Message feed */}
+                  <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {allMessages.filter(msg => {
+                      if (activeMsgRecipient === 'all') {
+                        return msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
+                      } else if (activeMsgRecipient.startsWith('grade_')) {
+                        return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                      } else {
+                        return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                      }
+                    }).length === 0 ? (
+                      <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                        No messages sent in this channel yet.
+                      </div>
+                    ) : (
+                      allMessages
+                        .filter(msg => {
+                          if (activeMsgRecipient === 'all') {
+                            return msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
+                          } else if (activeMsgRecipient.startsWith('grade_')) {
+                            return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                          } else {
+                            return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                          }
+                        })
+                        .map(msg => (
+                          <div
+                            key={msg.id}
+                            style={{
+                              alignSelf: 'flex-start',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid var(--color-border)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '0.65rem 0.9rem',
+                              maxWidth: '80%',
+                              fontSize: '0.82rem',
+                              color: 'var(--color-primary)',
+                              boxShadow: 'var(--shadow-sm)'
+                            }}
+                          >
+                            <div style={{ fontWeight: 700, fontSize: '0.65rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase' }}>
+                              You (MUN Coordinator)
+                            </div>
+                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
+                            <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                              {formatIST(msg.sent_at)}
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+
+                  {/* Message compose form */}
+                  <form onSubmit={handleSendCoordinatorMessage} style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      placeholder="Type your official announcement or message here..."
+                      value={newMsgContent}
+                      onChange={(e) => setNewMsgContent(e.target.value)}
+                      className="form-control"
+                      style={{ flex: 1 }}
+                      disabled={isMsgSending}
+                    />
+                    <Button type="submit" variant="primary" loading={isMsgSending} style={{ padding: '0.65rem 1.5rem' }}>
+                      Send
+                    </Button>
+                  </form>
+                </div>
+              </div>
             </Card>
           )}
         </div>

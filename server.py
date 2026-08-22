@@ -375,6 +375,30 @@ def db_save_position_papers(pp_list):
         res = requests.post(url, headers=headers, json=payload)
         return res.status_code in (200, 201)
 
+def db_get_messages():
+    if IS_DEMO_MODE:
+        return read_mock().get("messages", [])
+    else:
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.messages"
+        res = requests.get(url, headers=get_supabase_headers())
+        if res.status_code == 200 and res.json():
+            return res.json()[0].get("value", [])
+        return []
+
+def db_save_messages(msg_list):
+    if IS_DEMO_MODE:
+        data = read_mock()
+        data["messages"] = msg_list
+        write_mock(data)
+        return True
+    else:
+        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.messages"
+        payload = {"key": "messages", "value": msg_list, "updated_at": "now()"}
+        headers = get_supabase_headers()
+        headers["Prefer"] = "resolution=merge-duplicates"
+        res = requests.post(url, headers=headers, json=payload)
+        return res.status_code in (200, 201)
+
 def db_get_committees():
     if IS_DEMO_MODE:
         return read_mock().get("committees", [])
@@ -1008,6 +1032,92 @@ def api_coordinator_delete_position_paper(pp_id):
             return jsonify({"success": True})
         return jsonify({"error": "Failed to delete position paper."}), 500
     return jsonify({"error": "Position paper not found."}), 404
+
+
+@app.route('/api/messages', methods=['GET', 'POST'])
+def api_messages():
+    role = session.get('role')
+    reg_id = session.get('registration_id')
+
+    if not role:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    msg_list = db_get_messages()
+
+    if request.method == 'GET':
+        if role == 'delegate':
+            if not reg_id:
+                return jsonify({"error": "Unauthorized"}), 403
+            
+            regs = db_get_registrations()
+            delegate = next((r for r in regs if r.get('id') == reg_id), None)
+            if not delegate:
+                return jsonify({"error": "Delegate registration not found."}), 404
+            
+            delegate_grade = str(delegate.get('grade', ''))
+            
+            # Filter messages relevant to this delegate
+            filtered = []
+            for msg in msg_list:
+                rec_id = msg.get('recipient_id', '')
+                if rec_id == reg_id or rec_id == 'all' or rec_id == f"grade_{delegate_grade}":
+                    filtered.append(msg)
+            return jsonify(filtered)
+
+        elif role == 'coordinator':
+            return jsonify(msg_list)
+
+        elif role.startswith('in_charge_'):
+            grade = role.split('_')[-1]
+            regs = db_get_registrations()
+            grade_delegates = {r.get('id') for r in regs if str(r.get('grade')) == grade}
+            
+            # Filter messages sent by this incharge or sent to delegates of this grade
+            filtered = []
+            for msg in msg_list:
+                sender = msg.get('sender_role', '')
+                rec_id = msg.get('recipient_id', '')
+                if sender == role or rec_id in grade_delegates or rec_id == f"grade_{grade}":
+                    filtered.append(msg)
+            return jsonify(filtered)
+
+        return jsonify({"error": "Invalid role"}), 400
+
+    elif request.method == 'POST':
+        if role == 'delegate':
+            return jsonify({"error": "Delegates cannot send messages."}), 403
+
+        payload = request.json or {}
+        recipient_id = payload.get('recipient_id', '').strip()
+        content = payload.get('content', '').strip()
+
+        if not recipient_id or not content:
+            return jsonify({"error": "Recipient ID and message content are required."}), 400
+
+        # If in-charge, validate that they are sending to their own grade
+        if role.startswith('in_charge_'):
+            grade = role.split('_')[-1]
+            if recipient_id == f"grade_{grade}":
+                pass # valid grade-wide broadcast
+            else:
+                # verify it's a student of their grade
+                regs = db_get_registrations()
+                student = next((r for r in regs if r.get('id') == recipient_id), None)
+                if not student or str(student.get('grade')) != grade:
+                    return jsonify({"error": f"You can only send messages to Grade {grade} students."}), 403
+
+        new_msg = {
+            "id": f"msg_{int(time.time() * 1000)}",
+            "sender_role": role,
+            "recipient_id": recipient_id,
+            "content": content,
+            "sent_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        }
+
+        msg_list.append(new_msg)
+        if db_save_messages(msg_list):
+            return jsonify({"success": True, "message": new_msg})
+        return jsonify({"error": "Failed to save message."}), 500
 
 
 # --- SECURITY HEADERS INJECTION ---
