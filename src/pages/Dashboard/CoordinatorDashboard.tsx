@@ -59,6 +59,7 @@ export const CoordinatorDashboard: React.FC = () => {
 
   const [emailBroadcastSubject, setEmailBroadcastSubject] = useState('');
   const [emailBroadcastContent, setEmailBroadcastContent] = useState('');
+  const [emailRecipientType, setEmailRecipientType] = useState<'approved' | 'selected'>('approved');
   const [isEmailBroadcastSending, setIsEmailBroadcastSending] = useState(false);
 
   const handleSendEmailBroadcast = async () => {
@@ -71,13 +72,26 @@ export const CoordinatorDashboard: React.FC = () => {
       return;
     }
 
-    const approvedCount = registrations.filter(r => r.status === 'APPROVED').length;
-    if (approvedCount === 0) {
-      alert('There are no approved delegates to email.');
-      return;
+    let targetCount = 0;
+    if (emailRecipientType === 'approved') {
+      targetCount = registrations.filter(r => r.status === 'APPROVED').length;
+      if (targetCount === 0) {
+        alert('There are no approved delegates to email.');
+        return;
+      }
+    } else {
+      targetCount = selectedRegIds.length;
+      if (targetCount === 0) {
+        alert('Please go to the "Roster File" tab and check the delegates you want to email first.');
+        return;
+      }
     }
 
-    if (!window.confirm(`Are you sure you want to broadcast this email to all ${approvedCount} approved delegate(s)?`)) {
+    const confirmMsg = emailRecipientType === 'approved'
+      ? `Are you sure you want to broadcast this email to all ${targetCount} approved delegate(s)?`
+      : `Are you sure you want to send this email to the ${targetCount} selected delegate(s) checked in the Roster?`;
+
+    if (!window.confirm(confirmMsg)) {
       return;
     }
 
@@ -90,7 +104,9 @@ export const CoordinatorDashboard: React.FC = () => {
         },
         body: JSON.stringify({
           subject: emailBroadcastSubject.trim(),
-          content: emailBroadcastContent.trim()
+          content: emailBroadcastContent.trim(),
+          recipientType: emailRecipientType,
+          registrationIds: emailRecipientType === 'selected' ? selectedRegIds : []
         })
       });
       if (res.ok) {
@@ -98,6 +114,7 @@ export const CoordinatorDashboard: React.FC = () => {
         alert(`Email broadcast complete! Successfully sent to ${data.sent_count} delegates.`);
         setEmailBroadcastSubject('');
         setEmailBroadcastContent('');
+        setSelectedRegIds([]);
       } else {
         const err = await res.json().catch(() => ({ error: 'Broadcast failed.' }));
         alert(`Failed to send email broadcast: ${err.error}`);
@@ -1987,8 +2004,36 @@ export const CoordinatorDashboard: React.FC = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '800px' }}>
                 <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', margin: 0 }}>
-                  This will send a professional HTML email to all delegates whose registration has been approved. The email will automatically use the official visual identity of PISGMUN. You can personalize the message by writing <strong>{"{{NAME}}"}</strong> which will be replaced with each delegate's name.
+                  This will send a professional HTML email to the selected group of delegates. The email will automatically use the official visual identity of PISGMUN. You can personalize the message by writing <strong>{"{{NAME}}"}</strong> which will be replaced with each delegate's name.
                 </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-primary)' }}>
+                    Recipient Group
+                  </label>
+                  <div style={{ display: 'flex', gap: '1.5rem', marginTop: '4px', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', cursor: 'pointer', color: 'var(--color-text)' }}>
+                      <input
+                        type="radio"
+                        name="emailRecipientGroup"
+                        checked={emailRecipientType === 'approved'}
+                        onChange={() => setEmailRecipientType('approved')}
+                        disabled={isEmailBroadcastSending}
+                      />
+                      All Approved Delegates ({registrations.filter(r => r.status === 'APPROVED').length})
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', cursor: 'pointer', color: 'var(--color-text)' }}>
+                      <input
+                        type="radio"
+                        name="emailRecipientGroup"
+                        checked={emailRecipientType === 'selected'}
+                        onChange={() => setEmailRecipientType('selected')}
+                        disabled={isEmailBroadcastSending}
+                      />
+                      Selected Delegates (Checked in Roster) ({selectedRegIds.length})
+                    </label>
+                  </div>
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-primary)' }}>

@@ -1435,20 +1435,26 @@ def api_coordinator_email_broadcast():
     payload = request.json or {}
     subject = payload.get('subject', '').strip()
     content = payload.get('content', '').strip()
+    recipient_type = payload.get('recipientType', 'approved') # 'approved' or 'selected'
+    registration_ids = payload.get('registrationIds', [])
 
     if not subject or not content:
         return jsonify({"error": "Subject and body content are required."}), 400
 
     regs = db_get_registrations()
-    approved_regs = [r for r in regs if r.get('status') == 'APPROVED']
+    
+    if recipient_type == 'selected':
+        target_regs = [r for r in regs if r.get('id') in registration_ids]
+    else:
+        target_regs = [r for r in regs if r.get('status') == 'APPROVED']
 
-    if not approved_regs:
-        return jsonify({"error": "No approved delegates found to send emails to."}), 400
+    if not target_regs:
+        return jsonify({"error": "No target delegates found to send emails to."}), 400
 
     sent_count = 0
     errors = []
 
-    for r in approved_regs:
+    for r in target_regs:
         email = r.get('email', '').strip()
         name = r.get('name', '').strip()
         if not email:
@@ -1466,7 +1472,7 @@ def api_coordinator_email_broadcast():
     
     # If not a single email succeeded
     error_summary = "; ".join(errors[:3])
-    return jsonify({"error": f"Failed to send any broadcast emails. Sample errors: {error_summary}"}), 500
+    return jsonify({"error": f"Failed to send broadcast emails. Sample errors: {error_summary}"}), 500
 
 
 @app.route('/api/messages', methods=['GET', 'POST'])
