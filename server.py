@@ -585,6 +585,133 @@ def db_update_registration(reg_id, update_data):
         return res.status_code in (200, 204)
 
 
+def send_broadcast_email(email_address, name, subject, body_content):
+    smtp_server = os.environ.get('SMTP_SERVER')
+    smtp_port = os.environ.get('SMTP_PORT')
+    smtp_username = os.environ.get('SMTP_USERNAME')
+    smtp_password = os.environ.get('SMTP_PASSWORD')
+
+    if not all([smtp_server, smtp_port, smtp_username, smtp_password]):
+        return False, "SMTP credentials are not configured"
+
+    # Personalize name in the body content if they wrote {{NAME}}
+    personalized_body = body_content.replace("{{NAME}}", name)
+
+    # Convert line breaks to HTML breaks for body
+    html_body = personalized_body.replace("\n", "<br>")
+
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{subject}</title>
+  <style>
+    body {{
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }}
+    .email-container {{
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e1e8ed;
+    }}
+    .header-banner {{
+      background-color: #0d233a;
+      padding: 30px 40px;
+      text-align: center;
+    }}
+    .header-banner h1 {{
+      color: #ffffff;
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }}
+    .content-body {{
+      padding: 40px;
+      color: #333333;
+      line-height: 1.6;
+    }}
+    .subtitle {{
+      font-size: 18px;
+      font-weight: 600;
+      color: #0d233a;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #e1e8ed;
+      padding-bottom: 10px;
+    }}
+    .paragraph {{
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: #333333;
+    }}
+    .footer {{
+      background-color: #f8f9fa;
+      padding: 30px 40px;
+      text-align: center;
+      border-top: 1px solid #e1e8ed;
+      font-size: 13px;
+      color: #777777;
+    }}
+    .footer-team {{
+      font-weight: 700;
+      color: #0d233a;
+      margin-bottom: 5px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header-banner">
+      <h1>PISGMUN 2026</h1>
+    </div>
+    <div class="content-body">
+      <div class="subtitle">Official Announcement</div>
+      <div class="paragraph">{html_body}</div>
+    </div>
+    <div class="footer">
+      <div class="footer-team">Best Wishes,</div>
+      <div class="footer-team" style="margin-bottom: 15px;">Team PISGMUN</div>
+      <div>Podar International School, Nagpur, Godhani</div>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = smtp_username
+        msg['To'] = email_address
+
+        msg.attach(MIMEText(personalized_body, 'plain'))
+        msg.attach(MIMEText(html_content, 'html'))
+
+        port = int(smtp_port)
+        if port == 465:
+            server = smtplib.SMTP_SSL(smtp_server, port, timeout=10)
+        else:
+            server = smtplib.SMTP(smtp_server, port, timeout=10)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+
+        server.login(smtp_username, smtp_password)
+        server.sendmail(smtp_username, email_address, msg.as_string())
+        server.quit()
+        return True, None
+    except Exception as err:
+        return False, str(err)
+
+
 def send_confirmation_email(email_address, name, reg_id):
     smtp_server = os.environ.get('SMTP_SERVER')
     smtp_port = os.environ.get('SMTP_PORT')
@@ -1300,6 +1427,46 @@ def api_coordinator_send_confirmation(reg_id):
         return jsonify({"success": True})
     else:
         return jsonify({"error": f"Failed to send confirmation email: {err_msg}"}), 500
+
+
+@app.route('/api/coordinator/email-broadcast', methods=['POST'])
+@require_auth(['coordinator'])
+def api_coordinator_email_broadcast():
+    payload = request.json or {}
+    subject = payload.get('subject', '').strip()
+    content = payload.get('content', '').strip()
+
+    if not subject or not content:
+        return jsonify({"error": "Subject and body content are required."}), 400
+
+    regs = db_get_registrations()
+    approved_regs = [r for r in regs if r.get('status') == 'APPROVED']
+
+    if not approved_regs:
+        return jsonify({"error": "No approved delegates found to send emails to."}), 400
+
+    sent_count = 0
+    errors = []
+
+    for r in approved_regs:
+        email = r.get('email', '').strip()
+        name = r.get('name', '').strip()
+        if not email:
+            continue
+        
+        success, err_msg = send_broadcast_email(email, name, subject, content)
+        if success:
+            sent_count += 1
+        else:
+            errors.append(f"Failed for {name} ({email}): {err_msg}")
+
+    # Return summary of operation
+    if sent_count > 0:
+        return jsonify({"success": True, "sent_count": sent_count, "errors": errors})
+    
+    # If not a single email succeeded
+    error_summary = "; ".join(errors[:3])
+    return jsonify({"error": f"Failed to send any broadcast emails. Sample errors: {error_summary}"}), 500
 
 
 @app.route('/api/messages', methods=['GET', 'POST'])

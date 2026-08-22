@@ -57,6 +57,58 @@ export const CoordinatorDashboard: React.FC = () => {
     }
   };
 
+  const [emailBroadcastSubject, setEmailBroadcastSubject] = useState('');
+  const [emailBroadcastContent, setEmailBroadcastContent] = useState('');
+  const [isEmailBroadcastSending, setIsEmailBroadcastSending] = useState(false);
+
+  const handleSendEmailBroadcast = async () => {
+    if (!emailBroadcastSubject.trim()) {
+      alert('Please enter an email subject.');
+      return;
+    }
+    if (!emailBroadcastContent.trim()) {
+      alert('Please enter the email body message.');
+      return;
+    }
+
+    const approvedCount = registrations.filter(r => r.status === 'APPROVED').length;
+    if (approvedCount === 0) {
+      alert('There are no approved delegates to email.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to broadcast this email to all ${approvedCount} approved delegate(s)?`)) {
+      return;
+    }
+
+    setIsEmailBroadcastSending(true);
+    try {
+      const res = await fetch('/api/coordinator/email-broadcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          subject: emailBroadcastSubject.trim(),
+          content: emailBroadcastContent.trim()
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Email broadcast complete! Successfully sent to ${data.sent_count} delegates.`);
+        setEmailBroadcastSubject('');
+        setEmailBroadcastContent('');
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Broadcast failed.' }));
+        alert(`Failed to send email broadcast: ${err.error}`);
+      }
+    } catch (err) {
+      alert('Network error. Failed to send email broadcast.');
+    } finally {
+      setIsEmailBroadcastSending(false);
+    }
+  };
+
   // Configuration Form State
   const [configStatus, setConfigStatus] = useState<'OPEN' | 'CLOSED'>('OPEN');
   const [configDeadline, setConfigDeadline] = useState('');
@@ -878,6 +930,7 @@ export const CoordinatorDashboard: React.FC = () => {
     { id: 'position_papers', label: 'Position Papers' },
     { id: 'messages', label: 'Messages' },
     { id: 'announcements', label: 'Announcements' },
+    { id: 'write_email', label: 'Write Email' },
   ];
 
   if (contextLoading) {
@@ -1917,6 +1970,64 @@ export const CoordinatorDashboard: React.FC = () => {
                       Publish
                     </Button>
                   </form>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* TAB 8: WRITE EMAIL */}
+          {activeTab === 'write_email' && (
+            <Card elevation="md" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', minHeight: '500px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                <Mail size={20} style={{ color: 'var(--color-secondary)' }} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  Broadcast Email to Approved Delegates
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '800px' }}>
+                <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                  This will send a professional HTML email to all delegates whose registration has been approved. The email will automatically use the official visual identity of PISGMUN. You can personalize the message by writing <strong>{"{{NAME}}"}</strong> which will be replaced with each delegate's name.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-primary)' }}>
+                    Email Subject
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter email subject (e.g. PISGMUN 2026 | Important Notice regarding Committee Guidelines)"
+                    value={emailBroadcastSubject}
+                    onChange={(e) => setEmailBroadcastSubject(e.target.value)}
+                    className="form-control"
+                    disabled={isEmailBroadcastSending}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-primary)' }}>
+                    Email Body Message
+                  </label>
+                  <textarea
+                    rows={8}
+                    placeholder="Write your email body message here... You can use {{NAME}} to dynamically display the candidate's name."
+                    value={emailBroadcastContent}
+                    onChange={(e) => setEmailBroadcastContent(e.target.value)}
+                    className="form-control"
+                    style={{ resize: 'vertical', fontFamily: 'inherit', fontSize: '0.9rem' }}
+                    disabled={isEmailBroadcastSending}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <Button
+                    variant="primary"
+                    loading={isEmailBroadcastSending}
+                    onClick={handleSendEmailBroadcast}
+                    style={{ padding: '0.75rem 2rem' }}
+                  >
+                    Send Email to Approved Delegates
+                  </Button>
                 </div>
               </div>
             </Card>
