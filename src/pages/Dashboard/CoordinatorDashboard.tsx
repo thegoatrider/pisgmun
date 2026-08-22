@@ -7,7 +7,7 @@ import { Input } from '../../components/UI/Input';
 import { Button } from '../../components/UI/Button';
 import { Badge } from '../../components/UI/Badge';
 import { Modal } from '../../components/UI/Modal';
-import { Loader2, Download, Search, Settings, BookOpen, KeyRound, Save, CheckCircle, XCircle, Trash2, Edit3, LogOut, FileText } from 'lucide-react';
+import { Loader2, Download, Search, Settings, BookOpen, KeyRound, Save, CheckCircle, XCircle, Trash2, Edit3, LogOut, FileText, Mail } from 'lucide-react';
 
 export const CoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +35,27 @@ export const CoordinatorDashboard: React.FC = () => {
 
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [selectedRegIds, setSelectedRegIds] = useState<string[]>([]);
+  const [emailSendingMap, setEmailSendingMap] = useState<Record<string, boolean>>({});
+
+  const handleSendConfirmationEmail = async (regId: string) => {
+    setEmailSendingMap((prev) => ({ ...prev, [regId]: true }));
+    try {
+      const res = await fetch(`/api/coordinator/registrations/${regId}/send-confirmation`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        alert('Confirmation email sent successfully!');
+        await refreshData();
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        alert(`Failed to send confirmation email: ${err.error}`);
+      }
+    } catch (err) {
+      alert('Network error. Failed to send confirmation email.');
+    } finally {
+      setEmailSendingMap((prev) => ({ ...prev, [regId]: false }));
+    }
+  };
 
   // Configuration Form State
   const [configStatus, setConfigStatus] = useState<'OPEN' | 'CLOSED'>('OPEN');
@@ -1163,9 +1184,22 @@ export const CoordinatorDashboard: React.FC = () => {
                           <Badge status={reg.status} />
                         </td>
                         <td>
-                          <Button variant="outline" size="sm" onClick={() => handleOpenAllocation(reg)}>
-                            <Edit3 size={12} /> Manage
-                          </Button>
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <Button variant="outline" size="sm" onClick={() => handleOpenAllocation(reg)}>
+                              <Edit3 size={12} /> Manage
+                            </Button>
+                            <Button
+                              variant={reg.confirmation_email_sent ? "outline" : "primary"}
+                              size="sm"
+                              loading={emailSendingMap[reg.id] || false}
+                              onClick={() => handleSendConfirmationEmail(reg.id)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                              title={reg.confirmation_email_sent ? `Sent at: ${formatIST(reg.confirmation_email_sent_at)}${reg.confirmation_email_error ? ' | Error: ' + reg.confirmation_email_error : ''}` : "Send confirmation email"}
+                            >
+                              <Mail size={12} />
+                              {reg.confirmation_email_sent ? "Resend" : "Send Email"}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}

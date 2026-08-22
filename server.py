@@ -14,6 +14,9 @@ if 'VERCEL' not in os.environ:
 
 import bcrypt
 import requests
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from flask import Flask, request, jsonify, session, send_from_directory
 from dotenv import load_dotenv
 
@@ -582,6 +585,204 @@ def db_update_registration(reg_id, update_data):
         return res.status_code in (200, 204)
 
 
+def send_confirmation_email(email_address, name, reg_id):
+    smtp_server = os.environ.get('SMTP_SERVER')
+    smtp_port = os.environ.get('SMTP_PORT')
+    smtp_username = os.environ.get('SMTP_USERNAME')
+    smtp_password = os.environ.get('SMTP_PASSWORD')
+
+    if not all([smtp_server, smtp_port, smtp_username, smtp_password]):
+        return False, "SMTP credentials are not configured"
+
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PISGMUN 2026 | Registration Confirmed</title>
+  <style>
+    body {{
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }}
+    .email-container {{
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e1e8ed;
+    }}
+    .header-banner {{
+      background-color: #0d233a;
+      padding: 30px 40px;
+      text-align: center;
+    }}
+    .header-banner h1 {{
+      color: #ffffff;
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }}
+    .content-body {{
+      padding: 40px;
+      color: #333333;
+      line-height: 1.6;
+    }}
+    .subtitle {{
+      font-size: 20px;
+      font-weight: 600;
+      color: #0d233a;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #e1e8ed;
+      padding-bottom: 10px;
+    }}
+    .greeting {{
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }}
+    .paragraph {{
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: #555555;
+    }}
+    .id-box {{
+      background-color: #f0f7ff;
+      border: 1px solid #b3d7ff;
+      border-radius: 6px;
+      padding: 25px;
+      text-align: center;
+      margin: 30px 0;
+    }}
+    .id-label {{
+      font-size: 12px;
+      font-weight: 700;
+      color: #0d233a;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }}
+    .id-value {{
+      font-size: 32px;
+      font-weight: 800;
+      color: #007bff;
+      letter-spacing: 1px;
+      margin: 0;
+    }}
+    .next-steps-title {{
+      font-size: 18px;
+      font-weight: 700;
+      color: #0d233a;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }}
+    .footer {{
+      background-color: #f8f9fa;
+      padding: 30px 40px;
+      text-align: center;
+      border-top: 1px solid #e1e8ed;
+      font-size: 13px;
+      color: #777777;
+    }}
+    .footer-team {{
+      font-weight: 700;
+      color: #0d233a;
+      margin-bottom: 5px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header-banner">
+      <h1>PISGMUN 2026</h1>
+    </div>
+    <div class="content-body">
+      <div class="subtitle">Registration Confirmation</div>
+      <div class="greeting">Dear {name},</div>
+      <div class="paragraph">Thank you for registering for PISGMUN 2026 at Podar International School, Nagpur.</div>
+      <div class="paragraph">We are delighted to have you join us for a day of diplomacy, debate, collaboration, and meaningful discussion.</div>
+      <div class="paragraph">Your registration has been successfully received.</div>
+      
+      <div class="id-box">
+        <div class="id-label">YOUR REGISTRATION ID</div>
+        <div class="id-value">{reg_id}</div>
+      </div>
+      
+      <div class="paragraph">Please keep this Registration ID safe. You may be asked to provide it for registration verification and other MUN-related communication.</div>
+      
+      <div class="next-steps-title">What happens next?</div>
+      <div class="paragraph">Your registration details have been recorded by the PISGMUN Coordinator. Further information regarding your committee, country allocation, schedules, guidelines, and other important updates will be communicated to you through the registered email address.</div>
+      <div class="paragraph">Please keep an eye on your inbox for official communications from the PISGMUN Coordinator.</div>
+      
+      <div class="paragraph" style="margin-top: 30px;">We look forward to welcoming you and hope you have an enriching and memorable MUN experience.</div>
+    </div>
+    <div class="footer">
+      <div class="footer-team">Best Wishes,</div>
+      <div class="footer-team" style="margin-bottom: 15px;">Team PISGMUN</div>
+      <div>Podar International School, Nagpur, Godhani</div>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"PISGMUN 2026 | Registration Confirmed — {reg_id}"
+        msg['From'] = smtp_username
+        msg['To'] = email_address
+
+        text_content = f"""PISGMUN 2026
+
+Registration Confirmation
+
+Dear {name},
+
+Thank you for registering for PISGMUN 2026 at Podar International School, Nagpur.
+We are delighted to have you join us for a day of diplomacy, debate, collaboration, and meaningful discussion.
+
+Your registration has been successfully received.
+
+YOUR REGISTRATION ID: {reg_id}
+
+Please keep this Registration ID safe. You may be asked to provide it for registration verification and other MUN-related communication.
+
+What happens next?
+Your registration details have been recorded by the PISGMUN Coordinator. Further information regarding your committee, country allocation, schedules, guidelines, and other important updates will be communicated to you through the registered email address.
+
+Please keep an eye on your inbox for official communications from the PISGMUN Coordinator.
+
+We look forward to welcoming you and hope you have an enriching and memorable MUN experience.
+
+Best Wishes,
+Team PISGMUN
+Podar International School, Nagpur, Godhani
+"""
+        msg.attach(MIMEText(text_content, 'plain'))
+        msg.attach(MIMEText(html_content, 'html'))
+
+        port = int(smtp_port)
+        if port == 465:
+            server = smtplib.SMTP_SSL(smtp_server, port, timeout=10)
+        else:
+            server = smtplib.SMTP(smtp_server, port, timeout=10)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+
+        server.login(smtp_username, smtp_password)
+        server.sendmail(smtp_username, email_address, msg.as_string())
+        server.quit()
+        return True, None
+    except Exception as err:
+        return False, str(err)
+
+
 # --- API ACCESS ROUTING DECORATORS ---
 def get_auth_session():
     role = request.headers.get('X-Session-Role')
@@ -895,6 +1096,20 @@ def api_register():
 
     try:
         saved = db_submit_registration(sanitized_reg)
+        
+        # Trigger automated confirmation email sending
+        try:
+            success, err_msg = send_confirmation_email(email, name, reg_id)
+            update_payload = {
+                "confirmation_email_sent": success,
+                "confirmation_email_sent_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()) if success else None,
+                "confirmation_email_error": err_msg
+            }
+            # Attempt to update columns. If Supabase table isn't updated yet, this fails gracefully.
+            db_update_registration(reg_id, update_payload)
+        except Exception as email_err:
+            print(f"Error triggering confirmation email: {email_err}")
+
         session['role'] = 'delegate'
         session['registration_id'] = reg_id
         return jsonify(saved)
@@ -1054,6 +1269,37 @@ def api_coordinator_delete_position_paper(pp_id):
             return jsonify({"success": True})
         return jsonify({"error": "Failed to delete position paper."}), 500
     return jsonify({"error": "Position paper not found."}), 404
+
+
+@app.route('/api/coordinator/registrations/<reg_id>/send-confirmation', methods=['POST'])
+@require_auth(['coordinator'])
+def api_coordinator_send_confirmation(reg_id):
+    regs = db_get_registrations()
+    matched = next((r for r in regs if r.get('id') == reg_id), None)
+    if not matched:
+        return jsonify({"error": "Registration record not found."}), 404
+
+    email = matched.get('email', '').strip()
+    name = matched.get('name', '').strip()
+
+    if not email:
+        return jsonify({"error": "This registration has no email address associated with it."}), 400
+
+    success, err_msg = send_confirmation_email(email, name, reg_id)
+
+    update_payload = {
+        "confirmation_email_sent": success,
+        "confirmation_email_sent_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()) if success else None,
+        "confirmation_email_error": err_msg
+    }
+
+    # Attempt database update (fails gracefully if columns are not present yet)
+    db_update_registration(reg_id, update_payload)
+
+    if success:
+        return jsonify({"success": True})
+    else:
+        return jsonify({"error": f"Failed to send confirmation email: {err_msg}"}), 500
 
 
 @app.route('/api/messages', methods=['GET', 'POST'])

@@ -46,6 +46,9 @@ export interface Registration {
   assigned_country: string;
   status: 'APPROVED' | 'PENDING' | 'REJECTED' | 'NOT ASSIGNED';
   created_at?: string;
+  confirmation_email_sent?: boolean;
+  confirmation_email_sent_at?: string;
+  confirmation_email_error?: string;
 }
 
 export interface SystemConfig {
