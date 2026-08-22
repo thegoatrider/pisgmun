@@ -179,6 +179,53 @@ export const CoordinatorDashboard: React.FC = () => {
     }
   };
 
+  // Chat filter, unread counters, and recent sorting logic
+  const [delegateGradeFilter, setDelegateGradeFilter] = useState<'all' | 7 | 8 | 9 | 10>('all');
+
+  useEffect(() => {
+    if (activeTab === 'messages' && activeMsgRecipient && activeMsgRecipient !== 'all' && !activeMsgRecipient.startsWith('grade_')) {
+      localStorage.setItem(`pmun_read_msg_${activeMsgRecipient}`, new Date().toISOString());
+    }
+  }, [activeMsgRecipient, allMessages, activeTab]);
+
+  const getUnreadCount = (regId: string) => {
+    const lastReadStr = localStorage.getItem(`pmun_read_msg_${regId}`);
+    const lastReadTime = lastReadStr ? new Date(lastReadStr).getTime() : 0;
+    
+    const incomingMsgs = allMessages.filter(msg => 
+      msg.sender_role === 'delegate' && 
+      msg.sender_id === regId && 
+      msg.recipient_id === 'coordinator' &&
+      (msg.type || 'message') === 'message'
+    );
+    
+    return incomingMsgs.filter(msg => new Date(msg.sent_at).getTime() > lastReadTime).length;
+  };
+
+  const getSortedDelegates = () => {
+    const filtered = registrations.filter(reg => 
+      delegateGradeFilter === 'all' || reg.grade === delegateGradeFilter
+    );
+    
+    const getLatestTime = (regId: string) => {
+      const msgs = allMessages.filter(msg => 
+        (msg.recipient_id === regId || msg.sender_id === regId) &&
+        (msg.type || 'message') === 'message'
+      );
+      if (msgs.length === 0) return 0;
+      return Math.max(...msgs.map(m => new Date(m.sent_at).getTime()));
+    };
+    
+    return [...filtered].sort((a, b) => {
+      const timeA = getLatestTime(a.id);
+      const timeB = getLatestTime(b.id);
+      if (timeA !== timeB) {
+        return timeB - timeA;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  };
+
   // Coordinator Announcements states & API functions
   const [activeAnnounceRecipient, setActiveAnnounceRecipient] = useState<string>('all');
   const [newAnnounceContent, setNewAnnounceContent] = useState('');
@@ -791,7 +838,7 @@ export const CoordinatorDashboard: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }} className="welcome-header">
         <div>
           <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '1px' }}>
-            Director Panel
+            Coordinator Panel
           </span>
           <h2 style={{ fontSize: '2rem', color: 'var(--color-primary)', margin: '0.25rem 0 0 0' }}>
             MUN Coordinator Console
@@ -1472,7 +1519,10 @@ export const CoordinatorDashboard: React.FC = () => {
                     {/* Broadcast choices */}
                     <button
                       type="button"
-                      onClick={() => setActiveMsgRecipient('all')}
+                      onClick={() => {
+                        setActiveMsgRecipient('all');
+                        setDelegateGradeFilter('all');
+                      }}
                       style={{
                         padding: '0.75rem 1rem',
                         textAlign: 'left',
@@ -1493,7 +1543,10 @@ export const CoordinatorDashboard: React.FC = () => {
                       <button
                         key={g}
                         type="button"
-                        onClick={() => setActiveMsgRecipient(`grade_${g}`)}
+                        onClick={() => {
+                          setActiveMsgRecipient(`grade_${g}`);
+                          setDelegateGradeFilter(parseInt(g) as 7 | 8 | 9 | 10);
+                        }}
                         style={{
                           padding: '0.65rem 1rem',
                           textAlign: 'left',
@@ -1513,37 +1566,58 @@ export const CoordinatorDashboard: React.FC = () => {
 
                     <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block' }}>
-                        Individual Delegates
+                        {delegateGradeFilter === 'all' ? 'All Individual Delegates' : `Grade ${delegateGradeFilter} Delegates`}
                       </span>
-                      {registrations.length === 0 ? (
-                        <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>No delegates registered.</p>
+                      {getSortedDelegates().length === 0 ? (
+                        <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>No delegates found.</p>
                       ) : (
-                        registrations.map(reg => (
-                          <button
-                            key={reg.id}
-                            type="button"
-                            onClick={() => setActiveMsgRecipient(reg.id)}
-                            style={{
-                              padding: '0.6rem 0.85rem',
-                              textAlign: 'left',
-                              borderRadius: 'var(--radius-md)',
-                              border: '1px solid',
-                              borderColor: activeMsgRecipient === reg.id ? 'var(--color-primary)' : 'var(--color-border)',
-                              backgroundColor: activeMsgRecipient === reg.id ? 'var(--color-bg-main)' : '#ffffff',
-                              color: 'var(--color-primary)',
-                              cursor: 'pointer',
-                              width: '100%',
-                              marginBottom: '0.4rem',
-                              fontSize: '0.8rem',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '2px'
-                            }}
-                          >
-                            <span style={{ fontWeight: 700 }}>{reg.name}</span>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>Grade {reg.grade}-{reg.section} • {reg.id}</span>
-                          </button>
-                        ))
+                        getSortedDelegates().map(reg => {
+                          const unreadCount = getUnreadCount(reg.id);
+                          return (
+                            <button
+                              key={reg.id}
+                              type="button"
+                              onClick={() => setActiveMsgRecipient(reg.id)}
+                              style={{
+                                padding: '0.6rem 0.85rem',
+                                textAlign: 'left',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid',
+                                borderColor: activeMsgRecipient === reg.id ? 'var(--color-primary)' : 'var(--color-border)',
+                                backgroundColor: activeMsgRecipient === reg.id ? 'var(--color-bg-main)' : '#ffffff',
+                                color: 'var(--color-primary)',
+                                cursor: 'pointer',
+                                width: '100%',
+                                marginBottom: '0.4rem',
+                                fontSize: '0.8rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '8px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+                                <span style={{ fontWeight: 700 }}>{reg.name}</span>
+                                <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>Grade {reg.grade}-{reg.section} • {reg.id}</span>
+                              </div>
+                              {unreadCount > 0 && (
+                                <span style={{
+                                  backgroundColor: '#c62828',
+                                  color: '#ffffff',
+                                  borderRadius: '99px',
+                                  padding: '2px 7px',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 800,
+                                  minWidth: '18px',
+                                  textAlign: 'center',
+                                  boxShadow: '0 2px 4px rgba(198, 40, 40, 0.2)'
+                                }}>
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   </div>
