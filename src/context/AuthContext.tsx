@@ -1,6 +1,36 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { API, type Committee, type Country, type Registration, type SystemConfig } from '../services/api';
 
+// Global fetch interceptor to prevent multi-tab session conflicts
+const originalFetch = window.fetch;
+window.fetch = async function (input, init) {
+  const url = typeof input === 'string' ? input : (input as Request).url;
+  
+  if (url.includes('/api/')) {
+    const role = localStorage.getItem('pmun_session_role');
+    const regId = localStorage.getItem('pmun_registration_id');
+    const grade = localStorage.getItem('pmun_session_incharge_grade');
+    
+    init = init || {};
+    const headers = new Headers(init.headers || {});
+    
+    if (role) {
+      if (role === 'in_charge' && grade) {
+        headers.set('X-Session-Role', `in_charge_${grade}`);
+      } else {
+        headers.set('X-Session-Role', role);
+      }
+    }
+    if (regId) {
+      headers.set('X-Session-RegId', regId);
+    }
+    
+    init.headers = headers;
+  }
+  
+  return originalFetch.apply(this, [input, init]);
+};
+
 interface AuthContextType {
   role: string | null;
   registrationId: string | null;

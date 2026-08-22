@@ -583,14 +583,28 @@ def db_update_registration(reg_id, update_data):
 
 
 # --- API ACCESS ROUTING DECORATORS ---
+def get_auth_session():
+    role = request.headers.get('X-Session-Role')
+    reg_id = request.headers.get('X-Session-RegId')
+    if not role:
+        role = session.get('role')
+        reg_id = session.get('registration_id')
+    return role, reg_id
+
 def require_auth(roles):
     def decorator(f):
         def wrapper(*args, **kwargs):
-            session_role = session.get('role')
+            session_role, _ = get_auth_session()
             if not session_role:
                 return jsonify({"error": "Unauthenticated"}), 401
             if session_role != 'coordinator' and session_role not in roles:
-                return jsonify({"error": "Unauthorized"}), 403
+                is_allowed = False
+                for r in roles:
+                    if r == 'in_charge' and (session_role == 'in_charge' or session_role.startswith('in_charge_')):
+                        is_allowed = True
+                        break
+                if not is_allowed:
+                    return jsonify({"error": "Unauthorized"}), 403
             return f(*args, **kwargs)
         wrapper.__name__ = f.__name__
         return wrapper
@@ -669,9 +683,10 @@ def api_logout():
 
 @app.route('/api/auth/session', methods=['GET'])
 def api_session():
+    role, reg_id = get_auth_session()
     return jsonify({
-        "role": session.get('role'),
-        "registration_id": session.get('registration_id')
+        "role": role,
+        "registration_id": reg_id
     })
 
 @app.route('/api/auth/passwords/update', methods=['POST'])
@@ -701,7 +716,8 @@ def api_config():
         return jsonify(db_get_config())
     else:
         # Require coordinator access to save config
-        if session.get('role') != 'coordinator':
+        role, _ = get_auth_session()
+        if role != 'coordinator':
             return jsonify({"error": "Unauthorized"}), 403
         payload = request.json or {}
         if db_save_config(payload):
@@ -722,7 +738,7 @@ def api_update_committee(comm_id):
 
 @app.route('/api/countries', methods=['GET'])
 def api_countries():
-    role = session.get('role')
+    role, reg_id = get_auth_session()
     countries = db_get_countries()
 
     if not role:
@@ -764,7 +780,7 @@ def api_update_country(country_id):
 
 @app.route('/api/registrations', methods=['GET'])
 def api_registrations():
-    role = session.get('role')
+    role, reg_id = get_auth_session()
     regs = db_get_registrations()
 
     if not role:
@@ -785,7 +801,6 @@ def api_registrations():
         return jsonify(filtered)
 
     if role == 'delegate':
-        reg_id = session.get('registration_id')
         # Return full details for the logged-in delegate's own registration,
         # but stripped/anonymous details for all other registrations so they can calculate counts.
         # Strip other delegates' IDs to prevent credential leakage
@@ -923,8 +938,7 @@ def api_modify_registration(reg_id):
 @app.route('/api/delegate/position-paper', methods=['GET', 'POST', 'DELETE'])
 def api_delegate_position_paper():
     # Only delegates are authorized
-    reg_id = session.get('registration_id')
-    role = session.get('role')
+    role, reg_id = get_auth_session()
     if not reg_id or role != 'delegate':
         return jsonify({"error": "Unauthorized"}), 403
 
@@ -1010,7 +1024,8 @@ def api_delegate_position_paper():
 @app.route('/api/coordinator/position-papers', methods=['GET'])
 def api_coordinator_position_papers():
     # Only coordinator authorized
-    if session.get('role') != 'coordinator':
+    role, _ = get_auth_session()
+    if role != 'coordinator':
         return jsonify({"error": "Unauthorized"}), 403
 
     pp_list = db_get_position_papers()
@@ -1022,7 +1037,8 @@ def api_coordinator_position_papers():
 @app.route('/api/coordinator/position-paper/<pp_id>', methods=['DELETE'])
 def api_coordinator_delete_position_paper(pp_id):
     # Only coordinator authorized
-    if session.get('role') != 'coordinator':
+    role, _ = get_auth_session()
+    if role != 'coordinator':
         return jsonify({"error": "Unauthorized"}), 403
 
     pp_list = db_get_position_papers()
@@ -1042,8 +1058,7 @@ def api_coordinator_delete_position_paper(pp_id):
 
 @app.route('/api/messages', methods=['GET', 'POST'])
 def api_messages():
-    role = session.get('role')
-    reg_id = session.get('registration_id')
+    role, reg_id = get_auth_session()
 
     if not role:
         return jsonify({"error": "Unauthorized"}), 403
