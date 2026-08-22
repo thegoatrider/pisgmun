@@ -7,9 +7,20 @@ window.fetch = async function (input, init) {
   const url = typeof input === 'string' ? input : (input as Request).url;
   
   if (url.includes('/api/')) {
-    const role = localStorage.getItem('pmun_session_role');
-    const regId = localStorage.getItem('pmun_registration_id');
-    const grade = localStorage.getItem('pmun_session_incharge_grade');
+    const getSessionValue = (key: string) => {
+      let val = sessionStorage.getItem(key);
+      if (!val) {
+        val = localStorage.getItem(key);
+        if (val) {
+          sessionStorage.setItem(key, val);
+        }
+      }
+      return val;
+    };
+
+    const role = getSessionValue('pmun_session_role');
+    const regId = getSessionValue('pmun_registration_id');
+    const grade = getSessionValue('pmun_session_incharge_grade');
     
     init = init || {};
     const headers = new Headers(init.headers || {});
@@ -86,8 +97,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Automatic re-login fallback for delegates if session expired/cleared
       if (!session.role) {
-        const storedRole = localStorage.getItem('pmun_session_role');
-        const storedRegId = localStorage.getItem('pmun_registration_id');
+        const storedRole = sessionStorage.getItem('pmun_session_role') || localStorage.getItem('pmun_session_role');
+        const storedRegId = sessionStorage.getItem('pmun_registration_id') || localStorage.getItem('pmun_registration_id');
         if (storedRole === 'delegate' && storedRegId) {
           try {
             const success = await API.verifyPassword('delegate', storedRegId);
@@ -102,18 +113,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session.role) {
         setRole(session.role);
+        sessionStorage.setItem('pmun_session_role', session.role);
         localStorage.setItem('pmun_session_role', session.role);
       } else {
         setRole(null);
+        sessionStorage.removeItem('pmun_session_role');
+        sessionStorage.removeItem('pmun_session_incharge_grade');
         localStorage.removeItem('pmun_session_role');
         localStorage.removeItem('pmun_session_incharge_grade');
       }
 
       if (session.registration_id) {
         setRegistrationId(session.registration_id);
+        sessionStorage.setItem('pmun_registration_id', session.registration_id);
         localStorage.setItem('pmun_registration_id', session.registration_id);
       } else {
         setRegistrationId(null);
+        sessionStorage.removeItem('pmun_registration_id');
         localStorage.removeItem('pmun_registration_id');
       }
       
@@ -137,17 +153,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const success = await API.verifyPassword(inputRole, password);
       if (success) {
+        // Clear all session storage and stale local storage values on new login
+        sessionStorage.clear();
+        localStorage.removeItem('pmun_session_role');
+        localStorage.removeItem('pmun_session_incharge_grade');
+        localStorage.removeItem('pmun_registration_id');
+
         if (inputRole.startsWith('in_charge_')) {
           const gradeNum = inputRole.split('_')[2];
-          localStorage.setItem('pmun_session_incharge_grade', gradeNum);
+          sessionStorage.setItem('pmun_session_role', 'in_charge');
+          sessionStorage.setItem('pmun_session_incharge_grade', gradeNum);
           localStorage.setItem('pmun_session_role', 'in_charge');
+          localStorage.setItem('pmun_session_incharge_grade', gradeNum);
           setRole('in_charge');
         } else if (inputRole === 'delegate') {
-          localStorage.setItem('pmun_registration_id', password.trim());
+          sessionStorage.setItem('pmun_session_role', 'delegate');
+          sessionStorage.setItem('pmun_registration_id', password.trim());
           localStorage.setItem('pmun_session_role', 'delegate');
+          localStorage.setItem('pmun_registration_id', password.trim());
           setRole('delegate');
           setRegistrationId(password.trim());
         } else {
+          sessionStorage.setItem('pmun_session_role', inputRole);
           localStorage.setItem('pmun_session_role', inputRole);
           setRole(inputRole);
         }
@@ -170,6 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       console.warn('Backend logout warning:', e);
     } finally {
+      sessionStorage.clear();
       localStorage.removeItem('pmun_session_role');
       localStorage.removeItem('pmun_session_incharge_grade');
       localStorage.removeItem('pmun_registration_id');
