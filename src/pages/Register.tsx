@@ -23,7 +23,7 @@ export const Register: React.FC = () => {
   const [school, setSchool] = useState('Podar International School');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [portfolio, setPortfolio] = useState<'delegate' | 'executive_committee' | 'international_press'>('delegate');
+  const [portfolio, setPortfolio] = useState<'delegate' | 'executive_committee' | 'vice_chair'>('delegate');
   const [experience, setExperience] = useState('First time delegate');
   const [additional, setAdditional] = useState('');
   const [preferredCommittee, setPreferredCommittee] = useState('');
@@ -414,7 +414,7 @@ export const Register: React.FC = () => {
                     >
                       <option value="delegate">Delegate representation</option>
                       <option value="executive_committee">Executive Board / Chair</option>
-                      <option value="international_press">International Press / Journalist</option>
+                      <option value="vice_chair">Vice Chair</option>
                     </select>
                   </div>
                 </div>

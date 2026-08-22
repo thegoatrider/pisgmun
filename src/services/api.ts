@@ -37,7 +37,7 @@ export interface Registration {
   school: string;
   email: string;
   phone: string;
-  portfolio_preference: 'delegate' | 'executive_committee' | 'international_press';
+  portfolio_preference: 'delegate' | 'executive_committee' | 'vice_chair';
   mun_experience: string;
   additional_info: string;
   preferred_committee: string;
