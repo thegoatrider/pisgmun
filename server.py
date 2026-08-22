@@ -1090,6 +1090,7 @@ def api_messages():
         payload = request.json or {}
         recipient_id = payload.get('recipient_id', '').strip()
         content = payload.get('content', '').strip()
+        msg_type = payload.get('type', 'message').strip()
 
         if not recipient_id or not content:
             return jsonify({"error": "Recipient ID and message content are required."}), 400
@@ -1111,6 +1112,7 @@ def api_messages():
             "sender_role": role,
             "recipient_id": recipient_id,
             "content": content,
+            "type": msg_type,
             "sent_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         }
 

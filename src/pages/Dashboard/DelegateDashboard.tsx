@@ -655,10 +655,52 @@ export const DelegateDashboard: React.FC = () => {
             </div>
           </Card>
 
+          {/* Announcements Card */}
+          <Card elevation="md" style={{ padding: '1.5rem', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', height: '300px' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+              📢 Official Announcements
+            </h3>
+            <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {messages.filter(msg => msg.type === 'announcement').length === 0 ? (
+                <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
+                  No official announcements received yet.
+                </div>
+              ) : (
+                messages
+                  .filter(msg => msg.type === 'announcement')
+                  .map(msg => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        alignSelf: 'stretch',
+                        backgroundColor: 'rgba(59, 130, 246, 0.04)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.82rem',
+                        color: 'var(--color-text-main)',
+                        lineHeight: '1.4'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.68rem', color: 'var(--color-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {msg.recipient_id === 'all' ? '📢 Global Announcement' : `🎓 Grade ${delegateReg.grade} Announcement`}
+                        </span>
+                        <span style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)' }}>
+                          {formatIST(msg.sent_at)}
+                        </span>
+                      </div>
+                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 500 }}>{msg.content}</div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </Card>
+
           {/* Chatbox Panel */}
           <Card elevation="md" style={{ padding: '1.5rem', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', height: '360px' }}>
             <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
-              Announcements & Chat
+              💬 Direct Messages & Chat
             </h3>
             
             {/* Channel Tabs */}
@@ -706,22 +748,24 @@ export const DelegateDashboard: React.FC = () => {
             {/* Message History List */}
             <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {messages.filter(msg => {
+                const isPrivate = (msg.type || 'message') === 'message';
                 if (chatChannel === 'coordinator') {
-                  return msg.sender_role === 'coordinator';
+                  return isPrivate && msg.sender_role === 'coordinator';
                 } else {
-                  return msg.sender_role.startsWith('in_charge_');
+                  return isPrivate && msg.sender_role.startsWith('in_charge_');
                 }
               }).length === 0 ? (
                 <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
-                  No messages received in this channel yet.
+                  No private messages in this channel yet.
                 </div>
               ) : (
                 messages
                   .filter(msg => {
+                    const isPrivate = (msg.type || 'message') === 'message';
                     if (chatChannel === 'coordinator') {
-                      return msg.sender_role === 'coordinator';
+                      return isPrivate && msg.sender_role === 'coordinator';
                     } else {
-                      return msg.sender_role.startsWith('in_charge_');
+                      return isPrivate && msg.sender_role.startsWith('in_charge_');
                     }
                   })
                   .map(msg => (

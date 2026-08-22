@@ -179,6 +179,53 @@ export const CoordinatorDashboard: React.FC = () => {
     }
   };
 
+  // Coordinator Announcements states & API functions
+  const [activeAnnounceRecipient, setActiveAnnounceRecipient] = useState<string>('all');
+  const [newAnnounceContent, setNewAnnounceContent] = useState('');
+  const [isAnnounceSending, setIsAnnounceSending] = useState(false);
+
+  const handleSendCoordinatorAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAnnounceContent.trim() || !activeAnnounceRecipient) return;
+    setIsAnnounceSending(true);
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipient_id: activeAnnounceRecipient,
+          content: newAnnounceContent.trim(),
+          type: 'announcement'
+        })
+      });
+      if (res.ok) {
+        setNewAnnounceContent('');
+        const fetchRes = await fetch('/api/messages');
+        if (fetchRes.ok) {
+          const data = await fetchRes.json();
+          setAllMessages(data);
+        }
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Failed to post announcement.' }));
+        alert(err.error);
+      }
+    } catch (err) {
+      alert('Network error.');
+    } finally {
+      setIsAnnounceSending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'announcements') {
+      fetchAllMessages();
+      const interval = setInterval(fetchAllMessages, 5000); // Polling every 5s STAT
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     if (activeTab === 'messages') {
       fetchAllMessages();
@@ -727,6 +774,7 @@ export const CoordinatorDashboard: React.FC = () => {
     { id: 'passwords', label: 'Portal Passwords' },
     { id: 'position_papers', label: 'Position Papers' },
     { id: 'messages', label: 'Messages' },
+    { id: 'announcements', label: 'Announcements' },
   ];
 
   if (contextLoading) {
@@ -1518,26 +1566,28 @@ export const CoordinatorDashboard: React.FC = () => {
                   {/* Message feed */}
                   <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                     {allMessages.filter(msg => {
+                      const isPrivate = (msg.type || 'message') === 'message';
                       if (activeMsgRecipient === 'all') {
-                        return msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
+                        return isPrivate && msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
                       } else if (activeMsgRecipient.startsWith('grade_')) {
-                        return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                        return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
                       } else {
-                        return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                        return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
                       }
                     }).length === 0 ? (
                       <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
-                        No messages sent in this channel yet.
+                        No private messages sent in this channel yet.
                       </div>
                     ) : (
                       allMessages
                         .filter(msg => {
+                          const isPrivate = (msg.type || 'message') === 'message';
                           if (activeMsgRecipient === 'all') {
-                            return msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
+                            return isPrivate && msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
                           } else if (activeMsgRecipient.startsWith('grade_')) {
-                            return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                            return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
                           } else {
-                            return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                            return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
                           }
                         })
                         .map(msg => (
@@ -1580,6 +1630,135 @@ export const CoordinatorDashboard: React.FC = () => {
                     />
                     <Button type="submit" variant="primary" loading={isMsgSending} style={{ padding: '0.65rem 1.5rem' }}>
                       Send
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* TAB 7: ANNOUNCEMENTS */}
+          {activeTab === 'announcements' && (
+            <Card elevation="md" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', minHeight: '550px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                <BookOpen size={20} style={{ color: 'var(--color-secondary)' }} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  Official Announcement Board
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', gap: '2rem', flex: 1 }} className="grid-responsive">
+                {/* Left side: Announcement scope targets */}
+                <div style={{ flex: '0 0 300px', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--color-border)', paddingRight: '1.5rem', maxHeight: '550px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.75rem', display: 'block' }}>
+                    Select Announcement Target
+                  </span>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveAnnounceRecipient('all')}
+                      style={{
+                        padding: '0.85rem 1rem',
+                        textAlign: 'left',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid',
+                        borderColor: activeAnnounceRecipient === 'all' ? 'var(--color-secondary)' : 'var(--color-border)',
+                        backgroundColor: activeAnnounceRecipient === 'all' ? 'var(--color-secondary-bg)' : '#ffffff',
+                        color: activeAnnounceRecipient === 'all' ? 'var(--color-secondary)' : 'var(--color-primary)',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      📢 Broadcast: All Delegates
+                    </button>
+
+                    {['7', '8', '9', '10'].map(g => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setActiveAnnounceRecipient(`grade_${g}`)}
+                        style={{
+                          padding: '0.75rem 1rem',
+                          textAlign: 'left',
+                          borderRadius: 'var(--radius-md)',
+                          border: '1px solid',
+                          borderColor: activeAnnounceRecipient === `grade_${g}` ? 'var(--color-secondary)' : 'var(--color-border)',
+                          backgroundColor: activeAnnounceRecipient === `grade_${g}` ? 'var(--color-secondary-bg)' : '#ffffff',
+                          color: activeAnnounceRecipient === `grade_${g}` ? 'var(--color-secondary)' : 'var(--color-primary)',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        🎓 Broadcast: Grade {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right side: Announcement feed and post box */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '550px' }}>
+                  <div style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-primary)' }}>
+                      Announcements sent to:{' '}
+                      {activeAnnounceRecipient === 'all'
+                        ? '📢 All Delegates'
+                        : `🎓 Grade ${activeAnnounceRecipient.split('_')[1]}`}
+                    </span>
+                  </div>
+
+                  {/* Announcement feed */}
+                  <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {allMessages.filter(msg => {
+                      return msg.type === 'announcement' && msg.recipient_id === activeAnnounceRecipient;
+                    }).length === 0 ? (
+                      <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                        No announcements posted in this channel yet.
+                      </div>
+                    ) : (
+                      allMessages
+                        .filter(msg => msg.type === 'announcement' && msg.recipient_id === activeAnnounceRecipient)
+                        .map(msg => (
+                          <div
+                            key={msg.id}
+                            style={{
+                              alignSelf: 'stretch',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid var(--color-border)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '0.75rem 1rem',
+                              fontSize: '0.82rem',
+                              color: 'var(--color-primary)',
+                              boxShadow: 'var(--shadow-sm)'
+                            }}
+                          >
+                            <div style={{ fontWeight: 700, fontSize: '0.65rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase' }}>
+                              You (MUN Coordinator)
+                            </div>
+                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 500 }}>{msg.content}</div>
+                            <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                              {formatIST(msg.sent_at)}
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+
+                  {/* Compose Announcement form */}
+                  <form onSubmit={handleSendCoordinatorAnnouncement} style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      placeholder="Type your official announcement here..."
+                      value={newAnnounceContent}
+                      onChange={(e) => setNewAnnounceContent(e.target.value)}
+                      className="form-control"
+                      style={{ flex: 1 }}
+                      disabled={isAnnounceSending}
+                    />
+                    <Button type="submit" variant="primary" loading={isAnnounceSending} style={{ padding: '0.65rem 1.5rem' }}>
+                      Publish
                     </Button>
                   </form>
                 </div>
