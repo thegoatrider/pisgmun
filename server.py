@@ -3,6 +3,7 @@ import sys
 import re
 import json
 import time
+from datetime import timedelta
 
 # Resolve dependencies from workspace packages directory if running locally
 # (Vercel builds packages for its own Linux runtime from requirements.txt, loading local macOS packages will crash the serverless function)
@@ -23,9 +24,12 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = os.environ.get('SESSION_SECRET', 'pismun2026_default_secret_99f3b20c1a')
 
 # Cookie security settings
+is_production = 'VERCEL' in os.environ or os.environ.get('SESSION_SECRET') is not None
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=is_production,
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7)
 )
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').strip()
@@ -623,6 +627,7 @@ def api_login():
         
         # Store canonical ID in session
         canonical_id = matched["id"]
+        session.permanent = True
         session['role'] = 'delegate'
         session['registration_id'] = canonical_id
         return jsonify({"success": True, "role": "delegate", "registration_id": canonical_id})
@@ -650,6 +655,7 @@ def api_login():
         match = False
 
     if match:
+        session.permanent = True
         session['role'] = role
         session.pop('registration_id', None)
         return jsonify({"success": True, "role": role})

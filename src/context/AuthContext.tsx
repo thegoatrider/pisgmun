@@ -52,7 +52,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const initializeAuth = useCallback(async () => {
     setIsLoading(true);
     try {
-      const session = await API.getSession();
+      let session = await API.getSession();
+      
+      // Automatic re-login fallback for delegates if session expired/cleared
+      if (!session.role) {
+        const storedRole = localStorage.getItem('pmun_session_role');
+        const storedRegId = localStorage.getItem('pmun_registration_id');
+        if (storedRole === 'delegate' && storedRegId) {
+          try {
+            const success = await API.verifyPassword('delegate', storedRegId);
+            if (success) {
+              session = { role: 'delegate', registration_id: storedRegId };
+            }
+          } catch (err) {
+            console.warn('Auto re-login failed:', err);
+          }
+        }
+      }
       
       if (session.role) {
         setRole(session.role);

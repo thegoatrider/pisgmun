@@ -135,7 +135,7 @@ export const DelegateDashboard: React.FC = () => {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch('/api/messages');
+      const res = await fetch(`/api/messages?_=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data);

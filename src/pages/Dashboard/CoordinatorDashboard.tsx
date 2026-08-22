@@ -136,7 +136,7 @@ export const CoordinatorDashboard: React.FC = () => {
 
   const fetchAllMessages = async () => {
     try {
-      const res = await fetch('/api/messages');
+      const res = await fetch(`/api/messages?_=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setAllMessages(data);
