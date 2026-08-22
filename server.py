@@ -1060,7 +1060,7 @@ def api_messages():
             filtered = []
             for msg in msg_list:
                 rec_id = msg.get('recipient_id', '')
-                if rec_id == reg_id or rec_id == 'all' or rec_id == f"grade_{delegate_grade}":
+                if rec_id == reg_id or rec_id == 'all' or rec_id == f"grade_{delegate_grade}" or msg.get('sender_id') == reg_id:
                     filtered.append(msg)
             return jsonify(filtered)
 
@@ -1068,20 +1068,18 @@ def api_messages():
             return jsonify(msg_list)
 
         elif role.startswith('in_charge_'):
-            # In-charge can only fetch messages sent by themselves
+            # In-charge can fetch messages sent by themselves, or received from delegates of their grade
             filtered = []
             for msg in msg_list:
                 sender = msg.get('sender_role', '')
-                if sender == role:
+                rec_id = msg.get('recipient_id', '')
+                if sender == role or rec_id == role:
                     filtered.append(msg)
             return jsonify(filtered)
 
         return jsonify({"error": "Invalid role"}), 400
 
     elif request.method == 'POST':
-        if role == 'delegate':
-            return jsonify({"error": "Delegates cannot send messages."}), 403
-
         payload = request.json or {}
         recipient_id = payload.get('recipient_id', '').strip()
         content = payload.get('content', '').strip()
@@ -1090,8 +1088,29 @@ def api_messages():
         if not recipient_id or not content:
             return jsonify({"error": "Recipient ID and message content are required."}), 400
 
+        # Delegate validation
+        if role == 'delegate':
+            if not reg_id:
+                return jsonify({"error": "Unauthorized"}), 403
+            
+            regs = db_get_registrations()
+            delegate = next((r for r in regs if r.get('id') == reg_id), None)
+            if not delegate:
+                return jsonify({"error": "Delegate registration not found."}), 404
+            
+            delegate_grade = str(delegate.get('grade', ''))
+            
+            # Delegate can only send private 'message' type (no announcements)
+            if msg_type != 'message':
+                return jsonify({"error": "Delegates cannot publish announcements."}), 403
+            
+            # Delegate can only send to 'coordinator' or their own 'in_charge_X'
+            allowed_recipients = {'coordinator', f"in_charge_{delegate_grade}"}
+            if recipient_id not in allowed_recipients:
+                return jsonify({"error": "You can only message the coordinator or your grade in-charge."}), 403
+
         # If in-charge, validate that they are sending to their own grade
-        if role.startswith('in_charge_'):
+        elif role.startswith('in_charge_'):
             grade = role.split('_')[-1]
             if recipient_id == f"grade_{grade}":
                 pass # valid grade-wide broadcast
@@ -1110,6 +1129,8 @@ def api_messages():
             "type": msg_type,
             "sent_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         }
+        if role == 'delegate':
+            new_msg["sender_id"] = reg_id
 
         msg_list.append(new_msg)
         if db_save_messages(msg_list):

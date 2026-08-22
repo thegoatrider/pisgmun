@@ -1567,36 +1567,40 @@ export const CoordinatorDashboard: React.FC = () => {
                   <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                     {allMessages.filter(msg => {
                       const isPrivate = (msg.type || 'message') === 'message';
+                      if (!isPrivate) return false;
                       if (activeMsgRecipient === 'all') {
-                        return isPrivate && msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
+                        return msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
                       } else if (activeMsgRecipient.startsWith('grade_')) {
-                        return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                        return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
                       } else {
-                        return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                        return (msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator') ||
+                               (msg.sender_id === activeMsgRecipient && msg.sender_role === 'delegate' && msg.recipient_id === 'coordinator');
                       }
                     }).length === 0 ? (
                       <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
-                        No private messages sent in this channel yet.
+                        No messages sent in this channel yet.
                       </div>
                     ) : (
                       allMessages
                         .filter(msg => {
                           const isPrivate = (msg.type || 'message') === 'message';
+                          if (!isPrivate) return false;
                           if (activeMsgRecipient === 'all') {
-                            return isPrivate && msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
+                            return msg.recipient_id === 'all' && msg.sender_role === 'coordinator';
                           } else if (activeMsgRecipient.startsWith('grade_')) {
-                            return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                            return msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
                           } else {
-                            return isPrivate && msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator';
+                            return (msg.recipient_id === activeMsgRecipient && msg.sender_role === 'coordinator') ||
+                                   (msg.sender_id === activeMsgRecipient && msg.sender_role === 'delegate' && msg.recipient_id === 'coordinator');
                           }
                         })
                         .map(msg => (
                           <div
                             key={msg.id}
                             style={{
-                              alignSelf: 'flex-start',
-                              backgroundColor: '#ffffff',
-                              border: '1px solid var(--color-border)',
+                              alignSelf: msg.sender_role === 'coordinator' ? 'flex-end' : 'flex-start',
+                              backgroundColor: msg.sender_role === 'coordinator' ? 'var(--color-secondary-bg)' : '#ffffff',
+                              border: msg.sender_role === 'coordinator' ? '1px solid var(--color-secondary)' : '1px solid var(--color-border)',
                               borderRadius: 'var(--radius-md)',
                               padding: '0.65rem 0.9rem',
                               maxWidth: '80%',
@@ -1605,8 +1609,8 @@ export const CoordinatorDashboard: React.FC = () => {
                               boxShadow: 'var(--shadow-sm)'
                             }}
                           >
-                            <div style={{ fontWeight: 700, fontSize: '0.65rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase' }}>
-                              You (MUN Coordinator)
+                            <div style={{ fontWeight: 700, fontSize: '0.65rem', color: msg.sender_role === 'coordinator' ? 'var(--color-secondary)' : 'var(--color-primary)', marginBottom: '3px', textTransform: 'uppercase' }}>
+                              {msg.sender_role === 'coordinator' ? 'You (MUN Coordinator)' : `${registrations.find(r => r.id === msg.sender_id)?.name || msg.sender_id} (Delegate)`}
                             </div>
                             <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
                             <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>

@@ -130,6 +130,8 @@ export const DelegateDashboard: React.FC = () => {
   // Message System state & polling
   const [messages, setMessages] = useState<any[]>([]);
   const [chatChannel, setChatChannel] = useState<'in_charge' | 'coordinator'>('coordinator');
+  const [replyText, setReplyText] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
 
   const fetchMessages = async () => {
     try {
@@ -749,10 +751,11 @@ export const DelegateDashboard: React.FC = () => {
             <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {messages.filter(msg => {
                 const isPrivate = (msg.type || 'message') === 'message';
+                if (!isPrivate) return false;
                 if (chatChannel === 'coordinator') {
-                  return isPrivate && msg.sender_role === 'coordinator';
+                  return msg.sender_role === 'coordinator' || (msg.sender_role === 'delegate' && msg.recipient_id === 'coordinator');
                 } else {
-                  return isPrivate && msg.sender_role.startsWith('in_charge_');
+                  return msg.sender_role.startsWith('in_charge_') || (msg.sender_role === 'delegate' && msg.recipient_id === `in_charge_${delegateReg.grade}`);
                 }
               }).length === 0 ? (
                 <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
@@ -762,19 +765,20 @@ export const DelegateDashboard: React.FC = () => {
                 messages
                   .filter(msg => {
                     const isPrivate = (msg.type || 'message') === 'message';
+                    if (!isPrivate) return false;
                     if (chatChannel === 'coordinator') {
-                      return isPrivate && msg.sender_role === 'coordinator';
+                      return msg.sender_role === 'coordinator' || (msg.sender_role === 'delegate' && msg.recipient_id === 'coordinator');
                     } else {
-                      return isPrivate && msg.sender_role.startsWith('in_charge_');
+                      return msg.sender_role.startsWith('in_charge_') || (msg.sender_role === 'delegate' && msg.recipient_id === `in_charge_${delegateReg.grade}`);
                     }
                   })
                   .map(msg => (
                     <div
                       key={msg.id}
                       style={{
-                        alignSelf: 'flex-start',
-                        backgroundColor: 'var(--color-bg-main)',
-                        border: '1px solid var(--color-border)',
+                        alignSelf: msg.sender_role === 'delegate' ? 'flex-end' : 'flex-start',
+                        backgroundColor: msg.sender_role === 'delegate' ? 'var(--color-secondary-bg)' : 'var(--color-bg-main)',
+                        border: msg.sender_role === 'delegate' ? '1px solid var(--color-secondary)' : '1px solid var(--color-border)',
                         borderRadius: 'var(--radius-md)',
                         padding: '0.6rem 0.85rem',
                         maxWidth: '90%',
@@ -783,8 +787,8 @@ export const DelegateDashboard: React.FC = () => {
                         lineHeight: '1.4'
                       }}
                     >
-                      <div style={{ fontWeight: 700, fontSize: '0.68rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {msg.sender_role === 'coordinator' ? 'MUN Coordinator' : `Grade ${delegateReg.grade} In-Charge`}
+                      <div style={{ fontWeight: 700, fontSize: '0.68rem', color: msg.sender_role === 'delegate' ? 'var(--color-secondary)' : 'var(--color-primary)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {msg.sender_role === 'delegate' ? 'You (Delegate)' : msg.sender_role === 'coordinator' ? 'MUN Coordinator' : `Grade ${delegateReg.grade} In-Charge`}
                       </div>
                       <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
                       <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
@@ -794,6 +798,68 @@ export const DelegateDashboard: React.FC = () => {
                   ))
               )}
             </div>
+
+            {/* Delegate chat sender input */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const text = replyText.trim();
+                if (!text) return;
+                setIsSendingReply(true);
+                try {
+                  const targetRecipient = chatChannel === 'coordinator' ? 'coordinator' : `in_charge_${delegateReg.grade}`;
+                  const res = await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      recipient_id: targetRecipient,
+                      content: text,
+                      type: 'message'
+                    })
+                  });
+                  if (res.ok) {
+                    setReplyText('');
+                    fetchMessages();
+                  } else {
+                    const err = await res.json().catch(() => ({ error: 'Failed to send message.' }));
+                    alert(err.error);
+                  }
+                } catch {
+                  alert('Network error.');
+                } finally {
+                  setIsSendingReply(false);
+                }
+              }}
+              style={{ display: 'flex', gap: '0.45rem', marginTop: '0.75rem' }}
+            >
+              <input
+                type="text"
+                placeholder={`Message ${chatChannel === 'coordinator' ? 'Coordinator' : 'In-Charge'}...`}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                className="form-control"
+                style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                disabled={isSendingReply}
+              />
+              <button
+                type="submit"
+                disabled={isSendingReply}
+                style={{
+                  backgroundColor: 'var(--color-secondary)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.45rem 1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Send
+              </button>
+            </form>
           </Card>
         </div>
       </div>

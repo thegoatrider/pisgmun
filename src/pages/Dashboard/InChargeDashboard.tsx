@@ -417,23 +417,27 @@ export const InChargeDashboard: React.FC = () => {
               {/* Chat messages list */}
               <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                 {messages.filter(msg => {
-                  return msg.recipient_id === activeMsgRecipient && msg.sender_role === `in_charge_${inChargeGrade}`;
+                  const roleStr = `in_charge_${inChargeGrade}`;
+                  return (msg.recipient_id === activeMsgRecipient && msg.sender_role === roleStr) ||
+                         (msg.sender_id === activeMsgRecipient && msg.sender_role === 'delegate' && msg.recipient_id === roleStr);
                 }).length === 0 ? (
                   <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
-                    No announcements sent yet.
+                    No messages in this chat yet.
                   </div>
                 ) : (
                   messages
                     .filter(msg => {
-                      return msg.recipient_id === activeMsgRecipient && msg.sender_role === `in_charge_${inChargeGrade}`;
+                      const roleStr = `in_charge_${inChargeGrade}`;
+                      return (msg.recipient_id === activeMsgRecipient && msg.sender_role === roleStr) ||
+                             (msg.sender_id === activeMsgRecipient && msg.sender_role === 'delegate' && msg.recipient_id === roleStr);
                     })
                     .map(msg => (
                       <div
                         key={msg.id}
                         style={{
-                          alignSelf: 'flex-start',
-                          backgroundColor: '#ffffff',
-                          border: '1px solid var(--color-border)',
+                          alignSelf: msg.sender_role.startsWith('in_charge_') ? 'flex-end' : 'flex-start',
+                          backgroundColor: msg.sender_role.startsWith('in_charge_') ? 'var(--color-secondary-bg)' : '#ffffff',
+                          border: msg.sender_role.startsWith('in_charge_') ? '1px solid var(--color-secondary)' : '1px solid var(--color-border)',
                           borderRadius: 'var(--radius-md)',
                           padding: '0.6rem 0.85rem',
                           maxWidth: '80%',
@@ -442,8 +446,8 @@ export const InChargeDashboard: React.FC = () => {
                           boxShadow: 'var(--shadow-sm)'
                         }}
                       >
-                        <div style={{ fontWeight: 700, fontSize: '0.65rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase' }}>
-                          You (Grade {inChargeGrade} In-Charge)
+                        <div style={{ fontWeight: 700, fontSize: '0.65rem', color: msg.sender_role.startsWith('in_charge_') ? 'var(--color-secondary)' : 'var(--color-primary)', marginBottom: '3px', textTransform: 'uppercase' }}>
+                          {msg.sender_role.startsWith('in_charge_') ? `You (Grade ${inChargeGrade} In-Charge)` : `${gradeRegistrations.find(r => r.id === msg.sender_id)?.name || msg.sender_id} (Delegate)`}
                         </div>
                         <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
                         <div style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
