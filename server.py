@@ -1068,16 +1068,11 @@ def api_messages():
             return jsonify(msg_list)
 
         elif role.startswith('in_charge_'):
-            grade = role.split('_')[-1]
-            regs = db_get_registrations()
-            grade_delegates = {r.get('id') for r in regs if str(r.get('grade')) == grade}
-            
-            # Filter messages sent by this incharge or sent to delegates of this grade
+            # In-charge can only fetch messages sent by themselves
             filtered = []
             for msg in msg_list:
                 sender = msg.get('sender_role', '')
-                rec_id = msg.get('recipient_id', '')
-                if sender == role or rec_id in grade_delegates or rec_id == f"grade_{grade}":
+                if sender == role:
                     filtered.append(msg)
             return jsonify(filtered)
 
