@@ -60,6 +60,8 @@ export const CoordinatorDashboard: React.FC = () => {
   const [emailBroadcastSubject, setEmailBroadcastSubject] = useState('');
   const [emailBroadcastContent, setEmailBroadcastContent] = useState('');
   const [emailRecipientType, setEmailRecipientType] = useState<'approved' | 'selected'>('approved');
+  const [emailSelectedIds, setEmailSelectedIds] = useState<string[]>([]);
+  const [emailSearchQuery, setEmailSearchQuery] = useState('');
   const [isEmailBroadcastSending, setIsEmailBroadcastSending] = useState(false);
 
   const handleSendEmailBroadcast = async () => {
@@ -80,16 +82,16 @@ export const CoordinatorDashboard: React.FC = () => {
         return;
       }
     } else {
-      targetCount = selectedRegIds.length;
+      targetCount = emailSelectedIds.length;
       if (targetCount === 0) {
-        alert('Please go to the "Roster File" tab and check the delegates you want to email first.');
+        alert('Please select at least one delegate in the list below.');
         return;
       }
     }
 
     const confirmMsg = emailRecipientType === 'approved'
       ? `Are you sure you want to broadcast this email to all ${targetCount} approved delegate(s)?`
-      : `Are you sure you want to send this email to the ${targetCount} selected delegate(s) checked in the Roster?`;
+      : `Are you sure you want to send this email to the ${targetCount} selected delegate(s)?`;
 
     if (!window.confirm(confirmMsg)) {
       return;
@@ -106,7 +108,7 @@ export const CoordinatorDashboard: React.FC = () => {
           subject: emailBroadcastSubject.trim(),
           content: emailBroadcastContent.trim(),
           recipientType: emailRecipientType,
-          registrationIds: emailRecipientType === 'selected' ? selectedRegIds : []
+          registrationIds: emailRecipientType === 'selected' ? emailSelectedIds : []
         })
       });
       if (res.ok) {
@@ -114,7 +116,7 @@ export const CoordinatorDashboard: React.FC = () => {
         alert(`Email broadcast complete! Successfully sent to ${data.sent_count} delegates.`);
         setEmailBroadcastSubject('');
         setEmailBroadcastContent('');
-        setSelectedRegIds([]);
+        setEmailSelectedIds([]);
       } else {
         const err = await res.json().catch(() => ({ error: 'Broadcast failed.' }));
         alert(`Failed to send email broadcast: ${err.error}`);
@@ -2030,10 +2032,144 @@ export const CoordinatorDashboard: React.FC = () => {
                         onChange={() => setEmailRecipientType('selected')}
                         disabled={isEmailBroadcastSending}
                       />
-                      Selected Delegates (Checked in Roster) ({selectedRegIds.length})
+                      Selected Delegates ({emailSelectedIds.length})
                     </label>
                   </div>
                 </div>
+
+                {emailRecipientType === 'selected' && (
+                  <div style={{
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem',
+                    backgroundColor: 'rgba(0, 32, 74, 0.02)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem',
+                  }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input
+                        type="text"
+                        placeholder="Search delegates by name, email, or grade..."
+                        value={emailSearchQuery}
+                        onChange={(e) => setEmailSearchQuery(e.target.value)}
+                        className="form-control"
+                        style={{ flex: 1, minWidth: '200px', fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const filtered = registrations.filter(r => 
+                            r.name.toLowerCase().includes(emailSearchQuery.toLowerCase()) ||
+                            r.email.toLowerCase().includes(emailSearchQuery.toLowerCase()) ||
+                            String(r.grade).includes(emailSearchQuery) ||
+                            r.section.toLowerCase().includes(emailSearchQuery.toLowerCase())
+                          );
+                          const allFilteredIds = filtered.map(r => r.id);
+                          setEmailSelectedIds(prev => Array.from(new Set([...prev, ...allFilteredIds])));
+                        }}
+                        style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                      >
+                        Select All Matches
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEmailSelectedIds([])}
+                        style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+
+                    <div style={{
+                      maxHeight: '220px',
+                      overflowY: 'auto',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem',
+                      paddingRight: '0.25rem',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.5rem',
+                      backgroundColor: '#ffffff'
+                    }}>
+                      {registrations
+                        .filter(r => {
+                          const term = emailSearchQuery.toLowerCase();
+                          return r.name.toLowerCase().includes(term) ||
+                                 r.email.toLowerCase().includes(term) ||
+                                 String(r.grade).includes(term) ||
+                                 r.section.toLowerCase().includes(term);
+                        })
+                        .map(reg => {
+                          const isChecked = emailSelectedIds.includes(reg.id);
+                          return (
+                            <label
+                              key={reg.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.85rem',
+                                padding: '0.4rem 0.5rem',
+                                borderRadius: '4px',
+                                border: '1px solid var(--color-border)',
+                                backgroundColor: isChecked ? 'rgba(0, 123, 255, 0.05)' : '#ffffff',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => {
+                                  setEmailSelectedIds(prev =>
+                                    prev.includes(reg.id)
+                                      ? prev.filter(id => id !== reg.id)
+                                      : [...prev, reg.id]
+                                  );
+                                }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{reg.name}</span>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', marginLeft: '6px' }}>
+                                  ({reg.email})
+                                </span>
+                              </div>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginRight: '6px' }}>
+                                Gr {reg.grade}-{reg.section}
+                              </span>
+                              <span style={{
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                backgroundColor: reg.status === 'APPROVED' ? '#d4edda' : '#f8d7da',
+                                color: reg.status === 'APPROVED' ? '#155724' : '#721c24'
+                              }}>
+                                {reg.status}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      {registrations.filter(r => {
+                        const term = emailSearchQuery.toLowerCase();
+                        return r.name.toLowerCase().includes(term) ||
+                               r.email.toLowerCase().includes(term) ||
+                               String(r.grade).includes(term) ||
+                               r.section.toLowerCase().includes(term);
+                      }).length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                          No matching delegates found.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-primary)' }}>
