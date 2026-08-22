@@ -778,6 +778,41 @@ export const CoordinatorDashboard: React.FC = () => {
     setIsActionLoading(false);
   };
 
+  const [isBatchEmailSending, setIsBatchEmailSending] = useState(false);
+
+  const handleBatchSendEmail = async () => {
+    const selectedRegs = registrations.filter(r => selectedRegIds.includes(r.id));
+    if (selectedRegs.length === 0) return;
+
+    if (!window.confirm(`Are you sure you want to send/resend the confirmation email to the ${selectedRegs.length} selected registration(s)?`)) return;
+
+    setIsBatchEmailSending(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const reg of selectedRegs) {
+      try {
+        const res = await fetch(`/api/coordinator/registrations/${reg.id}/send-confirmation`, {
+          method: 'POST',
+        });
+        if (res.ok) {
+          successCount++;
+        } else {
+          console.error(`Failed to send email to ${reg.id}`);
+          failCount++;
+        }
+      } catch (err) {
+        console.error(`Network error sending email to ${reg.id}:`, err);
+        failCount++;
+      }
+    }
+
+    alert(`Batch email dispatch completed! Sent successfully: ${successCount}, Failed: ${failCount}`);
+    setSelectedRegIds([]);
+    await refreshData();
+    setIsBatchEmailSending(false);
+  };
+
   const handleBatchReject = async () => {
     const selectedRegs = registrations.filter(r => selectedRegIds.includes(r.id));
     if (selectedRegs.length === 0) return;
@@ -1097,6 +1132,15 @@ export const CoordinatorDashboard: React.FC = () => {
                       loading={isActionLoading}
                     >
                       <CheckCircle size={14} /> Approve Selected
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleBatchSendEmail}
+                      loading={isBatchEmailSending}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Mail size={14} /> Send Email Selected
                     </Button>
                     <Button
                       variant="outline"
