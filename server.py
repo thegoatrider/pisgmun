@@ -1223,19 +1223,6 @@ def api_register():
 
     try:
         saved = db_submit_registration(sanitized_reg)
-        
-        # Trigger automated confirmation email sending
-        try:
-            success, err_msg = send_confirmation_email(email, name, reg_id)
-            update_payload = {
-                "confirmation_email_sent": success,
-                "confirmation_email_sent_at": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()) if success else None,
-                "confirmation_email_error": err_msg
-            }
-            # Attempt to update columns. If Supabase table isn't updated yet, this fails gracefully.
-            db_update_registration(reg_id, update_payload)
-        except Exception as email_err:
-            print(f"Error triggering confirmation email: {email_err}")
 
         session['role'] = 'delegate'
         session['registration_id'] = reg_id
