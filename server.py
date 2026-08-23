@@ -689,7 +689,7 @@ def send_broadcast_email(email_address, name, subject, body_content):
     try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
-        msg['From'] = smtp_username
+        msg['From'] = f"Team PISGMUN <{smtp_username}>"
         msg['To'] = email_address
 
         msg.attach(MIMEText(personalized_body, 'plain'))
@@ -861,7 +861,7 @@ def send_confirmation_email(email_address, name, reg_id):
     try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = f"PISGMUN 2026 | Registration Confirmed — {reg_id}"
-        msg['From'] = smtp_username
+        msg['From'] = f"Team PISGMUN <{smtp_username}>"
         msg['To'] = email_address
 
         text_content = f"""PISGMUN 2026
