@@ -48,7 +48,7 @@ export const Footer: React.FC = () => {
                   lineHeight: '1.2',
                 }}
               >
-                PODAR INTERNATIONAL SCHOOL Nagpur
+                PODAR INTERNATIONAL SCHOOL Nagpur, Godhani
               </span>
             </div>
             <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', lineHeight: '1.6' }}>
@@ -150,7 +150,7 @@ export const Footer: React.FC = () => {
           }}
         >
           <span>
-            &copy; {currentYear} Podar International School, Nagpur. All rights reserved.
+            &copy; {currentYear} Podar International School, Nagpur, Godhani. All rights reserved.
           </span>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <a

@@ -92,7 +92,7 @@ export const Navbar: React.FC = () => {
               textTransform: 'uppercase',
             }}
           >
-            Nagpur
+            Nagpur, Godhani
           </span>
         </div>
       </div>

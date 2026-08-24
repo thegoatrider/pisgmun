@@ -840,7 +840,7 @@ def send_confirmation_email(email_address, name, reg_id):
     <div class="content-body">
       <div class="subtitle">Registration Confirmation</div>
       <div class="greeting">Dear {name},</div>
-      <div class="paragraph">Thank you for registering for PISGMUN 2026 at Podar International School, Nagpur.</div>
+      <div class="paragraph">Thank you for registering for PISGMUN 2026 at Podar International School, Nagpur, Godhani.</div>
       <div class="paragraph">We are delighted to have you join us for a day of diplomacy, debate, collaboration, and meaningful discussion.</div>
       <div class="paragraph">Your registration has been successfully received.</div>
       
@@ -878,7 +878,7 @@ Registration Confirmation
 
 Dear {name},
 
-Thank you for registering for PISGMUN 2026 at Podar International School, Nagpur.
+Thank you for registering for PISGMUN 2026 at Podar International School, Nagpur, Godhani.
 We are delighted to have you join us for a day of diplomacy, debate, collaboration, and meaningful discussion.
 
 Your registration has been successfully received.

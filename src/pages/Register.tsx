@@ -20,7 +20,7 @@ export const Register: React.FC = () => {
   const [name, setName] = useState('');
   const [grade, setGrade] = useState('');
   const [section, setSection] = useState('');
-  const [school, setSchool] = useState('Podar International School');
+  const [school, setSchool] = useState('Podar International School, Nagpur, Godhani');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [portfolio, setPortfolio] = useState<'delegate' | 'executive_committee' | 'vice_chair'>('delegate');
