@@ -26,6 +26,14 @@
       "dest": "/favicon.svg"
     },
     {
+      "src": "/hero-logo-navy_v9.png",
+      "dest": "/hero-logo-navy_v9.png"
+    },
+    {
+      "src": "/hero-banner-raw_v6.png",
+      "dest": "/hero-banner-raw_v6.png"
+    },
+    {
       "src": "/icons.svg",
       "dest": "/icons.svg"
     },
