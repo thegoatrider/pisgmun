@@ -258,7 +258,7 @@ export const DelegateDashboard: React.FC = () => {
               <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', color: 'var(--color-success)', backgroundColor: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', fontSize: '0.88rem' }}>
                 <CheckCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
-                  <strong>Approved!</strong> Your PMUN enrollment is complete. Your country portfolio and committee have been allocated by the directors. Explore materials on the right to prepare.
+                  <strong>Approved!</strong> Your PMUN enrollment is complete. Your country portfolio and committee have been allocated by the coordinators. Explore materials on the right to prepare.
                 </div>
               </div>
             )}

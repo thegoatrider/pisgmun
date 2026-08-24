@@ -52,9 +52,9 @@ export const Home: React.FC = () => {
     {
       id: 'coordinator',
       title: 'MUN Coordinator',
-      description: 'Administrative panel for PMUN directors to allocate countries, track stats, and toggle system configs.',
+      description: 'Administrative panel for PMUN coordinators to allocate countries, track stats, and toggle system configs.',
       icon: <ShieldAlert size={32} style={{ color: 'var(--color-secondary)' }} />,
-      btnText: 'Director Portal',
+      btnText: 'Coordinator Portal',
     },
   ];
 
