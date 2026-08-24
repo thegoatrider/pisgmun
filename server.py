@@ -313,14 +313,22 @@ def get_supabase_headers():
 
 def db_get_config():
     if IS_DEMO_MODE:
-        return read_mock().get("config", {})
+        val = read_mock().get("config", {})
+        if val.get("deadline") != "2026-08-25T18:29:59.000Z":
+            val["deadline"] = "2026-08-25T18:29:59.000Z"
+            db_save_config(val)
+        return val
     else:
         url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.global_settings"
         res = requests.get(url, headers=get_supabase_headers())
         if res.status_code == 200 and res.json():
-            return res.json()[0].get("value", {})
+            val = res.json()[0].get("value", {})
+            if val.get("deadline") != "2026-08-25T18:29:59.000Z":
+                val["deadline"] = "2026-08-25T18:29:59.000Z"
+                db_save_config(val)
+            return val
         # Seed default
-        default_val = {"registration_status": "OPEN", "deadline": "2026-09-01T00:00:00Z", "allow_switch_committee": False}
+        default_val = {"registration_status": "OPEN", "deadline": "2026-08-25T18:29:59.000Z", "allow_switch_committee": False}
         db_save_config(default_val)
         return default_val
 
