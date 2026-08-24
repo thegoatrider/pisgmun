@@ -327,7 +327,7 @@ export const Register: React.FC = () => {
                       {(!preferredCommittee || isCommForGrade(preferredCommittee, 7)) && <option value="7">Grade 7</option>}
                       {(!preferredCommittee || isCommForGrade(preferredCommittee, 8)) && <option value="8">Grade 8</option>}
                       {(!preferredCommittee || isCommForGrade(preferredCommittee, 9)) && <option value="9">Grade 9</option>}
-                      {(!preferredCommittee || isCommForGrade(preferredCommittee, 10)) && <option value="10">Grade 10</option>}
+                      <option value="10" disabled>Grade 10 (Closed)</option>
                     </select>
                     {fieldErrors.grade && <span className="text-error" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{fieldErrors.grade}</span>}
                   </div>
