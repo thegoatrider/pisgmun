@@ -20,7 +20,7 @@ export const Home: React.FC = () => {
     {
       icon: <MapPin size={24} style={{ color: 'var(--color-secondary)' }} />,
       title: 'Venue',
-      value: 'Nagpur Campus',
+      value: 'PIS Godhani Campus',
     },
     {
       icon: <Users size={24} style={{ color: 'var(--color-secondary)' }} />,
