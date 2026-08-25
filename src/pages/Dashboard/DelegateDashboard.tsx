@@ -869,6 +869,7 @@ export const DelegateDashboard: React.FC = () => {
         onClose={() => setIsDrawerOpen(false)}
         defaultTab={drawerDefaultTab}
         delegateReg={delegateReg}
+        delegateId={registrationId || 'guest'}
         triggerUpload={triggerUploadCount}
       />
 

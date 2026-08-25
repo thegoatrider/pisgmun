@@ -92,6 +92,7 @@ interface StudyGuidesDrawerProps {
   onClose: () => void;
   defaultTab: 'content' | 'notes';
   delegateReg: any;
+  delegateId: string;
   triggerUpload?: number;
 }
 
@@ -100,6 +101,7 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
   onClose,
   defaultTab,
   delegateReg,
+  delegateId,
   triggerUpload
 }) => {
   const [activeTab, setActiveTab] = useState<'content' | 'notes'>('content');
@@ -127,7 +129,7 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
       setActiveTab(defaultTab);
       loadSavedData();
     }
-  }, [isOpen, defaultTab]);
+  }, [isOpen, defaultTab, delegateId]);
 
   useEffect(() => {
     if (isOpen && triggerUpload && triggerUpload > 0) {
@@ -140,7 +142,7 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
     try {
       const dbFiles = await getFilesFromDB();
       const dbNotes = await getNotesFromDB();
-      const currentDelegateId = delegateReg?.id || 'guest';
+      const currentDelegateId = delegateId;
 
       // Migrate legacy notes/files that don't have a delegateId
       for (const file of dbFiles) {
@@ -185,7 +187,7 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
         name: file.name,
         type: file.type || (ext === 'pdf' ? 'application/pdf' : 'application/msword'),
         data: base64Data,
-        delegateId: delegateReg?.id || 'guest'
+        delegateId: delegateId
       };
 
       try {
@@ -258,7 +260,7 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
       title: noteTitle.trim() || 'Untitled Note',
       content: content,
       updatedAt: new Date().toISOString(),
-      delegateId: delegateReg?.id || 'guest'
+      delegateId: delegateId
     };
 
     try {
