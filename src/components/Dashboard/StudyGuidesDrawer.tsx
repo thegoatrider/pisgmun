@@ -136,18 +136,36 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
       }, 150);
     }
   }, [isOpen, triggerUpload]);
-
   const loadSavedData = async () => {
     try {
       const dbFiles = await getFilesFromDB();
       const dbNotes = await getNotesFromDB();
-      setFiles(dbFiles);
-      setNotes(dbNotes);
+      const currentDelegateId = delegateReg?.id || 'guest';
+
+      // Migrate legacy notes/files that don't have a delegateId
+      for (const file of dbFiles) {
+        if (!file.delegateId) {
+          file.delegateId = currentDelegateId;
+          await saveFileToDB(file);
+        }
+      }
+      for (const note of dbNotes) {
+        if (!note.delegateId) {
+          note.delegateId = currentDelegateId;
+          await saveNoteToDB(note);
+        }
+      }
+
+      // Filter by current delegate ID
+      const delegateFiles = dbFiles.filter((f) => f.delegateId === currentDelegateId);
+      const delegateNotes = dbNotes.filter((n) => n.delegateId === currentDelegateId);
+
+      setFiles(delegateFiles);
+      setNotes(delegateNotes);
     } catch (e) {
       console.error('Failed to load local database assets:', e);
     }
   };
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -166,7 +184,8 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
         id: `file_${Date.now()}`,
         name: file.name,
         type: file.type || (ext === 'pdf' ? 'application/pdf' : 'application/msword'),
-        data: base64Data
+        data: base64Data,
+        delegateId: delegateReg?.id || 'guest'
       };
 
       try {
@@ -238,7 +257,8 @@ export const StudyGuidesDrawer: React.FC<StudyGuidesDrawerProps> = ({
       id: activeNoteId,
       title: noteTitle.trim() || 'Untitled Note',
       content: content,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      delegateId: delegateReg?.id || 'guest'
     };
 
     try {
