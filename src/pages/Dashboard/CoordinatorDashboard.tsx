@@ -565,6 +565,61 @@ export const CoordinatorDashboard: React.FC = () => {
     }
   };
 
+  // Change allocated committee and adjust country portfolio
+  const handleUpdateCommittee = async (reg: Registration, newComm: string) => {
+    if (!reg || !newComm) return;
+    if (reg.committee === newComm) return;
+
+    if (!window.confirm(`Are you sure you want to change ${reg.name}'s committee from ${reg.committee.toUpperCase()} to ${newComm.toUpperCase()}? This will release their currently assigned country portfolio.`)) {
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      // 1. Release old country allocation if allocated
+      if (reg.committee !== 'NOT ASSIGNED' && reg.assigned_country !== 'NOT ASSIGNED') {
+        const oldCountryObj = countries.find(
+          (c) =>
+            c.committee_id.toLowerCase() === reg.committee.toLowerCase() &&
+            c.country_name.toLowerCase() === reg.assigned_country.toLowerCase()
+        );
+        if (oldCountryObj) {
+          await API.updateCountry(oldCountryObj.id, { assigned_to: null, available: true });
+        }
+      }
+
+      // 2. Find first available country in the new committee
+      const newCountryObj = countries.find(
+        (c) =>
+          c.committee_id.toLowerCase() === newComm.toLowerCase() &&
+          (!c.assigned_to || c.assigned_to === '') &&
+          c.available !== false
+      );
+
+      const newCountry = newCountryObj ? newCountryObj.country_name : 'NOT ASSIGNED';
+
+      // 3. Update the Registration table
+      await API.updateRegistration(reg.id, {
+        committee: newComm,
+        assigned_country: newCountry,
+      });
+
+      // 4. Lock new country in database if assigned
+      if (newCountryObj) {
+        await API.updateCountry(newCountryObj.id, { assigned_to: reg.id, available: false });
+      }
+
+      alert(`Committee changed successfully! Assigned country: ${newCountry}`);
+      setIsAllocationModalOpen(false);
+      setSelectedReg(null);
+      await refreshData();
+    } catch (err: any) {
+      alert(`Failed to change committee: ${err.message}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   // 6. Reject Application
   const handleRejectRegistration = async (reg: Registration) => {
     if (!window.confirm(`Are you sure you want to REJECT ${reg.name}'s registration?`)) return;
@@ -2361,6 +2416,31 @@ export const CoordinatorDashboard: React.FC = () => {
                 )}
               </div>
             </Card>
+
+            {/* REALLOCATE COMMITTEE (ONLY IF APPROVED) */}
+            {selectedReg.status === 'APPROVED' && (
+              <Card style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', padding: '1.25rem' }}>
+                <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.92rem', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Reallocate Committee
+                </h4>
+                <p style={{ fontSize: '0.88rem', margin: '0 0 1rem 0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                  Select a new committee to assign. This will release their currently assigned country and assign a new available country in the chosen committee.
+                </p>
+                <select
+                  value={selectedReg.committee}
+                  onChange={(e) => handleUpdateCommittee(selectedReg, e.target.value)}
+                  disabled={isActionLoading}
+                  className="form-control"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
+                >
+                  {committees.map((comm) => (
+                    <option key={comm.id} value={comm.id}>
+                      {comm.name} ({comm.id.toUpperCase()})
+                    </option>
+                  ))}
+                </select>
+              </Card>
+            )}
 
             {/* Reject & Delete Danger Zones */}
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
