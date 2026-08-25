@@ -1182,27 +1182,13 @@ def api_register():
     # Prevent duplicate registration with same email or phone number
     regs = db_get_registrations()
 
-    # 1. Stop all registrations tomorrow midnight (End of August 25, 2026 at 23:59:59 IST)
+    # 1. Stop all registrations tonight midnight (End of August 25, 2026 at 23:59:59 IST)
     from datetime import datetime, timezone, timedelta
     ist_tz = timezone(timedelta(hours=5, minutes=30))
     now_ist = datetime.now(ist_tz)
     closing_time = datetime(2026, 8, 25, 23, 59, 59, tzinfo=ist_tz)
     if now_ist > closing_time:
         return jsonify({"error": "Registrations for PISGMUN 2026 are now closed."}), 400
-
-    # 2. Stop Grade 10 registrations immediately
-    try:
-        grade_num = int(grade)
-    except (ValueError, TypeError):
-        return jsonify({"error": "Invalid grade specified."}), 400
-
-    if grade_num == 10:
-        return jsonify({"error": "Registrations for Grade 10 are now closed."}), 400
-
-    # 3. Keep registrations open for other grades (7, 8, 9) until they reach 30
-    grade_regs_count = sum(1 for r in regs if int(r.get('grade', 0)) == grade_num)
-    if grade_regs_count >= 30:
-        return jsonify({"error": f"Registrations for Grade {grade_num} are now closed as it has reached the capacity limit of 30 delegates."}), 400
 
     if any(r.get('email', '').strip().lower() == email.lower() for r in regs):
         return jsonify({"error": "A delegate registration with this email already exists. If you have already registered, please use your existing Registration ID to access the portal."}), 400
