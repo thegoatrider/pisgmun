@@ -1046,10 +1046,10 @@ export const CoordinatorDashboard: React.FC = () => {
   const approvedCount = registrations.filter((r) => r.status === 'APPROVED').length;
   const pendingCount = registrations.filter((r) => r.status === 'PENDING' || r.status === 'NOT ASSIGNED').length;
 
-  const grade7Count = registrations.filter((r) => r.grade === 7).length;
-  const grade8Count = registrations.filter((r) => r.grade === 8).length;
-  const grade9Count = registrations.filter((r) => r.grade === 9).length;
-  const grade10Count = registrations.filter((r) => r.grade === 10).length;
+  const grade7Count = registrations.filter((r) => r.grade === 7 && r.status === 'APPROVED').length;
+  const grade8Count = registrations.filter((r) => r.grade === 8 && r.status === 'APPROVED').length;
+  const grade9Count = registrations.filter((r) => r.grade === 9 && r.status === 'APPROVED').length;
+  const grade10Count = registrations.filter((r) => r.grade === 10 && r.status === 'APPROVED').length;
 
 
 
