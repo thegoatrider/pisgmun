@@ -720,6 +720,63 @@ export const CoordinatorDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // CSV Exporter for approved registrations only
+  const handleExportApprovedCSV = () => {
+    const approvedRegs = registrations.filter((r) => r.status === 'APPROVED');
+    if (approvedRegs.length === 0) {
+      alert('No approved registrations available to export.');
+      return;
+    }
+
+    const headers = [
+      'Registration ID',
+      'Full Name',
+      'Grade',
+      'Section',
+      'School',
+      'Email',
+      'Phone',
+      'Portfolio Preference',
+      'MUN Experience',
+      'Preferred Committee',
+      'Country Preference',
+      'Assigned Committee',
+      'Assigned Country',
+      'Status'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...approvedRegs.map((r) =>
+        [
+          r.id,
+          `"${r.name.replace(/"/g, '""')}"`,
+          r.grade,
+          r.section,
+          `"${r.school.replace(/"/g, '""')}"`,
+          r.email,
+          r.phone,
+          r.portfolio_preference,
+          `"${(r.mun_experience || 'First time delegate').replace(/"/g, '""')}"`,
+          r.preferred_committee,
+          `"${r.country_preferences.join('; ')}"`,
+          r.committee,
+          r.assigned_country,
+          r.status
+        ].join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'PISGMUN_Approved_Delegates.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Roster filtering logic
   const filteredRegs = registrations.filter((r) => {
     const matchesSearch =
@@ -975,6 +1032,9 @@ export const CoordinatorDashboard: React.FC = () => {
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <Button variant="outline" size="sm" onClick={handleExportAllCSV}>
             <Download size={14} /> Export All CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportApprovedCSV}>
+            <Download size={14} /> Export Approved Only
           </Button>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut size={14} /> Logout
