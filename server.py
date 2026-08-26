@@ -1056,6 +1056,51 @@ def api_update_passwords():
         return jsonify({"success": True})
     return jsonify({"error": "Failed to update security passwords."}), 500
 
+@app.route('/api/maintenance/reset-registrations', methods=['POST'])
+def api_reset_registrations():
+    payload = request.json or {}
+    secret = payload.get('secret')
+    if secret != 'nagpur2026':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    regs = db_get_registrations()
+    countries = db_get_countries()
+
+    reset_count = 0
+    for r in regs:
+        should_reset = False
+        try:
+            grade_num = int(r.get('grade'))
+        except (ValueError, TypeError):
+            grade_num = 0
+        pref_comm = (r.get('preferred_committee') or '').strip().lower()
+
+        # Grade 10 check
+        if grade_num == 10:
+            should_reset = True
+        # Grade 9 who preferred ECOSOC or UNICEF
+        elif grade_num == 9 and pref_comm in ('ecosoc', 'unicef'):
+            should_reset = True
+
+        if should_reset and r.get('status') == 'APPROVED':
+            # Release country allocation
+            curr_comm = r.get('committee')
+            curr_country = r.get('assigned_country')
+            if curr_comm and curr_comm != 'NOT ASSIGNED' and curr_country and curr_country != 'NOT ASSIGNED':
+                country_obj = next((c for c in countries if c["committee_id"].lower() == curr_comm.lower() and c["country_name"].lower() == curr_country.lower()), None)
+                if country_obj:
+                    db_update_country(country_obj["id"], {"assigned_to": None, "available": True})
+            
+            # Reset registration status to NOT ASSIGNED/PENDING
+            db_update_registration(r["id"], {
+                "committee": "NOT ASSIGNED",
+                "assigned_country": "NOT ASSIGNED",
+                "status": "PENDING"
+            })
+            reset_count += 1
+
+    return jsonify({"success": True, "reset_count": reset_count})
+
 @app.route('/api/config', methods=['GET', 'POST'])
 def api_config():
     if request.method == 'GET':

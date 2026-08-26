@@ -28,11 +28,11 @@ export const CoordinatorDashboard: React.FC = () => {
   const [gradeFilter, setGradeFilter] = useState('ALL');
   const [committeeFilter, setCommitteeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-
   // Selected Delegate for Modal
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
-
+  const [reallocComm, setReallocComm] = useState<string>('');
+  const [reallocCountry, setReallocCountry] = useState<string>('');
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [selectedRegIds, setSelectedRegIds] = useState<string[]>([]);
   const [emailSendingMap, setEmailSendingMap] = useState<Record<string, boolean>>({});
@@ -506,6 +506,8 @@ export const CoordinatorDashboard: React.FC = () => {
   // 4. Open allocation details modal
   const handleOpenAllocation = (reg: Registration) => {
     setSelectedReg(reg);
+    setReallocComm(reg.committee || reg.preferred_committee || '');
+    setReallocCountry(reg.assigned_country || 'NOT ASSIGNED');
     setIsAllocationModalOpen(true);
   };
 
@@ -565,18 +567,21 @@ export const CoordinatorDashboard: React.FC = () => {
     }
   };
 
-  // Change allocated committee and adjust country portfolio
-  const handleUpdateCommittee = async (reg: Registration, newComm: string) => {
-    if (!reg || !newComm) return;
-    if (reg.committee === newComm) return;
+  // Reallocate delegate to selected committee and country
+  const handleSaveReallocation = async (reg: Registration, newComm: string, newCountry: string) => {
+    if (!reg || !newComm || !newCountry) return;
+    if (reg.committee === newComm && reg.assigned_country === newCountry) {
+      alert('No changes detected.');
+      return;
+    }
 
-    if (!window.confirm(`Are you sure you want to change ${reg.name}'s committee from ${reg.committee.toUpperCase()} to ${newComm.toUpperCase()}? This will release their currently assigned country portfolio.`)) {
+    if (!window.confirm(`Are you sure you want to reallocate ${reg.name} to committee ${newComm.toUpperCase()} and country ${newCountry.toUpperCase()}?`)) {
       return;
     }
 
     setIsActionLoading(true);
     try {
-      // 1. Release old country allocation if allocated
+      // 1. Release old country allocation if previously allocated
       if (reg.committee !== 'NOT ASSIGNED' && reg.assigned_country !== 'NOT ASSIGNED') {
         const oldCountryObj = countries.find(
           (c) =>
@@ -588,33 +593,30 @@ export const CoordinatorDashboard: React.FC = () => {
         }
       }
 
-      // 2. Find first available country in the new committee
-      const newCountryObj = countries.find(
-        (c) =>
-          c.committee_id.toLowerCase() === newComm.toLowerCase() &&
-          (!c.assigned_to || c.assigned_to === '') &&
-          c.available !== false
-      );
-
-      const newCountry = newCountryObj ? newCountryObj.country_name : 'NOT ASSIGNED';
-
-      // 3. Update the Registration table
+      // 2. Update the Registration table
       await API.updateRegistration(reg.id, {
         committee: newComm,
         assigned_country: newCountry,
       });
 
-      // 4. Lock new country in database if assigned
-      if (newCountryObj) {
-        await API.updateCountry(newCountryObj.id, { assigned_to: reg.id, available: false });
+      // 3. Lock new country allocation if assigned and not 'NOT ASSIGNED'
+      if (newCountry !== 'NOT ASSIGNED') {
+        const newCountryObj = countries.find(
+          (c) =>
+            c.committee_id.toLowerCase() === newComm.toLowerCase() &&
+            c.country_name.toLowerCase() === newCountry.toLowerCase()
+        );
+        if (newCountryObj) {
+          await API.updateCountry(newCountryObj.id, { assigned_to: reg.id, available: false });
+        }
       }
 
-      alert(`Committee changed successfully! Assigned country: ${newCountry}`);
+      alert('Delegate reallocated successfully!');
       setIsAllocationModalOpen(false);
       setSelectedReg(null);
       await refreshData();
     } catch (err: any) {
-      alert(`Failed to change committee: ${err.message}`);
+      alert(`Failed to reallocate delegate: ${err.message}`);
     } finally {
       setIsActionLoading(false);
     }
@@ -2421,24 +2423,93 @@ export const CoordinatorDashboard: React.FC = () => {
             {selectedReg.status === 'APPROVED' && (
               <Card style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', padding: '1.25rem' }}>
                 <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.92rem', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Reallocate Committee
+                  Reallocate Portfolio
                 </h4>
-                <p style={{ fontSize: '0.88rem', margin: '0 0 1rem 0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
-                  Select a new committee to assign. This will release their currently assigned country and assign a new available country in the chosen committee.
+                <p style={{ fontSize: '0.88rem', margin: '0 0 1.25rem 0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                  Choose a new committee and country to reassign this delegate. Available countries will update dynamically based on the selected committee.
                 </p>
-                <select
-                  value={selectedReg.committee}
-                  onChange={(e) => handleUpdateCommittee(selectedReg, e.target.value)}
-                  disabled={isActionLoading}
-                  className="form-control"
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
-                >
-                  {committees.map((comm) => (
-                    <option key={comm.id} value={comm.id}>
-                      {comm.name} ({comm.id.toUpperCase()})
-                    </option>
-                  ))}
-                </select>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: '0.35rem', display: 'block' }}>
+                      Committee:
+                    </label>
+                    <select
+                      value={reallocComm}
+                      onChange={(e) => {
+                        const newComm = e.target.value;
+                        setReallocComm(newComm);
+                        // Default to the first available country in the new committee
+                        const firstAvail = countries.find(
+                          (c) =>
+                            c.committee_id.toLowerCase() === newComm.toLowerCase() &&
+                            (!c.assigned_to || c.assigned_to === '') &&
+                            c.available !== false
+                        );
+                        setReallocCountry(firstAvail ? firstAvail.country_name : 'NOT ASSIGNED');
+                      }}
+                      disabled={isActionLoading}
+                      className="form-control"
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
+                    >
+                      {committees.map((comm) => (
+                        <option key={comm.id} value={comm.id}>
+                          {comm.name} ({comm.id.toUpperCase()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: '0.35rem', display: 'block' }}>
+                      Country Portfolio:
+                    </label>
+                    <select
+                      value={reallocCountry}
+                      onChange={(e) => setReallocCountry(e.target.value)}
+                      disabled={isActionLoading}
+                      className="form-control"
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
+                    >
+                      {/* If the selected committee matches their current committee and they have an assigned country, show it */}
+                      {selectedReg.committee.toLowerCase() === reallocComm.toLowerCase() &&
+                        selectedReg.assigned_country !== 'NOT ASSIGNED' && (
+                          <option value={selectedReg.assigned_country}>
+                            {selectedReg.assigned_country} (Current)
+                          </option>
+                        )}
+                      {/* Show other available countries */}
+                      {countries
+                        .filter(
+                          (c) =>
+                            c.committee_id.toLowerCase() === reallocComm.toLowerCase() &&
+                            (!c.assigned_to || c.assigned_to === '' || c.assigned_to === selectedReg.id) &&
+                            c.available !== false
+                        )
+                        .filter(
+                          (c) =>
+                            selectedReg.committee.toLowerCase() !== reallocComm.toLowerCase() ||
+                            c.country_name.toLowerCase() !== selectedReg.assigned_country.toLowerCase()
+                        )
+                        .map((c) => (
+                          <option key={c.id} value={c.country_name}>
+                            {c.country_name}
+                          </option>
+                        ))}
+                      <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+                    </select>
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleSaveReallocation(selectedReg, reallocComm, reallocCountry)}
+                    loading={isActionLoading}
+                    style={{ marginTop: '0.5rem' }}
+                  >
+                    Save Reallocation
+                  </Button>
+                </div>
               </Card>
             )}
 
