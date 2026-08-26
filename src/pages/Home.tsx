@@ -3,9 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, Calendar, MapPin, Users, BookOpen, Globe2, Award, Users2, SearchCode, Milestone, ArrowRight } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { Button } from '../components/UI/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { config } = useAuth();
+
+  const isRegistrationClosed = () => {
+    if (config?.registration_status === 'CLOSED') return true;
+    if (config?.deadline) {
+      const deadlineDate = new Date(config.deadline);
+      const now = new Date();
+      if (now > deadlineDate) return true;
+    }
+    return false;
+  };
 
   const handleGateRedirect = (role: string) => {
     navigate(`/login?role=${role}`);
@@ -149,10 +161,27 @@ export const Home: React.FC = () => {
             </p>
 
             <div>
-              <Button variant="primary" size="lg" onClick={() => navigate('/register')} style={{ boxShadow: 'var(--shadow-md)' }}>
-                Register for PMUN 2026
-                <ArrowRight size={16} />
-              </Button>
+              {isRegistrationClosed() ? (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  color: 'var(--color-error)',
+                  padding: '0.75rem 1.25rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  border: '1px solid var(--color-error)'
+                }}>
+                  Registrations are Closed
+                </div>
+              ) : (
+                <Button variant="primary" size="lg" onClick={() => navigate('/register')} style={{ boxShadow: 'var(--shadow-md)' }}>
+                  Register for PMUN 2026
+                  <ArrowRight size={16} />
+                </Button>
+              )}
             </div>
           </div>
         </div>

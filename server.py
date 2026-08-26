@@ -1155,6 +1155,8 @@ def api_registrations():
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
+    return jsonify({"error": "Registrations for PISGMUN 2026 are now closed."}), 400
+
     payload = request.json or {}
     
     # Server-side input validation schema

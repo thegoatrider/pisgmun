@@ -5,12 +5,12 @@ import { API, type Registration } from '../services/api';
 import { Card } from '../components/UI/Card';
 import { Input } from '../components/UI/Input';
 import { Button } from '../components/UI/Button';
-import { User, Globe, FileCheck, ArrowLeft, ArrowRight, Save, Search } from 'lucide-react';
+import { User, Globe, FileCheck, ArrowLeft, ArrowRight, Save, Search, Lock } from 'lucide-react';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { committees, countries, refreshData } = useAuth();
+  const { committees, countries, refreshData, config } = useAuth();
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -192,6 +192,54 @@ export const Register: React.FC = () => {
   const totalCommitteeCountries = countries.filter(
     (c) => c.committee_id.toLowerCase() === preferredCommittee.toLowerCase()
   ).length;
+
+  const isRegistrationClosed = () => {
+    if (config?.registration_status === 'CLOSED') return true;
+    if (config?.deadline) {
+      const deadlineDate = new Date(config.deadline);
+      const now = new Date();
+      if (now > deadlineDate) return true;
+    }
+    return false;
+  };
+
+  if (isRegistrationClosed()) {
+    return (
+      <div style={{
+        backgroundColor: 'var(--color-bg-main)',
+        padding: '4rem 1.5rem',
+        minHeight: 'calc(100vh - 70px - 340px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <Card style={{ width: '100%', maxWidth: '500px', textAlign: 'center', padding: '3rem 2rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            color: 'var(--color-error)',
+            marginBottom: '1.5rem'
+          }}>
+            <Lock size={32} />
+          </div>
+          <h2 style={{ color: 'var(--color-primary)', fontSize: '1.75rem', margin: '0 0 1rem 0' }}>
+            Registrations are Closed
+          </h2>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 2rem 0' }}>
+            Registrations for PISGMUN 2026 Nagpur Godhani have ended. If you have already registered, you can log in to your dashboard to view your portfolio assignment and study materials.
+          </p>
+          <Button onClick={() => navigate('/login')} style={{ width: '100%' }}>
+            Go to Login
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div
