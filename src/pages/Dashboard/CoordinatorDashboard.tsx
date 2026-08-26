@@ -506,33 +506,61 @@ export const CoordinatorDashboard: React.FC = () => {
   // 4. Open allocation details modal
   const handleOpenAllocation = (reg: Registration) => {
     setSelectedReg(reg);
-    setReallocComm(reg.committee || reg.preferred_committee || '');
-    setReallocCountry(reg.assigned_country || 'NOT ASSIGNED');
+    
+    // For Grade 10, force UNICEF committee
+    const isGrade10 = reg.grade === 10;
+    const initialComm = isGrade10 ? 'unicef' : (reg.committee && reg.committee !== 'NOT ASSIGNED' ? reg.committee : (reg.preferred_committee || ''));
+    
+    setReallocComm(initialComm);
+    
+    // Determine initial country selection
+    let initialCountry = 'NOT ASSIGNED';
+    if (reg.assigned_country && reg.assigned_country !== 'NOT ASSIGNED') {
+      initialCountry = reg.assigned_country;
+    } else {
+      // For pending registration, default to their first preferred country choice if available
+      const prefCountry = reg.country_preferences && reg.country_preferences[0];
+      const isPrefAvail = prefCountry && countries.some(
+        (c) =>
+          c.committee_id.toLowerCase() === initialComm.toLowerCase() &&
+          c.country_name.toLowerCase() === prefCountry.toLowerCase() &&
+          (!c.assigned_to || c.assigned_to === '') &&
+          c.available !== false
+      );
+      if (isPrefAvail) {
+        initialCountry = prefCountry;
+      } else {
+        const firstAvail = countries.find(
+          (c) =>
+            c.committee_id.toLowerCase() === initialComm.toLowerCase() &&
+            (!c.assigned_to || c.assigned_to === '') &&
+            c.available !== false
+        );
+        initialCountry = firstAvail ? firstAvail.country_name : 'NOT ASSIGNED';
+      }
+    }
+    setReallocCountry(initialCountry);
+    
     setIsAllocationModalOpen(true);
   };
 
   // 5. Approve Delegate Registration
-  const handleApproveRegistration = async (reg: Registration) => {
-    if (!reg) return;
-    const prefComm = reg.preferred_committee;
-    const prefCountry = reg.country_preferences && reg.country_preferences[0];
-
-    if (!prefComm || !prefCountry) {
-      alert('Missing preferred committee or country for this candidate.');
-      return;
-    }
+  const handleApproveRegistration = async (reg: Registration, selectedComm: string, selectedCountry: string) => {
+    if (!reg || !selectedComm || !selectedCountry) return;
 
     // Check if the country is already taken by someone else
-    const isTaken = countries.some(
-      (c) =>
-        c.committee_id.toLowerCase() === prefComm.toLowerCase() &&
-        c.country_name.toLowerCase() === prefCountry.toLowerCase() &&
-        c.assigned_to &&
-        c.assigned_to !== reg.id
-    );
-    if (isTaken) {
-      alert(`The preferred country '${prefCountry}' in '${prefComm.toUpperCase()}' is already taken by another approved delegate.`);
-      return;
+    if (selectedCountry !== 'NOT ASSIGNED') {
+      const isTaken = countries.some(
+        (c) =>
+          c.committee_id.toLowerCase() === selectedComm.toLowerCase() &&
+          c.country_name.toLowerCase() === selectedCountry.toLowerCase() &&
+          c.assigned_to &&
+          c.assigned_to !== reg.id
+      );
+      if (isTaken) {
+        alert(`The country '${selectedCountry}' in '${selectedComm.toUpperCase()}' is already taken by another approved delegate.`);
+        return;
+      }
     }
 
     if (!window.confirm(`Are you sure you want to APPROVE ${reg.name}'s registration?`)) return;
@@ -541,19 +569,21 @@ export const CoordinatorDashboard: React.FC = () => {
     try {
       // 1. Update Registration Table
       await API.updateRegistration(reg.id, {
-        committee: prefComm,
-        assigned_country: prefCountry,
+        committee: selectedComm,
+        assigned_country: selectedCountry,
         status: 'APPROVED',
       });
 
       // 2. Lock country in database
-      const countryObj = countries.find(
-        (c) =>
-          c.committee_id.toLowerCase() === prefComm.toLowerCase() &&
-          c.country_name.toLowerCase() === prefCountry.toLowerCase()
-      );
-      if (countryObj) {
-        await API.updateCountry(countryObj.id, { assigned_to: reg.id, available: false });
+      if (selectedCountry !== 'NOT ASSIGNED') {
+        const countryObj = countries.find(
+          (c) =>
+            c.committee_id.toLowerCase() === selectedComm.toLowerCase() &&
+            c.country_name.toLowerCase() === selectedCountry.toLowerCase()
+        );
+        if (countryObj) {
+          await API.updateCountry(countryObj.id, { assigned_to: reg.id, available: false });
+        }
       }
 
       alert('Registration approved successfully!');
@@ -2390,36 +2420,103 @@ export const CoordinatorDashboard: React.FC = () => {
                 Registration Decision
               </h4>
 
-              <p style={{ fontSize: '0.88rem', margin: '0 0 1.25rem 0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
-                Approve or reject this registration. Approving will automatically assign their preferred committee (<strong>{(selectedReg.preferred_committee || '').toUpperCase()}</strong>) and country (<strong>{selectedReg.country_preferences && selectedReg.country_preferences[0]}</strong>).
-              </p>
+              {selectedReg.status !== 'APPROVED' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <p style={{ fontSize: '0.88rem', margin: '0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                    Select the committee and country portfolio to assign. Approving will register this candidate and lock the chosen country.
+                  </p>
 
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                {selectedReg.status !== 'APPROVED' ? (
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: '0.35rem', display: 'block' }}>
+                      Committee:
+                    </label>
+                    <select
+                      value={reallocComm}
+                      onChange={(e) => {
+                        const newComm = e.target.value;
+                        setReallocComm(newComm);
+                        // Default to the first available country in the new committee
+                        const firstAvail = countries.find(
+                          (c) =>
+                            c.committee_id.toLowerCase() === newComm.toLowerCase() &&
+                            (!c.assigned_to || c.assigned_to === '') &&
+                            c.available !== false
+                        );
+                        setReallocCountry(firstAvail ? firstAvail.country_name : 'NOT ASSIGNED');
+                      }}
+                      disabled={isActionLoading || selectedReg.grade === 10}
+                      className="form-control"
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
+                    >
+                      {selectedReg.grade === 10 ? (
+                        <option value="unicef">UNICEF (Grade 10 restricted)</option>
+                      ) : (
+                        committees.map((comm) => (
+                          <option key={comm.id} value={comm.id}>
+                            {comm.name} ({comm.id.toUpperCase()})
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: '0.35rem', display: 'block' }}>
+                      Country Portfolio:
+                    </label>
+                    <select
+                      value={reallocCountry}
+                      onChange={(e) => setReallocCountry(e.target.value)}
+                      disabled={isActionLoading}
+                      className="form-control"
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
+                    >
+                      {/* Show other available countries */}
+                      {countries
+                        .filter(
+                          (c) =>
+                            c.committee_id.toLowerCase() === reallocComm.toLowerCase() &&
+                            (!c.assigned_to || c.assigned_to === '' || c.assigned_to === selectedReg.id) &&
+                            c.available !== false
+                        )
+                        .map((c) => (
+                          <option key={c.id} value={c.country_name}>
+                            {c.country_name}
+                          </option>
+                        ))}
+                      <option value="NOT ASSIGNED">NOT ASSIGNED</option>
+                    </select>
+                  </div>
+
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => handleApproveRegistration(selectedReg)}
+                    onClick={() => handleApproveRegistration(selectedReg, reallocComm, reallocCountry)}
                     loading={isActionLoading}
-                    style={{ flex: 1 }}
+                    style={{ width: '100%' }}
                   >
                     <CheckCircle size={14} /> Approve Registration
                   </Button>
-                ) : (
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <p style={{ fontSize: '0.88rem', margin: '0', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                    This registration has been approved. You can revoke their approval to release the country slot and return them to the pending queue.
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleRevokeAllocation(selectedReg)}
                     loading={isActionLoading}
-                    style={{ flex: 1, color: 'var(--color-warning)', borderColor: 'var(--color-warning)' }}
+                    style={{ width: '100%', color: 'var(--color-warning)', borderColor: 'var(--color-warning)' }}
                   >
                     <XCircle size={14} /> Revoke Approval
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </Card>
 
-            {/* REALLOCATE COMMITTEE (ONLY IF APPROVED) */}
+            {/* REALLOCATE PORTFOLIO (ONLY IF APPROVED) */}
             {selectedReg.status === 'APPROVED' && (
               <Card style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', padding: '1.25rem' }}>
                 <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.92rem', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -2448,15 +2545,19 @@ export const CoordinatorDashboard: React.FC = () => {
                         );
                         setReallocCountry(firstAvail ? firstAvail.country_name : 'NOT ASSIGNED');
                       }}
-                      disabled={isActionLoading}
+                      disabled={isActionLoading || selectedReg.grade === 10}
                       className="form-control"
                       style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
                     >
-                      {committees.map((comm) => (
-                        <option key={comm.id} value={comm.id}>
-                          {comm.name} ({comm.id.toUpperCase()})
-                        </option>
-                      ))}
+                      {selectedReg.grade === 10 ? (
+                        <option value="unicef">UNICEF (Grade 10 restricted)</option>
+                      ) : (
+                        committees.map((comm) => (
+                          <option key={comm.id} value={comm.id}>
+                            {comm.name} ({comm.id.toUpperCase()})
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
 
