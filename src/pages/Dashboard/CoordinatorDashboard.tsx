@@ -507,9 +507,16 @@ export const CoordinatorDashboard: React.FC = () => {
   const handleOpenAllocation = (reg: Registration) => {
     setSelectedReg(reg);
     
-    // For Grade 10, force UNICEF committee
+    // For Grade 10, default to UNICEF committee. For Grade 9, default to UNHRC.
     const isGrade10 = reg.grade === 10;
-    const initialComm = isGrade10 ? 'unicef' : (reg.committee && reg.committee !== 'NOT ASSIGNED' ? reg.committee : (reg.preferred_committee || ''));
+    const isGrade9 = reg.grade === 9;
+    const initialComm = isGrade10
+      ? 'unicef'
+      : isGrade9
+      ? 'unhrc'
+      : reg.committee && reg.committee !== 'NOT ASSIGNED'
+      ? reg.committee
+      : reg.preferred_committee || '';
     
     setReallocComm(initialComm);
     
