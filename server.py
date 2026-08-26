@@ -1069,68 +1069,6 @@ def api_update_passwords():
         return jsonify({"success": True})
     return jsonify({"error": "Failed to update security passwords."}), 500
 
-@app.route('/api/maintenance/reset-fao', methods=['POST'])
-def api_reset_fao():
-    payload = request.json or {}
-    secret = payload.get('secret')
-    if secret != 'nagpur2026':
-        return jsonify({"error": "Unauthorized"}), 403
-
-    regs = db_get_registrations()
-    countries = db_get_countries()
-
-    # 1. Reset Grade 7 and 8 approved delegates in FAO
-    reset_count = 0
-    for r in regs:
-        try:
-            grade_num = int(r.get('grade'))
-        except (ValueError, TypeError):
-            grade_num = 0
-        curr_comm = (r.get('committee') or '').strip().lower()
-
-        if grade_num in (7, 8) and curr_comm == 'fao' and r.get('status') == 'APPROVED':
-            # Release country allocation
-            curr_country = r.get('assigned_country')
-            if curr_country and curr_country != 'NOT ASSIGNED':
-                country_obj = next((c for c in countries if c["committee_id"].lower() == 'fao' and c["country_name"].lower() == curr_country.lower()), None)
-                if country_obj:
-                    db_update_country(country_obj["id"], {"assigned_to": None, "available": True})
-            
-            # Reset registration
-            db_update_registration(r["id"], {
-                "committee": "NOT ASSIGNED",
-                "assigned_country": "NOT ASSIGNED",
-                "status": "PENDING",
-                "preferred_committee": "un-women",
-                "country_preferences": ["NOT ASSIGNED"]
-            })
-            reset_count += 1
-
-    # 2. Add 6 new countries to UN-Women
-    new_names = ["United Kingdom", "Netherlands", "Italy", "Spain", "Belgium", "Austria"]
-    added_count = 0
-
-    unwomen_country_names = [c["country_name"].lower() for c in countries if c["committee_id"].lower() == "un-women"]
-
-    for name in new_names:
-        if name.lower() not in unwomen_country_names:
-            country_data = {
-                "committee_id": "un-women",
-                "country_name": name,
-                "category": "Feminist foreign policy / donor nations",
-                "available": True,
-                "assigned_to": None,
-                "preference_count": 0
-            }
-            if db_insert_country(country_data):
-                added_count += 1
-
-    return jsonify({
-        "success": True,
-        "reset_count": reset_count,
-        "added_countries_count": added_count
-    })
-
 @app.route('/api/config', methods=['GET', 'POST'])
 def api_config():
     if request.method == 'GET':
