@@ -1076,7 +1076,7 @@ def api_add_unicef_countries():
     if secret != 'nagpur2026':
         return jsonify({"error": "Unauthorized"}), 403
 
-    new_names = ["United Kingdom", "Netherlands", "Italy", "Spain"]
+    new_names = ["United Kingdom", "Netherlands", "Italy", "Spain", "Belgium", "Austria", "Finland"]
     added_count = 0
 
     current_countries = db_get_countries()
