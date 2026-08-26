@@ -1069,35 +1069,6 @@ def api_update_passwords():
         return jsonify({"success": True})
     return jsonify({"error": "Failed to update security passwords."}), 500
 
-@app.route('/api/maintenance/add-unicef-countries', methods=['POST'])
-def api_add_unicef_countries():
-    payload = request.json or {}
-    secret = payload.get('secret')
-    if secret != 'nagpur2026':
-        return jsonify({"error": "Unauthorized"}), 403
-
-    new_names = ["United Kingdom", "Netherlands", "Italy", "Spain", "Belgium", "Austria", "Finland"]
-    added_count = 0
-
-    current_countries = db_get_countries()
-    unicef_country_names = [c["country_name"].lower() for c in current_countries if c["committee_id"].lower() == "unicef"]
-
-    for name in new_names:
-        if name.lower() not in unicef_country_names:
-            category = "Major donor countries"
-            country_data = {
-                "committee_id": "unicef",
-                "country_name": name,
-                "category": category,
-                "available": True,
-                "assigned_to": None,
-                "preference_count": 0
-            }
-            if db_insert_country(country_data):
-                added_count += 1
-
-    return jsonify({"success": True, "added_count": added_count})
-
 @app.route('/api/config', methods=['GET', 'POST'])
 def api_config():
     if request.method == 'GET':
