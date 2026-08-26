@@ -1408,32 +1408,6 @@ def api_coordinator_send_confirmation(reg_id):
         return jsonify({"error": f"Failed to send confirmation email: {err_msg}"}), 500
 
 
-@app.route('/api/maintenance/delete-fao-ecosoc', methods=['POST'])
-def api_delete_fao_ecosoc():
-    payload = request.json or {}
-    secret = payload.get('secret')
-    if secret != 'nagpur2026':
-        return jsonify({"error": "Unauthorized"}), 403
-
-    if IS_DEMO_MODE:
-        data = read_mock()
-        data["committees"] = [c for c in data["committees"] if c["id"].lower() not in ("fao", "ecosoc")]
-        data["countries"] = [c for c in data["countries"] if c["committee_id"].lower() not in ("fao", "ecosoc")]
-        write_mock(data)
-        return jsonify({"success": True, "msg": "Mock data cleaned."})
-    else:
-        comm_url = f"{SUPABASE_URL}/rest/v1/committees?id=in.(fao,ecosoc)"
-        comm_res = requests.delete(comm_url, headers=get_supabase_headers())
-        
-        count_url = f"{SUPABASE_URL}/rest/v1/countries?committee_id=in.(fao,ecosoc)"
-        count_res = requests.delete(count_url, headers=get_supabase_headers())
-        
-        return jsonify({
-            "success": True, 
-            "comm_status": comm_res.status_code, 
-            "countries_status": count_res.status_code
-        })
-
 @app.route('/api/coordinator/email-broadcast', methods=['POST'])
 @require_auth(['coordinator'])
 def api_coordinator_email_broadcast():
