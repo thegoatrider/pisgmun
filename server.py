@@ -1069,34 +1069,6 @@ def api_update_passwords():
         return jsonify({"success": True})
     return jsonify({"error": "Failed to update security passwords."}), 500
 
-@app.route('/api/maintenance/restore-fao', methods=['POST'])
-def api_restore_fao():
-    payload = request.json or {}
-    secret = payload.get('secret')
-    if secret != 'nagpur2026':
-        return jsonify({"error": "Unauthorized"}), 403
-
-    regs = db_get_registrations()
-    restore_count = 0
-
-    for r in regs:
-        try:
-            grade_num = int(r.get('grade'))
-        except (ValueError, TypeError):
-            grade_num = 0
-        status = r.get('status')
-        committee = r.get('committee')
-        preferred = r.get('preferred_committee')
-
-        # Identify the 13 delegates reset from FAO
-        if grade_num in (7, 8) and status == 'PENDING' and committee == 'NOT ASSIGNED' and preferred == 'un-women':
-            db_update_registration(r["id"], {
-                "preferred_committee": "fao"
-            })
-            restore_count += 1
-
-    return jsonify({"success": True, "restore_count": restore_count})
-
 @app.route('/api/config', methods=['GET', 'POST'])
 def api_config():
     if request.method == 'GET':
