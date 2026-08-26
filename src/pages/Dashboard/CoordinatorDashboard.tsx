@@ -2444,19 +2444,15 @@ export const CoordinatorDashboard: React.FC = () => {
                         );
                         setReallocCountry(firstAvail ? firstAvail.country_name : 'NOT ASSIGNED');
                       }}
-                      disabled={isActionLoading || selectedReg.grade === 10}
+                      disabled={isActionLoading}
                       className="form-control"
                       style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
                     >
-                      {selectedReg.grade === 10 ? (
-                        <option value="unicef">UNICEF (Grade 10 restricted)</option>
-                      ) : (
-                        committees.map((comm) => (
-                          <option key={comm.id} value={comm.id}>
-                            {comm.name} ({comm.id.toUpperCase()})
-                          </option>
-                        ))
-                      )}
+                      {committees.map((comm) => (
+                        <option key={comm.id} value={comm.id}>
+                          {comm.name} ({comm.id.toUpperCase()})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -2545,19 +2541,15 @@ export const CoordinatorDashboard: React.FC = () => {
                         );
                         setReallocCountry(firstAvail ? firstAvail.country_name : 'NOT ASSIGNED');
                       }}
-                      disabled={isActionLoading || selectedReg.grade === 10}
+                      disabled={isActionLoading}
                       className="form-control"
                       style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text)' }}
                     >
-                      {selectedReg.grade === 10 ? (
-                        <option value="unicef">UNICEF (Grade 10 restricted)</option>
-                      ) : (
-                        committees.map((comm) => (
-                          <option key={comm.id} value={comm.id}>
-                            {comm.name} ({comm.id.toUpperCase()})
-                          </option>
-                        ))
-                      )}
+                      {committees.map((comm) => (
+                        <option key={comm.id} value={comm.id}>
+                          {comm.name} ({comm.id.toUpperCase()})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
