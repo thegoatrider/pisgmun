@@ -198,12 +198,12 @@ export const InChargeDashboard: React.FC = () => {
 
   // Get committees of this grade
   const gradeCommittees = committees.filter((c) => {
-    // ECOSOC, UNICEF, UNHRC -> Grades 9-10. UNEP, UN Women, FAO -> Grades 7-8
+    // UNICEF, UNHRC -> Grades 9-10. UNEP, UN Women -> Grades 7-8
     const id = c.id.toLowerCase();
     if (inChargeGrade === 8 || inChargeGrade === 7) {
-      return ['unep', 'un-women', 'fao'].includes(id);
+      return ['unep', 'un-women'].includes(id);
     } else {
-      return ['unhrc', 'unicef', 'ecosoc'].includes(id);
+      return ['unhrc', 'unicef'].includes(id);
     }
   });
 

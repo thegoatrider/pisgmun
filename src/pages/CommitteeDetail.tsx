@@ -51,14 +51,11 @@ export const CommitteeDetail: React.FC = () => {
   const isFull = gradeRegs.length >= committee.capacity;
   const isClosed = config?.registration_status === 'CLOSED' || committee.status === 'CLOSED';
 
-  // PDF Guides mapping
   const pdfMapping: Record<string, string> = {
     unep: '/resources/unep_background_guide.pdf',
     unicef: '/resources/unicef_background_guide.pdf',
-    fao: '/resources/fao_background_guide.pdf',
     unhrc: '/resources/unhrc_background_guide.pdf',
     'un-women': '/resources/un_women_background_guide.pdf',
-    ecosoc: '/resources/fao_background_guide.pdf', // fallback
   };
   const pdfPath = pdfMapping[committee.id.toLowerCase()] || '/resources/rules_of_procedure.pdf';
 

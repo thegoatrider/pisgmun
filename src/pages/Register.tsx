@@ -32,14 +32,11 @@ export const Register: React.FC = () => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLocked, setIsLocked] = useState(false);
 
-  // Constants mapping
   const committeeGrades: Record<string, number[]> = {
     unep: [7, 8],
     'un-women': [7, 8],
-    fao: [7, 8],
     unhrc: [9, 10],
     unicef: [9, 10],
-    ecosoc: [9, 10],
   };
 
   const isCommForGrade = (commId: string, gradeNum: number) => {
@@ -426,11 +423,11 @@ export const Register: React.FC = () => {
                       style={{ borderColor: fieldErrors.preferredCommittee ? 'var(--color-error)' : undefined }}
                     >
                       <option value="">Select Committee</option>
-                      {/* Grouping by grade eligibility */}
+                       {/* Grouping by grade eligibility */}
                       {(!grade || ['7', '8'].includes(grade)) && (
                         <optgroup label="Grades 7 & 8 Committees">
                           {committees
-                            .filter((c) => ['unep', 'un-women', 'fao'].includes(c.id.toLowerCase()))
+                            .filter((c) => ['unep', 'un-women'].includes(c.id.toLowerCase()))
                             .map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -441,7 +438,7 @@ export const Register: React.FC = () => {
                       {(!grade || ['9', '10'].includes(grade)) && (
                         <optgroup label="Grades 9 & 10 Committees">
                           {committees
-                            .filter((c) => ['unhrc', 'unicef', 'ecosoc'].includes(c.id.toLowerCase()))
+                            .filter((c) => ['unhrc', 'unicef'].includes(c.id.toLowerCase()))
                             .map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}

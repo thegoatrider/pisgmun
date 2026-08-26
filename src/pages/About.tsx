@@ -31,10 +31,8 @@ export const About: React.FC = () => {
   ];
 
   const agendas = [
-    { committee: 'ECOSOC', title: 'Ensuring Transparency and Sustainability in Food Supply Chains in the Age of Online Commerce' },
     { committee: 'UN Women', title: 'Addressing Challenges to Women’s Rights and Empowerment' },
     { committee: 'UNHRC', title: 'Protecting Digital Rights during Conflicts' },
-    { committee: 'FAO', title: 'Addressing the Crisis of Food Insecurity in Conflict Areas' },
     { committee: 'UNEP', title: 'Harnessing Solar Energy for Equitable Access and Clean Air' },
     { committee: 'UNICEF', title: 'Impact of Foreign Aid Reductions on Global Child Healthcare' },
   ];

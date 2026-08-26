@@ -69,19 +69,6 @@ DB_DEFAULT_COMMITTEES = {
     "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
     "capacity": 50, "status": "OPEN"
   },
-  "fao": {
-    "id": "fao",
-    "name": "Food and Agriculture Organization (FAO)",
-    "grade": 8,
-    "description": "The FAO leads international efforts to defeat hunger and improve nutrition and food security globally in agrarian and crisis sectors.",
-    "agenda": "Addressing the Crisis of Food Insecurity in Conflict Areas",
-    "eb_chair": "Pending", "eb_vice_chair": "Pending", "eb_rapporteur": "Pending",
-    "rules": "Standard UN Rules of Procedure (RoP) apply. Logistics coordination and agrarian support policies are heavily valued.",
-    "prepare_info": "Explore food security metrics, supply disruption logistics, and relief frameworks in target conflict zones.",
-    "resources": [{"title": "FAO Background Guide 2026 (PDF)", "url": "/resources/fao_background_guide.pdf"}],
-    "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
-    "capacity": 50, "status": "OPEN"
-  },
   "unhrc": {
     "id": "unhrc",
     "name": "United Nations Human Rights Council (UNHRC)",
@@ -107,19 +94,6 @@ DB_DEFAULT_COMMITTEES = {
     "resources": [{"title": "UNICEF Background Guide 2026 (PDF)", "url": "/resources/unicef_background_guide.pdf"}],
     "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
     "capacity": 50, "status": "OPEN"
-  },
-  "ecosoc": {
-    "id": "ecosoc",
-    "name": "Economic and Social Council (ECOSOC)",
-    "grade": 10,
-    "description": "ECOSOC deals with international economic, social, cultural, and development matters. This session addresses food supply chain resilience in digital marketplaces.",
-    "agenda": "Food Supply Chains in the Age of Online Commerce",
-    "eb_chair": "Pending", "eb_vice_chair": "Pending", "eb_rapporteur": "Pending",
-    "rules": "Standard UN Rules of Procedure (RoP) apply. Formal debate consists of GSL, Moderated Caucuses, and Unmoderated Caucuses.",
-    "prepare_info": "Research global food logistics, ecommerce trade dynamics, and market pricing transparency.",
-    "resources": [{"title": "ECOSOC Background Guide 2026 (PDF)", "url": "/resources/fao_background_guide.pdf"}],
-    "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
-    "capacity": 50, "status": "OPEN"
   }
 }
 
@@ -137,7 +111,7 @@ def get_default_countries():
         "Switzerland", "New Zealand", "Singapore", "Costa Rica", "Iceland", "Sweden"
     ]
     
-    committees = ["unep", "un-women", "fao", "unhrc", "unicef", "ecosoc"]
+    committees = ["unep", "un-women", "unhrc", "unicef"]
     
     for comm in committees:
         for c in unified_list:
@@ -167,18 +141,6 @@ def get_default_countries():
                 else:
                     category = "Neutral / human rights advocates"
                     
-            elif comm == "fao":
-                if c in ["Germany", "France", "Australia", "Denmark", "Canada", "USA"]:
-                    category = "Major agricultural exporters / aid donors"
-                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
-                    category = "Agrarian nations / food security improvement areas"
-                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam", "Russia"]:
-                    category = "Major global producers / supply stakeholders"
-                elif c in ["Saudi Arabia", "UAE", "Iraq", "Japan", "Norway", "Sweden"]:
-                    category = "Net food-importing / supply challenge countries"
-                else:
-                    category = "Neutral / policy observers"
-                    
             elif comm == "unhrc":
                 if c in ["Germany", "France", "Norway", "Denmark", "Australia", "Canada", "Sweden", "USA", "Japan"]:
                     category = "Western / tech regulation advocates"
@@ -202,18 +164,6 @@ def get_default_countries():
                     category = "Aid-dependent / conflict transition zones"
                 else:
                     category = "Balancing / neutral observers"
-                    
-            elif comm == "ecosoc":
-                if c in ["Germany", "France", "Japan", "USA", "Canada", "Sweden", "Australia", "Denmark", "Norway"]:
-                    category = "Global ecommerce / digital trade giants"
-                elif c in ["Kenya", "Nigeria", "Ethiopia", "Tanzania", "Uganda", "Bangladesh"]:
-                    category = "Developing nations scaling ecommerce networks"
-                elif c in ["India", "China", "Brazil", "South Africa", "Indonesia", "Vietnam"]:
-                    category = "Emerging economies / transition logistics hubs"
-                elif c in ["Russia", "Saudi Arabia", "UAE", "Iraq"]:
-                    category = "Supply-chain vulnerable / transition economies"
-                else:
-                    category = "Neutral / regulatory standards observers"
             
             countries.append({
                 "committee_id": comm,
@@ -1457,6 +1407,32 @@ def api_coordinator_send_confirmation(reg_id):
     else:
         return jsonify({"error": f"Failed to send confirmation email: {err_msg}"}), 500
 
+
+@app.route('/api/maintenance/delete-fao-ecosoc', methods=['POST'])
+def api_delete_fao_ecosoc():
+    payload = request.json or {}
+    secret = payload.get('secret')
+    if secret != 'nagpur2026':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    if IS_DEMO_MODE:
+        data = read_mock()
+        data["committees"] = [c for c in data["committees"] if c["id"].lower() not in ("fao", "ecosoc")]
+        data["countries"] = [c for c in data["countries"] if c["committee_id"].lower() not in ("fao", "ecosoc")]
+        write_mock(data)
+        return jsonify({"success": True, "msg": "Mock data cleaned."})
+    else:
+        comm_url = f"{SUPABASE_URL}/rest/v1/committees?id=in.(fao,ecosoc)"
+        comm_res = requests.delete(comm_url, headers=get_supabase_headers())
+        
+        count_url = f"{SUPABASE_URL}/rest/v1/countries?committee_id=in.(fao,ecosoc)"
+        count_res = requests.delete(count_url, headers=get_supabase_headers())
+        
+        return jsonify({
+            "success": True, 
+            "comm_status": comm_res.status_code, 
+            "countries_status": count_res.status_code
+        })
 
 @app.route('/api/coordinator/email-broadcast', methods=['POST'])
 @require_auth(['coordinator'])

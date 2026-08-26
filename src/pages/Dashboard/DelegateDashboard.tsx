@@ -211,14 +211,11 @@ export const DelegateDashboard: React.FC = () => {
   // Find committee details
   const commObj = committees.find((c) => c.id?.toLowerCase() === targetCommId?.toLowerCase());
 
-  // PDF Guides mapping
   const pdfMapping: Record<string, string> = {
     unep: '/resources/unep_background_guide.pdf',
     unicef: '/resources/unicef_background_guide.pdf',
-    fao: '/resources/fao_background_guide.pdf',
     unhrc: '/resources/unhrc_background_guide.pdf',
     'un-women': '/resources/un_women_background_guide.pdf',
-    ecosoc: '/resources/fao_background_guide.pdf',
   };
 
   const commPdfPath = pdfMapping[targetCommId?.toLowerCase()] || '#';

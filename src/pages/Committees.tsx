@@ -11,9 +11,9 @@ export const Committees: React.FC = () => {
   const navigate = useNavigate();
 
   const getCommitteeGrades = (commId: string) => {
-    // ECOSOC, UNICEF, UNHRC -> Grades 9-10. Others (UNEP, UN Women, FAO) -> Grades 7-8
+    // UNICEF, UNHRC -> Grades 9-10. Others (UNEP, UN Women) -> Grades 7-8
     const id = commId.toLowerCase();
-    if (id === 'ecosoc' || id === 'unicef' || id === 'unhrc') {
+    if (id === 'unicef' || id === 'unhrc') {
       return 'Grades 9 • 10';
     }
     return 'Grades 7 • 8';
