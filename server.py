@@ -532,6 +532,19 @@ def db_update_country(country_id, update_data):
         res = requests.patch(url, headers=get_supabase_headers(), json=update_data)
         return res.status_code in (200, 204)
 
+def db_insert_country(country_data):
+    if IS_DEMO_MODE:
+        data = read_mock()
+        max_id = max((c["id"] for c in data["countries"]), default=0)
+        country_data["id"] = max_id + 1
+        data["countries"].append(country_data)
+        write_mock(data)
+        return True
+    else:
+        url = f"{SUPABASE_URL}/rest/v1/countries"
+        res = requests.post(url, headers=get_supabase_headers(), json=country_data)
+        return res.status_code in (200, 201, 204)
+
 def db_get_registrations():
     if IS_DEMO_MODE:
         return read_mock().get("registrations", [])
@@ -1055,6 +1068,35 @@ def api_update_passwords():
     if success:
         return jsonify({"success": True})
     return jsonify({"error": "Failed to update security passwords."}), 500
+
+@app.route('/api/maintenance/add-unicef-countries', methods=['POST'])
+def api_add_unicef_countries():
+    payload = request.json or {}
+    secret = payload.get('secret')
+    if secret != 'nagpur2026':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    new_names = ["United Kingdom", "Netherlands", "Italy", "Spain"]
+    added_count = 0
+
+    current_countries = db_get_countries()
+    unicef_country_names = [c["country_name"].lower() for c in current_countries if c["committee_id"].lower() == "unicef"]
+
+    for name in new_names:
+        if name.lower() not in unicef_country_names:
+            category = "Major donor countries"
+            country_data = {
+                "committee_id": "unicef",
+                "country_name": name,
+                "category": category,
+                "available": True,
+                "assigned_to": None,
+                "preference_count": 0
+            }
+            if db_insert_country(country_data):
+                added_count += 1
+
+    return jsonify({"success": True, "added_count": added_count})
 
 @app.route('/api/config', methods=['GET', 'POST'])
 def api_config():
