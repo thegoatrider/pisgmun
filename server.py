@@ -340,9 +340,14 @@ def db_save_config(config_val):
         return True
     else:
         url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.global_settings"
-        payload = {"key": "global_settings", "value": config_val, "updated_at": "now()"}
-        res = requests.post(url, headers=get_supabase_headers(), json=payload)
-        return res.status_code in (200, 201)
+        payload = {"value": config_val, "updated_at": "now()"}
+        res = requests.patch(url, headers=get_supabase_headers(), json=payload)
+        if res.status_code in (200, 201, 204):
+            return True
+        # Fallback to POST insert if the record doesn't exist
+        payload_full = {"key": "global_settings", "value": config_val, "updated_at": "now()"}
+        res_post = requests.post(f"{SUPABASE_URL}/rest/v1/pmun_settings", headers=get_supabase_headers(), json=payload_full)
+        return res_post.status_code in (200, 201)
 
 def db_get_passwords():
     if IS_DEMO_MODE:
@@ -362,9 +367,14 @@ def db_save_passwords(passwords_val):
         return True
     else:
         url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.passwords"
-        payload = {"key": "passwords", "value": passwords_val, "updated_at": "now()"}
-        res = requests.post(url, headers=get_supabase_headers(), json=payload)
-        return res.status_code in (200, 201)
+        payload = {"value": passwords_val, "updated_at": "now()"}
+        res = requests.patch(url, headers=get_supabase_headers(), json=payload)
+        if res.status_code in (200, 201, 204):
+            return True
+        # Fallback to POST insert if the record doesn't exist
+        payload_full = {"key": "passwords", "value": passwords_val, "updated_at": "now()"}
+        res_post = requests.post(f"{SUPABASE_URL}/rest/v1/pmun_settings", headers=get_supabase_headers(), json=payload_full)
+        return res_post.status_code in (200, 201)
 
 def db_get_position_papers():
     if IS_DEMO_MODE:
