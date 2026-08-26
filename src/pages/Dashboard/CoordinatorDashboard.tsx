@@ -571,6 +571,8 @@ export const CoordinatorDashboard: React.FC = () => {
       await API.updateRegistration(reg.id, {
         committee: selectedComm,
         assigned_country: selectedCountry,
+        preferred_committee: selectedComm,
+        country_preferences: [selectedCountry],
         status: 'APPROVED',
       });
 
@@ -627,6 +629,8 @@ export const CoordinatorDashboard: React.FC = () => {
       await API.updateRegistration(reg.id, {
         committee: newComm,
         assigned_country: newCountry,
+        preferred_committee: newComm,
+        country_preferences: [newCountry],
       });
 
       // 3. Lock new country allocation if assigned and not 'NOT ASSIGNED'
@@ -873,7 +877,9 @@ export const CoordinatorDashboard: React.FC = () => {
 
     const matchesGrade = gradeFilter === 'ALL' || r.grade.toString() === gradeFilter;
 
-    const matchesComm = committeeFilter === 'ALL' || r.preferred_committee.toLowerCase() === committeeFilter.toLowerCase();
+    const matchesComm =
+      committeeFilter === 'ALL' ||
+      (r.status === 'APPROVED' ? (r.committee || r.preferred_committee) : r.preferred_committee).toLowerCase() === committeeFilter.toLowerCase();
 
     const matchesStatus =
       statusFilter === 'ALL' ||

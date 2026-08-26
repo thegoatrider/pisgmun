@@ -1069,6 +1069,29 @@ def api_update_passwords():
         return jsonify({"success": True})
     return jsonify({"error": "Failed to update security passwords."}), 500
 
+@app.route('/api/maintenance/sync-preferences', methods=['POST'])
+def api_sync_preferences():
+    payload = request.json or {}
+    secret = payload.get('secret')
+    if secret != 'nagpur2026':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    regs = db_get_registrations()
+    sync_count = 0
+
+    for r in regs:
+        if r.get('status') == 'APPROVED':
+            comm = r.get('committee')
+            country = r.get('assigned_country')
+            if comm and comm != 'NOT ASSIGNED' and country and country != 'NOT ASSIGNED':
+                db_update_registration(r["id"], {
+                    "preferred_committee": comm,
+                    "country_preferences": [country]
+                })
+                sync_count += 1
+
+    return jsonify({"success": True, "sync_count": sync_count})
+
 @app.route('/api/config', methods=['GET', 'POST'])
 def api_config():
     if request.method == 'GET':
