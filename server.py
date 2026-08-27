@@ -263,22 +263,14 @@ def get_supabase_headers():
 
 def db_get_config():
     if IS_DEMO_MODE:
-        val = read_mock().get("config", {})
-        if val.get("deadline") != "2026-08-25T18:29:59.000Z":
-            val["deadline"] = "2026-08-25T18:29:59.000Z"
-            db_save_config(val)
-        return val
+        return read_mock().get("config", {})
     else:
         url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.global_settings"
         res = requests.get(url, headers=get_supabase_headers())
         if res.status_code == 200 and res.json():
-            val = res.json()[0].get("value", {})
-            if val.get("deadline") != "2026-08-25T18:29:59.000Z":
-                val["deadline"] = "2026-08-25T18:29:59.000Z"
-                db_save_config(val)
-            return val
+            return res.json()[0].get("value", {})
         # Seed default
-        default_val = {"registration_status": "OPEN", "deadline": "2026-08-25T18:29:59.000Z", "allow_switch_committee": False}
+        default_val = {"registration_status": "OPEN", "deadline": "2026-09-10T18:30:00.000Z", "allow_switch_committee": False}
         db_save_config(default_val)
         return default_val
 
@@ -1128,7 +1120,19 @@ def api_registrations():
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
-    return jsonify({"error": "Registrations for PISGMUN 2026 are now closed."}), 400
+    # Dynamic check from database config
+    config = db_get_config()
+    if config.get("registration_status") == "CLOSED":
+        return jsonify({"error": "Registrations for PISGMUN 2026 are now closed."}), 400
+    if config.get("deadline"):
+        try:
+            from datetime import datetime, timezone
+            deadline_str = config.get("deadline").replace("Z", "+00:00")
+            deadline_time = datetime.fromisoformat(deadline_str)
+            if datetime.now(timezone.utc) > deadline_time:
+                return jsonify({"error": "Registrations for PISGMUN 2026 are now closed."}), 400
+        except Exception:
+            pass
 
     payload = request.json or {}
     
@@ -1156,14 +1160,6 @@ def api_register():
 
     # Prevent duplicate registration with same email or phone number
     regs = db_get_registrations()
-
-    # 1. Stop all registrations tonight midnight (End of August 25, 2026 at 23:59:59 IST)
-    from datetime import datetime, timezone, timedelta
-    ist_tz = timezone(timedelta(hours=5, minutes=30))
-    now_ist = datetime.now(ist_tz)
-    closing_time = datetime(2026, 8, 25, 23, 59, 59, tzinfo=ist_tz)
-    if now_ist > closing_time:
-        return jsonify({"error": "Registrations for PISGMUN 2026 are now closed."}), 400
 
     if any(r.get('email', '').strip().lower() == email.lower() for r in regs):
         return jsonify({"error": "A delegate registration with this email already exists. If you have already registered, please use your existing Registration ID to access the portal."}), 400
