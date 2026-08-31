@@ -108,11 +108,16 @@ export const CommitteeDetail: React.FC = () => {
     {
       title: 'Executive Board (EB)',
       content: (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }} className="eb-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: committee.eb_rapporteur && committee.eb_rapporteur.includes(',') ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '1.25rem' }} className="eb-grid">
           {[
             { role: 'Chairperson', name: committee.eb_chair },
             { role: 'Vice Chairperson', name: committee.eb_vice_chair },
-            { role: 'In-Charge', name: committee.eb_rapporteur },
+            ...(committee.eb_rapporteur && committee.eb_rapporteur.includes(',') ? [
+              { role: 'In-Charge 1', name: committee.eb_rapporteur.split(',')[0]?.trim() },
+              { role: 'In-Charge 2', name: committee.eb_rapporteur.split(',')[1]?.trim() },
+            ] : [
+              { role: 'In-Charge', name: committee.eb_rapporteur },
+            ])
           ].map((member, i) => (
             <div key={i} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem', textAlign: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>

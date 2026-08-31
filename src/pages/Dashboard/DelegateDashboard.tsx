@@ -315,7 +315,7 @@ export const DelegateDashboard: React.FC = () => {
                     <strong style={{ color: 'var(--color-primary)', display: 'block', marginBottom: '0.25rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       Executive Board
                     </strong>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', backgroundColor: 'var(--color-bg-main)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontSize: '0.82rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: commObj?.eb_rapporteur && commObj.eb_rapporteur.includes(',') ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '0.5rem', backgroundColor: 'var(--color-bg-main)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontSize: '0.82rem' }}>
                       <div>
                         <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>Chairperson</span>
                         <strong>{commObj?.eb_chair || 'TBD'}</strong>
@@ -324,10 +324,23 @@ export const DelegateDashboard: React.FC = () => {
                         <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>Vice Chair</span>
                         <strong>{commObj?.eb_vice_chair || 'TBD'}</strong>
                       </div>
-                      <div>
-                        <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge</span>
-                        <strong>{commObj?.eb_rapporteur || 'TBD'}</strong>
-                      </div>
+                      {commObj?.eb_rapporteur && commObj.eb_rapporteur.includes(',') ? (
+                        <>
+                          <div>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge 1</span>
+                            <strong>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge 2</span>
+                            <strong>{commObj.eb_rapporteur.split(',')[1]?.trim() || 'TBD'}</strong>
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge</span>
+                          <strong>{commObj?.eb_rapporteur || 'TBD'}</strong>
+                        </div>
+                      )}
                     </div>
                   </div>
 

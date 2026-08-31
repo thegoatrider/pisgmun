@@ -1546,7 +1546,7 @@ export const CoordinatorDashboard: React.FC = () => {
                     required
                   />
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem' }} className="grid-responsive">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }} className="grid-responsive">
                     <Input
                       label="Chairperson Name"
                       value={commForm.eb_chair}
@@ -1559,10 +1559,28 @@ export const CoordinatorDashboard: React.FC = () => {
                       onChange={(e) => setCommForm({ ...commForm, eb_vice_chair: e.target.value })}
                       required
                     />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginTop: '1.25rem' }} className="grid-responsive">
                     <Input
-                      label="In-Charge Name"
-                      value={commForm.eb_rapporteur}
-                      onChange={(e) => setCommForm({ ...commForm, eb_rapporteur: e.target.value })}
+                      label="In-Charge 1 Name"
+                      value={commForm.eb_rapporteur ? commForm.eb_rapporteur.split(',')[0]?.trim() || '' : ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const parts = commForm.eb_rapporteur ? commForm.eb_rapporteur.split(',') : [];
+                        const part2 = parts[1] ? parts[1].trim() : 'Pending';
+                        setCommForm({ ...commForm, eb_rapporteur: `${val}, ${part2}` });
+                      }}
+                      required
+                    />
+                    <Input
+                      label="In-Charge 2 Name"
+                      value={commForm.eb_rapporteur && commForm.eb_rapporteur.includes(',') ? commForm.eb_rapporteur.split(',')[1]?.trim() || '' : ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const parts = commForm.eb_rapporteur ? commForm.eb_rapporteur.split(',') : [];
+                        const part1 = parts[0] ? parts[0].trim() : 'Pending';
+                        setCommForm({ ...commForm, eb_rapporteur: `${part1}, ${val}` });
+                      }}
                       required
                     />
                   </div>
