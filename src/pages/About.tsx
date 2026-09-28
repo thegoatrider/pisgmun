@@ -1,5 +1,5 @@
 import React from 'react';
-import { Landmark, BookText, School, Star } from 'lucide-react';
+import { Landmark, BookText, School, Star, Calendar, Clock, CheckCircle } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 
 export const About: React.FC = () => {
@@ -95,7 +95,7 @@ export const About: React.FC = () => {
         </div>
         
         <p style={{ fontSize: '0.98rem', color: 'var(--color-text-main)', lineHeight: '1.8', marginBottom: '2rem' }}>
-          For the <strong>Podar Nagpur Model United Nations 2026-27</strong>, our executive committee has defined six specialized agendas mapping to critical global issues:
+          For the <strong>Podar Nagpur Model United Nations 2026-27</strong>, our executive committee has defined four specialized agendas mapping to critical global issues:
         </p>
 
         <Card elevation="sm" style={{ padding: '2rem' }}>
@@ -170,6 +170,86 @@ export const About: React.FC = () => {
           </Card>
         </div>
       </section>
+
+      {/* Section D: PMUN Session Dates & Conference Timeline */}
+      <section style={{ marginBottom: '4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '2px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '1.75rem' }}>
+          <Calendar size={28} style={{ color: 'var(--color-secondary)' }} />
+          <h2 style={{ fontSize: '1.6rem', color: 'var(--color-primary)', margin: 0, fontWeight: 700 }}>
+            D. Important Dates & Conference Schedule
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.75rem' }} className="about-dates-grid">
+          {/* Preparatory Training Sessions */}
+          <Card elevation="sm" style={{ padding: '2rem' }}>
+            <h3 style={{ fontSize: '1.15rem', color: 'var(--color-primary)', margin: '0 0 1rem 0', fontWeight: 700 }}>
+              Preparatory Training Sessions
+            </h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
+              Essential preparation sessions covering research, speech delivery, draft resolutions, and Rules of Procedure.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {[
+                { date: '15th October 2026', day: 'Thursday' },
+                { date: '16th October 2026', day: 'Friday' },
+                { date: '17th October 2026', day: 'Saturday' },
+                { date: '21st October 2026', day: 'Wednesday' },
+                { date: '28th October 2026', day: 'Wednesday' },
+              ].map((s, idx) => (
+                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.85rem', backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                  <strong style={{ color: 'var(--color-primary)', fontSize: '0.88rem' }}>{s.date}</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{s.day}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Simulation & Final Conference */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <Card elevation="sm" style={{ padding: '1.75rem', backgroundColor: 'rgba(217, 119, 6, 0.05)', border: '1.5px solid rgba(217, 119, 6, 0.3)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.35rem' }}>
+                <Clock size={18} style={{ color: '#d97706' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#d97706' }}>
+                  Mock Simulation
+                </span>
+              </div>
+              <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.15rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                20th November 2026 (Friday)
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                Dry-run simulation for all delegates to rehearse speeches, point-of-orders, and caucus procedures.
+              </p>
+            </Card>
+
+            <Card elevation="md" style={{ padding: '1.75rem', backgroundColor: 'rgba(13, 148, 136, 0.08)', border: '2px solid var(--color-secondary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.35rem' }}>
+                <CheckCircle size={18} style={{ color: 'var(--color-secondary)' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)' }}>
+                  Final Session (1-Day Official Conference)
+                </span>
+              </div>
+              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', color: 'var(--color-primary)', fontWeight: 800 }}>
+                21st November 2026 (Saturday)
+              </h4>
+              <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', padding: '0.65rem 0.85rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                • 8:30 AM - 10:30 AM: Opening Ceremony & GSL Setup<br />
+                • 10:45 AM - 1:00 PM: Moderated Caucus & Debate<br />
+                • 1:45 PM - 3:45 PM: Unmoderated Caucus & Resolution Drafting<br />
+                • 4:00 PM - 5:30 PM: Voting Procedure & Closing Ceremony
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .about-dates-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

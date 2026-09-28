@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Calendar, MapPin, Users, BookOpen, Globe2, Award, Users2, SearchCode, Milestone, ArrowRight } from 'lucide-react';
+import { ShieldAlert, Calendar, MapPin, Users, BookOpen, Globe2, Award, Users2, SearchCode, Milestone, ArrowRight, Clock, CheckCircle } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { Button } from '../components/UI/Button';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
     {
       icon: <Calendar size={24} style={{ color: 'var(--color-secondary)' }} />,
       title: 'Dates',
-      value: 'Coming Soon',
+      value: '21st Nov 2026',
     },
     {
       icon: <MapPin size={24} style={{ color: 'var(--color-secondary)' }} />,
@@ -42,7 +42,7 @@ export const Home: React.FC = () => {
     {
       icon: <BookOpen size={24} style={{ color: 'var(--color-secondary)' }} />,
       title: 'Committees',
-      value: '6 UN Councils',
+      value: '4 UN Councils',
     },
   ];
 
@@ -261,6 +261,114 @@ export const Home: React.FC = () => {
           .stat-col:nth-last-child(-n+2) {
             border-bottom: none !important;
             padding-bottom: 0 !important;
+          }
+        }
+      `}</style>
+
+      {/* 2.5 PMUN 2026 Session Dates & Schedule */}
+      <section className="section" style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--color-border)' }}>
+        <div className="container">
+          <div className="text-center" style={{ marginBottom: '3rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontWeight: 700 }}>
+              PMUN 2026 Session Dates & Schedule
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: '0.5rem 0 1.25rem 0' }}>
+              <div style={{ height: '1.2px', width: '30px', backgroundColor: 'var(--color-border)' }}></div>
+              <span style={{ color: 'var(--color-secondary)', fontSize: '0.55rem' }}>◆</span>
+              <div style={{ height: '1.2px', width: '30px', backgroundColor: 'var(--color-border)' }}></div>
+            </div>
+            <p style={{ color: 'var(--color-text-muted)', maxWidth: '600px', margin: '0 auto' }}>
+              Comprehensive timeline for training workshops, simulation mock sessions, and the official 1-day Model United Nations conference.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '2rem' }} className="timeline-grid">
+            {/* Preparatory Training Sessions */}
+            <Card elevation="sm" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                  <Calendar size={22} style={{ color: 'var(--color-secondary)' }} />
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                    Preparatory Training Sessions
+                  </h3>
+                </div>
+                <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>
+                  Intensive workshops on Rules of Procedure (RoP), position paper drafting, lobbying strategies, and public speaking.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {[
+                    { date: '15th October 2026', day: 'Thursday', tag: 'Session 1' },
+                    { date: '16th October 2026', day: 'Friday', tag: 'Session 2' },
+                    { date: '17th October 2026', day: 'Saturday', tag: 'Session 3' },
+                    { date: '21st October 2026', day: 'Wednesday', tag: 'Session 4' },
+                    { date: '28th October 2026', day: 'Wednesday', tag: 'Session 5' },
+                  ].map((s, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '0.65rem 1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-secondary)', textTransform: 'uppercase', backgroundColor: '#ffffff', padding: '2px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
+                          {s.tag}
+                        </span>
+                        <strong style={{ fontSize: '0.9rem', color: 'var(--color-primary)' }}>{s.date}</strong>
+                      </div>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>{s.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* Mock & Final Conference Card */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* Mock Session Card */}
+              <Card elevation="sm" style={{ padding: '1.75rem', backgroundColor: 'rgba(217, 119, 6, 0.05)', border: '1.5px solid rgba(217, 119, 6, 0.3)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                  <Clock size={20} style={{ color: '#d97706' }} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#d97706', letterSpacing: '0.5px' }}>
+                    Simulation Rehearsal
+                  </span>
+                </div>
+                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                  Mock Session
+                </h3>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#d97706', marginBottom: '0.5rem' }}>
+                  20th November 2026 (Friday)
+                </div>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                  Full procedural dry-run to test roll call, moderated caucuses, resolution submissions, and podium decorum under simulated conditions.
+                </p>
+              </Card>
+
+              {/* Final Session Card */}
+              <Card elevation="md" style={{ padding: '1.75rem', backgroundColor: 'rgba(13, 148, 136, 0.08)', border: '2px solid var(--color-secondary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                  <CheckCircle size={20} style={{ color: 'var(--color-secondary)' }} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px' }}>
+                    Official Conference Day
+                  </span>
+                </div>
+                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                  Final Session (PMUN Conference)
+                </h3>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-primary)', marginBottom: '0.75rem' }}>
+                  21st November 2026 (Saturday)
+                </div>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', padding: '0.75rem 1rem', fontSize: '0.82rem', color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
+                  <strong style={{ color: 'var(--color-primary)', display: 'block', marginBottom: '4px' }}>Single-Day MUN Schedule:</strong>
+                  • 8:30 AM - 10:30 AM: Opening Ceremony & GSL Setup<br />
+                  • 10:45 AM - 1:00 PM: Moderated Caucus & Debate<br />
+                  • 1:45 PM - 3:45 PM: Unmoderated Caucus & Resolution Drafting<br />
+                  • 4:00 PM - 5:30 PM: Voting Procedure & Closing Ceremony
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .timeline-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>

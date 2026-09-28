@@ -49,11 +49,11 @@ DB_DEFAULT_COMMITTEES = {
     "grade": 7,
     "description": "UNEP coordinates the United Nations environmental activities, assisting developing countries in implementing environmentally sound policies and renewable energy adoption.",
     "agenda": "Harnessing Solar Energy for Equitable Access and Clean Air",
-    "eb_chair": "Pending", "eb_vice_chair": "Pending", "eb_rapporteur": "Pending",
+    "eb_chair": "Darsh Pal (X)", "eb_vice_chair": "Khanak Ragsaaniya (IX)", "eb_rapporteur": "Jyoti Adurti, Pooja Kale",
     "rules": "Standard UN Rules of Procedure (RoP) apply. Formal debate consists of a General Speakers List (GSL), Moderated Caucuses, and Unmoderated Caucuses.",
     "prepare_info": "Examine solar capacity metrics, climate financing systems, and clean energy technology transfer incentives. Draft a 1-page Position Paper.",
     "resources": [{"title": "UNEP Background Guide 2026 (PDF)", "url": "/resources/unep_background_guide.pdf"}],
-    "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
+    "schedule": "Session 1: Opening Ceremony & GSL Setup (8:30 AM - 10:30 AM) | Session 2: Moderated Caucus & Debate (10:45 AM - 1:00 PM) | Session 3: Unmoderated Caucus & Resolution Drafting (1:45 PM - 3:45 PM) | Session 4: Voting Procedure & Closing Ceremony (4:00 PM - 5:30 PM)",
     "capacity": 50, "status": "OPEN"
   },
   "un-women": {
@@ -62,11 +62,11 @@ DB_DEFAULT_COMMITTEES = {
     "grade": 7,
     "description": "UN Women is the UN entity dedicated to gender equality and the empowerment of women. This committee addresses international gender disparities and empowerment programs.",
     "agenda": "Addressing Challenges to Women’s Rights and Empowerment",
-    "eb_chair": "Pending", "eb_vice_chair": "Pending", "eb_rapporteur": "Pending",
+    "eb_chair": "Nitisha Sinku (X)", "eb_vice_chair": "Swara Sable (IX)", "eb_rapporteur": "Archana Tripathi, Karishma Khankule",
     "rules": "Standard UN Rules of Procedure (RoP) apply. Respectful, inclusive diplomatic dialogue is strictly enforced.",
     "prepare_info": "Examine national gender parity statistics, human rights conventions, and structural barriers facing women globally.",
     "resources": [{"title": "UN Women Background Guide 2026 (PDF)", "url": "/resources/un_women_background_guide.pdf"}],
-    "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
+    "schedule": "Session 1: Opening Ceremony & GSL Setup (8:30 AM - 10:30 AM) | Session 2: Moderated Caucus & Debate (10:45 AM - 1:00 PM) | Session 3: Unmoderated Caucus & Resolution Drafting (1:45 PM - 3:45 PM) | Session 4: Voting Procedure & Closing Ceremony (4:00 PM - 5:30 PM)",
     "capacity": 50, "status": "OPEN"
   },
   "unhrc": {
@@ -75,11 +75,11 @@ DB_DEFAULT_COMMITTEES = {
     "grade": 9,
     "description": "The UNHRC promotes and protects human rights globally. This session focuses on civil rights, freedom of speech, and digital rights during conflict operations.",
     "agenda": "Protecting Digital Rights during Conflicts",
-    "eb_chair": "Pending", "eb_vice_chair": "Pending", "eb_rapporteur": "Pending",
+    "eb_chair": "Ekansh Pal (X)", "eb_vice_chair": "Mohd Ahkam (IX)", "eb_rapporteur": "Reena Singh, Priyanka Adgube",
     "rules": "Standard UN Rules of Procedure (RoP) apply. Debate focuses on international humanitarian law, digital surveillance, and cyber conventions.",
     "prepare_info": "Analyze your state policy on internet shutdowns in conflict areas, cyber surveillance, and digital privacy.",
     "resources": [{"title": "UNHRC Background Guide 2026 (PDF)", "url": "/resources/unhrc_background_guide.pdf"}],
-    "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
+    "schedule": "Session 1: Opening Ceremony & GSL Setup (8:30 AM - 10:30 AM) | Session 2: Moderated Caucus & Debate (10:45 AM - 1:00 PM) | Session 3: Unmoderated Caucus & Resolution Drafting (1:45 PM - 3:45 PM) | Session 4: Voting Procedure & Closing Ceremony (4:00 PM - 5:30 PM)",
     "capacity": 50, "status": "OPEN"
   },
   "unicef": {
@@ -88,11 +88,11 @@ DB_DEFAULT_COMMITTEES = {
     "grade": 9,
     "description": "UNICEF provides humanitarian and developmental aid to children worldwide, advocating for their safety, education, and health.",
     "agenda": "Impact of Foreign Aid Reductions on Global Child Healthcare",
-    "eb_chair": "Pending", "eb_vice_chair": "Pending", "eb_rapporteur": "Pending",
+    "eb_chair": "Ananya Pandey (X)", "eb_vice_chair": "Naisha Phadke (IX)", "eb_rapporteur": "Shalini Pandey, Isha Chourse",
     "rules": "Standard UN Rules of Procedure (RoP) apply. High-stakes negotiation on funding deficits and healthcare infrastructure.",
     "prepare_info": "Examine public healthcare funding, infant mortality trends, and structural consequences of international aid cuts.",
     "resources": [{"title": "UNICEF Background Guide 2026 (PDF)", "url": "/resources/unicef_background_guide.pdf"}],
-    "schedule": "Day 1 - Session 1: Opening & GSL Setup (9:00 AM - 12:30 PM) | Day 1 - Session 2: Moderated Caucus (1:30 PM - 4:00 PM) | Day 2 - Session 3: Resolution Drafting (9:00 AM - 12:00 PM) | Day 2 - Session 4: Voting & Closing Ceremony (1:00 PM - 3:30 PM)",
+    "schedule": "Session 1: Opening Ceremony & GSL Setup (8:30 AM - 10:30 AM) | Session 2: Moderated Caucus & Debate (10:45 AM - 1:00 PM) | Session 3: Unmoderated Caucus & Resolution Drafting (1:45 PM - 3:45 PM) | Session 4: Voting Procedure & Closing Ceremony (4:00 PM - 5:30 PM)",
     "capacity": 50, "status": "OPEN"
   }
 }

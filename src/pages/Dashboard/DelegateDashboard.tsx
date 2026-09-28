@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/UI/Card';
 import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
-import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2 } from 'lucide-react';
+import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2, Calendar } from 'lucide-react';
 import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer';
 
 export const DelegateDashboard: React.FC = () => {
@@ -277,6 +277,73 @@ export const DelegateDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+          </Card>
+
+          {/* PMUN Session Dates & Conference Timeline Card */}
+          <Card elevation="md" style={{ padding: '2rem', border: '1px solid var(--color-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={20} style={{ color: 'var(--color-secondary)' }} />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
+                  PMUN Session Dates & Timeline
+                </h3>
+              </div>
+              <span className="status-badge" style={{ backgroundColor: 'rgba(0, 32, 74, 0.08)', color: 'var(--color-primary)', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-round)', fontSize: '0.75rem', fontWeight: 700 }}>
+                Conference Day: 21st Nov 2026
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* Preparatory Training Sessions */}
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>
+                  Preparatory Sessions
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem' }}>
+                  {[
+                    { date: '15th October', day: 'Thursday' },
+                    { date: '16th October', day: 'Friday' },
+                    { date: '17th October', day: 'Saturday' },
+                    { date: '21st October', day: 'Wednesday' },
+                    { date: '28th October', day: 'Wednesday' },
+                  ].map((s, idx) => (
+                    <div key={idx} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '0.65rem 0.85rem' }}>
+                      <strong style={{ fontSize: '0.85rem', color: 'var(--color-primary)', display: 'block' }}>{s.date}</strong>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>{s.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Milestone Sessions: Mock & Final */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ backgroundColor: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.3)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.25rem' }}>
+                    <Clock size={16} style={{ color: '#d97706' }} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#d97706', letterSpacing: '0.5px' }}>
+                      Mock Session
+                    </span>
+                  </div>
+                  <strong style={{ fontSize: '1rem', color: 'var(--color-primary)', display: 'block' }}>
+                    20th November (Friday)
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Rules & Debate Simulation</span>
+                </div>
+
+                <div style={{ backgroundColor: 'rgba(13, 148, 136, 0.1)', border: '1.5px solid var(--color-secondary)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.25rem' }}>
+                    <CheckCircle size={16} style={{ color: 'var(--color-secondary)' }} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px' }}>
+                      Final Session
+                    </span>
+                  </div>
+                  <strong style={{ fontSize: '1rem', color: 'var(--color-primary)', display: 'block' }}>
+                    21st November (Saturday)
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Official 1-Day PMUN Conference</span>
+                </div>
+              </div>
+            </div>
           </Card>
 
           {/* Allocation Panel */}
