@@ -14,6 +14,7 @@ import { Contact } from './pages/Contact';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Success } from './pages/Success';
+import { SessionGallery } from './pages/SessionGallery';
 
 // Dashboards (to be implemented)
 import { DelegateDashboard } from './pages/Dashboard/DelegateDashboard';
@@ -114,6 +115,16 @@ const App: React.FC = () => {
               <ProtectedRoute allowedRoles={['coordinator']}>
                 <LayoutWrapper>
                   <CoordinatorDashboard />
+                </LayoutWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sessions/:sessionId"
+            element={
+              <ProtectedRoute allowedRoles={['delegate', 'coordinator', 'in_charge']}>
+                <LayoutWrapper>
+                  <SessionGallery />
                 </LayoutWrapper>
               </ProtectedRoute>
             }

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/UI/Card';
 import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
-import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2, Calendar } from 'lucide-react';
+import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2, Calendar, Camera, ChevronRight } from 'lucide-react';
 import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer';
 
 export const DelegateDashboard: React.FC = () => {
@@ -296,22 +296,75 @@ export const DelegateDashboard: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Preparatory Training Sessions */}
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>
-                  Preparatory Sessions
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '4px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '0.5px' }}>
+                    Preparatory Sessions
+                  </span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                    {registrationId === 'PIS-2026-8898' ? 'Testing Mode: All Galleries Unlocked' : 'Click active sessions to view photos'}
+                  </span>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem' }}>
                   {[
-                    { date: '15th October', day: 'Thursday' },
-                    { date: '16th October', day: 'Friday' },
-                    { date: '17th October', day: 'Saturday' },
-                    { date: '21st October', day: 'Wednesday' },
-                    { date: '28th October', day: 'Wednesday' },
-                  ].map((s, idx) => (
-                    <div key={idx} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '0.65rem 0.85rem' }}>
-                      <strong style={{ fontSize: '0.85rem', color: 'var(--color-primary)', display: 'block' }}>{s.date}</strong>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>{s.day}</span>
-                    </div>
-                  ))}
+                    { id: 'session-1', date: '15th October', day: 'Thursday', isoDate: '2026-10-15' },
+                    { id: 'session-2', date: '16th October', day: 'Friday', isoDate: '2026-10-16' },
+                    { id: 'session-3', date: '17th October', day: 'Saturday', isoDate: '2026-10-17' },
+                    { id: 'session-4', date: '21st October', day: 'Wednesday', isoDate: '2026-10-21' },
+                    { id: 'session-5', date: '28th October', day: 'Wednesday', isoDate: '2026-10-28' },
+                  ].map((s, idx) => {
+                    const now = new Date();
+                    const localYear = now.getFullYear();
+                    const localMonth = String(now.getMonth() + 1).padStart(2, '0');
+                    const localDay = String(now.getDate()).padStart(2, '0');
+                    const localTodayIso = `${localYear}-${localMonth}-${localDay}`;
+                    const isTestingUser = registrationId === 'PIS-2026-8898';
+                    const isUnlocked = isTestingUser || localTodayIso >= s.isoDate;
+
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          if (isUnlocked) {
+                            navigate(`/sessions/${s.id}`);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: isUnlocked ? '#ffffff' : 'var(--color-bg-main)',
+                          border: isUnlocked ? '1.5px solid var(--color-primary)' : '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0.65rem 0.85rem',
+                          cursor: isUnlocked ? 'pointer' : 'default',
+                          transition: 'all 0.15s ease',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          position: 'relative',
+                          boxShadow: isUnlocked ? 'var(--shadow-sm)' : 'none',
+                          opacity: isUnlocked ? 1 : 0.65
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                            <strong style={{ fontSize: '0.85rem', color: isUnlocked ? 'var(--color-primary)' : 'var(--color-text-main)' }}>
+                              {s.date}
+                            </strong>
+                            {isUnlocked ? (
+                              <Camera size={13} style={{ color: 'var(--color-secondary)' }} />
+                            ) : (
+                              <Lock size={11} style={{ color: 'var(--color-text-muted)', opacity: 0.6 }} />
+                            )}
+                          </div>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>{s.day}</span>
+                        </div>
+                        {isUnlocked && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '0.4rem', fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-secondary)' }}>
+                            <span>View Photos</span>
+                            <ChevronRight size={10} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
