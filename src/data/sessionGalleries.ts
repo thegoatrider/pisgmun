@@ -5,7 +5,6 @@ export interface SessionPhoto {
   imageUrl: string;
   caption?: string;
   description: string;
-  restrictedToRegistrationId?: string; // If set, only visible to this specific ID
 }
 
 export interface SessionData {
@@ -50,7 +49,6 @@ export const PREPARATORY_SESSIONS: SessionData[] = [
         imageUrl: mockSessionImg,
         caption: 'Session 1 Dispatch & Analysis',
         description: mockDescription,
-        restrictedToRegistrationId: 'PIS-2026-8898',
       },
     ],
   },
@@ -68,7 +66,6 @@ export const PREPARATORY_SESSIONS: SessionData[] = [
         imageUrl: mockSessionImg,
         caption: 'Session 2 Dispatch & Analysis',
         description: mockDescription,
-        restrictedToRegistrationId: 'PIS-2026-8898',
       },
     ],
   },
@@ -86,7 +83,6 @@ export const PREPARATORY_SESSIONS: SessionData[] = [
         imageUrl: mockSessionImg,
         caption: 'Session 3 Dispatch & Analysis',
         description: mockDescription,
-        restrictedToRegistrationId: 'PIS-2026-8898',
       },
     ],
   },
@@ -104,7 +100,6 @@ export const PREPARATORY_SESSIONS: SessionData[] = [
         imageUrl: mockSessionImg,
         caption: 'Session 4 Dispatch & Analysis',
         description: mockDescription,
-        restrictedToRegistrationId: 'PIS-2026-8898',
       },
     ],
   },
@@ -122,7 +117,6 @@ export const PREPARATORY_SESSIONS: SessionData[] = [
         imageUrl: mockSessionImg,
         caption: 'Session 5 Dispatch & Analysis',
         description: mockDescription,
-        restrictedToRegistrationId: 'PIS-2026-8898',
       },
     ],
   },

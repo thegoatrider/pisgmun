@@ -312,13 +312,7 @@ export const DelegateDashboard: React.FC = () => {
                     { id: 'session-4', date: '21st October', day: 'Wednesday', isoDate: '2026-10-21' },
                     { id: 'session-5', date: '28th October', day: 'Wednesday', isoDate: '2026-10-28' },
                   ].map((s, idx) => {
-                    const now = new Date();
-                    const localYear = now.getFullYear();
-                    const localMonth = String(now.getMonth() + 1).padStart(2, '0');
-                    const localDay = String(now.getDate()).padStart(2, '0');
-                    const localTodayIso = `${localYear}-${localMonth}-${localDay}`;
-                    const isTestingUser = registrationId === 'PIS-2026-8898';
-                    const isUnlocked = isTestingUser || localTodayIso >= s.isoDate;
+                    const isUnlocked = true;
 
                     return (
                       <div

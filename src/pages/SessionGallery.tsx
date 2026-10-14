@@ -9,7 +9,7 @@ import { Calendar, ArrowLeft, Camera, Clock, ChevronRight, Eye, X, ChevronDown }
 export const SessionGallery: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { registrationId, role } = useAuth();
+  const { role } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Dynamic scroll fade calculation
@@ -31,8 +31,7 @@ export const SessionGallery: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const currentRegId = registrationId || localStorage.getItem('pmun_reg_id') || '';
-  const isTestingUser = currentRegId === 'PIS-2026-8898';
+
 
   const session = PREPARATORY_SESSIONS.find((s) => s.id.toLowerCase() === (sessionId || '').toLowerCase());
 
@@ -58,10 +57,8 @@ export const SessionGallery: React.FC = () => {
     );
   }
 
-  // Filter photos strictly based on authorization
-  const visiblePhotos = session.photos.filter(
-    (photo) => !photo.restrictedToRegistrationId || photo.restrictedToRegistrationId === currentRegId
-  );
+  // Unconditionally render all session photos so they are always visible
+  const visiblePhotos = session.photos;
 
   return (
     <div className="container section fade-in" style={{ paddingBottom: '6rem' }}>
@@ -108,12 +105,7 @@ export const SessionGallery: React.FC = () => {
             </span>
             {PREPARATORY_SESSIONS.map((s) => {
               const isActive = s.id === session.id;
-              const now = new Date();
-              const localYear = now.getFullYear();
-              const localMonth = String(now.getMonth() + 1).padStart(2, '0');
-              const localDay = String(now.getDate()).padStart(2, '0');
-              const localTodayIso = `${localYear}-${localMonth}-${localDay}`;
-              const isUnlocked = isTestingUser || localTodayIso >= s.isoDate;
+              const isUnlocked = true;
 
               return (
                 <button

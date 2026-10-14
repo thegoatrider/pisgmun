@@ -122,11 +122,9 @@ const App: React.FC = () => {
           <Route
             path="/sessions/:sessionId"
             element={
-              <ProtectedRoute allowedRoles={['delegate', 'coordinator', 'in_charge']}>
-                <LayoutWrapper>
-                  <SessionGallery />
-                </LayoutWrapper>
-              </ProtectedRoute>
+              <LayoutWrapper>
+                <SessionGallery />
+              </LayoutWrapper>
             }
           />
 
