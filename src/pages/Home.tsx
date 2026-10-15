@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, Calendar, MapPin, Users, BookOpen, Globe2, Award, Users2, SearchCode, Milestone, ArrowRight, Clock, CheckCircle } from 'lucide-react';
 import { Card } from '../components/UI/Card';
@@ -8,6 +8,48 @@ import { useAuth } from '../context/AuthContext';
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { config } = useAuth();
+
+  // Apple-style scroll fade for hero banner
+  const [heroOpacity, setHeroOpacity] = useState(1);
+  const [heroTranslateY, setHeroTranslateY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      if (scrollY < 550) {
+        setHeroOpacity(Math.max(0.18, 1 - scrollY / 520));
+        setHeroTranslateY(scrollY * 0.16);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Apple-style scroll reveal observer for each section and card
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('apple-visible');
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px -40px 0px',
+        threshold: 0.08,
+      }
+    );
+
+    const elements = document.querySelectorAll('.apple-scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+      observer.disconnect();
+    };
+  }, []);
 
   const isRegistrationClosed = () => {
     if (config?.registration_status === 'CLOSED') return true;
@@ -115,7 +157,16 @@ export const Home: React.FC = () => {
         }}
         className="hero-section"
       >
-        <div className="container" style={{ display: 'flex', justifyContent: 'flex-start' }}>
+        <div
+          className="container"
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+            opacity: heroOpacity,
+            transform: `translateY(${heroTranslateY}px)`,
+            transition: 'opacity 0.12s ease-out, transform 0.12s ease-out',
+          }}
+        >
           <div style={{ maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* School Crest Title Row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
@@ -211,7 +262,7 @@ export const Home: React.FC = () => {
 
       {/* 2. Stats Bar */}
       <section style={{ backgroundColor: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border)', padding: '2rem 0' }}>
-        <div className="container">
+        <div className="container apple-scroll-reveal">
           <div
             style={{
               display: 'grid',
@@ -232,7 +283,7 @@ export const Home: React.FC = () => {
                   padding: '0.5rem 1rem',
                   textAlign: 'center',
                 }}
-                className="stat-col"
+                className={`stat-col apple-scroll-reveal apple-stagger-${idx + 1}`}
               >
                 {stat.icon}
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-text-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
@@ -268,7 +319,7 @@ export const Home: React.FC = () => {
       {/* 2.5 PMUN 2026 Session Dates & Schedule */}
       <section className="section" style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--color-border)' }}>
         <div className="container">
-          <div className="text-center" style={{ marginBottom: '3rem' }}>
+          <div className="text-center apple-scroll-reveal" style={{ marginBottom: '3rem' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontWeight: 700 }}>
               PMUN 2026 Session Dates & Schedule
             </h2>
@@ -284,7 +335,7 @@ export const Home: React.FC = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '2rem' }} className="timeline-grid">
             {/* Preparatory Training Sessions */}
-            <Card elevation="sm" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <Card elevation="sm" className="apple-scroll-reveal apple-stagger-1" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
                   <Calendar size={22} style={{ color: 'var(--color-secondary)' }} />
@@ -297,13 +348,36 @@ export const Home: React.FC = () => {
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   {[
-                    { date: '15th October 2026', day: 'Thursday', tag: 'Session 1' },
-                    { date: '16th October 2026', day: 'Friday', tag: 'Session 2' },
-                    { date: '17th October 2026', day: 'Saturday', tag: 'Session 3' },
-                    { date: '21st October 2026', day: 'Wednesday', tag: 'Session 4' },
-                    { date: '28th October 2026', day: 'Wednesday', tag: 'Session 5' },
+                    { date: '15th October 2026', day: 'Thursday', tag: 'Session 1', id: 'session-1' },
+                    { date: '16th October 2026', day: 'Friday', tag: 'Session 2', id: 'session-2' },
+                    { date: '17th October 2026', day: 'Saturday', tag: 'Session 3', id: 'session-3' },
+                    { date: '21st October 2026', day: 'Wednesday', tag: 'Session 4', id: 'session-4' },
+                    { date: '28th October 2026', day: 'Wednesday', tag: 'Session 5', id: 'session-5' },
                   ].map((s, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '0.65rem 1rem' }}>
+                    <div
+                      key={idx}
+                      onClick={() => navigate(`/sessions/${s.id}`)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: 'var(--color-bg-main)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.65rem 1rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--color-secondary)';
+                        e.currentTarget.style.backgroundColor = 'rgba(12, 86, 179, 0.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--color-border)';
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg-main)';
+                      }}
+                      title={`View ${s.tag} details`}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-secondary)', textTransform: 'uppercase', backgroundColor: '#ffffff', padding: '2px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
                           {s.tag}
@@ -318,7 +392,7 @@ export const Home: React.FC = () => {
             </Card>
 
             {/* Mock & Final Conference Card */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="apple-scroll-reveal apple-stagger-2" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {/* Mock Session Card */}
               <Card elevation="sm" style={{ padding: '1.75rem', backgroundColor: 'rgba(217, 119, 6, 0.05)', border: '1.5px solid rgba(217, 119, 6, 0.3)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
@@ -376,7 +450,7 @@ export const Home: React.FC = () => {
       {/* 3. Portals Gateways */}
       <section className="section" style={{ backgroundColor: 'var(--color-bg-main)' }}>
         <div className="container">
-          <div className="text-center" style={{ marginBottom: '3.5rem' }}>
+          <div className="text-center apple-scroll-reveal" style={{ marginBottom: '3.5rem' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontWeight: 700 }}>
               Access the Portals
             </h2>
@@ -391,9 +465,10 @@ export const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-3">
-            {portals.map((portal) => (
+            {portals.map((portal, idx) => (
               <Card
                 key={portal.id}
+                className={`apple-scroll-reveal apple-stagger-${idx + 1}`}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -442,7 +517,7 @@ export const Home: React.FC = () => {
       {/* 4. Why PMUN Benefits */}
       <section className="section" style={{ backgroundColor: 'var(--color-bg-surface)', borderTop: '1px solid var(--color-border)' }}>
         <div className="container">
-          <div className="text-center" style={{ marginBottom: '4rem' }}>
+          <div className="text-center apple-scroll-reveal" style={{ marginBottom: '4rem' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontWeight: 700 }}>
               The Educational Impact
             </h2>
@@ -467,6 +542,7 @@ export const Home: React.FC = () => {
             {benefits.map((benefit, idx) => (
               <div
                 key={idx}
+                className={`apple-scroll-reveal apple-stagger-${(idx % 5) + 1}`}
                 style={{
                   flex: '1',
                   minWidth: '220px',
