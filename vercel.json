@@ -47,10 +47,6 @@
       "dest": "/resources/$1"
     },
     {
-      "src": "/sessions/(.*)",
-      "dest": "/sessions/$1"
-    },
-    {
       "src": "/((?!api/).*)",
       "dest": "/index.html"
     }
