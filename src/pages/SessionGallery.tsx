@@ -12,18 +12,19 @@ export const SessionGallery: React.FC = () => {
   const { role } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Subtle, gentle scroll fade - stays crystal clear on initial view and fades by just a tad as you scroll
+  // Subtle, gentle scroll fade - stays crystal clear on initial view and fades by just a tiny hint as you scroll down
+  // Automatically eases back to 1.0 as you scroll up, maintaining clarity and depth
   const [scrollOpacity, setScrollOpacity] = useState(1);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY;
-      // Stays at 1.0 for the first 120px so people can read the quote clearly
-      // Then gently dims down to 0.78 over 800px of scrolling (just a subtle tad)
-      if (scrolled < 120) {
+      // Stays at 1.0 for the first 160px so people can read the quote with full clarity
+      // Then gently eases to 0.88 max over 1400px of scrolling (just a subtle hint)
+      if (scrolled < 160) {
         setScrollOpacity(1);
       } else {
-        const gentleFade = Math.max(0.78, 1 - (scrolled - 120) / 900);
+        const gentleFade = Math.max(0.88, 1 - (scrolled - 160) / 1400);
         setScrollOpacity(gentleFade);
       }
     };
@@ -220,15 +221,15 @@ export const SessionGallery: React.FC = () => {
               <Eye size={14} /> Click to expand
             </div>
 
-            {/* Faded Seam Transition: Dissolves the bottom edge of the image directly into the text box */}
+            {/* INCREASED BLEND: Ultra-smooth 280px multi-stop gradient dissolve between image and text */}
             <div
               style={{
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: '160px',
-                background: 'linear-gradient(to bottom, rgba(20, 20, 20, 0) 0%, rgba(20, 20, 20, 0.25) 35%, rgba(255, 255, 255, 0.8) 80%, #ffffff 100%)',
+                height: '280px',
+                background: 'linear-gradient(to bottom, rgba(20, 20, 20, 0) 0%, rgba(20, 20, 20, 0.04) 20%, rgba(20, 20, 20, 0.14) 38%, rgba(255, 255, 255, 0.35) 58%, rgba(255, 255, 255, 0.72) 75%, rgba(255, 255, 255, 0.94) 90%, #ffffff 100%)',
                 pointerEvents: 'none',
                 zIndex: 2
               }}
@@ -240,7 +241,7 @@ export const SessionGallery: React.FC = () => {
             style={{
               width: '100%',
               backgroundColor: '#ffffff',
-              padding: '2rem 1.5rem 6rem 1.5rem',
+              padding: '1rem 1.5rem 6rem 1.5rem',
               display: 'flex',
               justifyContent: 'center',
               position: 'relative',

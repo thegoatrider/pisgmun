@@ -102,7 +102,7 @@ export const API = {
     const res = await fetch('/api/auth/passwords/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPasswords)
+      body: JSON.stringify({ passwords: newPasswords, ...newPasswords })
     });
     const data = await handleResponse(res);
     return !!data.success;

@@ -270,7 +270,7 @@ def db_get_config():
         if res.status_code == 200 and res.json():
             return res.json()[0].get("value", {})
         # Seed default
-        default_val = {"registration_status": "OPEN", "deadline": "2026-09-10T18:30:00.000Z", "allow_switch_committee": False}
+        default_val = {"registration_status": "OPEN", "deadline": "2026-11-20T23:59:59.000Z", "allow_switch_committee": False}
         db_save_config(default_val)
         return default_val
 
@@ -952,8 +952,14 @@ def api_login():
         return jsonify({"error": "Password required."}), 400
 
     # Fetch stored passwords config
-    saved_passwords = db_get_passwords()
-    stored_hash = saved_passwords.get(role) or DEFAULT_HASHES.get(role)
+    saved_passwords = db_get_passwords() or {}
+    stored_hash = saved_passwords.get(role)
+    if not stored_hash and role.startswith('in_charge_'):
+        stored_hash = saved_passwords.get('in_charge')
+    if not stored_hash:
+        stored_hash = DEFAULT_HASHES.get(role)
+        if not stored_hash and role.startswith('in_charge_'):
+            stored_hash = DEFAULT_HASHES.get('in_charge')
 
     if not stored_hash:
         return jsonify({"error": "Invalid credentials."}), 401
@@ -994,21 +1000,31 @@ def api_session():
 @require_auth(['coordinator'])
 def api_update_passwords():
     payload = request.json or {}
-    new_passwords = payload.get('passwords', {})
+    # Accept both nested { "passwords": { ... } } or flat { "in_charge_7": "...", ... }
+    new_passwords = payload.get('passwords')
+    if new_passwords is None or not isinstance(new_passwords, dict):
+        new_passwords = {k: v for k, v in payload.items() if k != 'passwords'}
 
     if not new_passwords:
         return jsonify({"error": "Passwords cannot be blank."}), 400
 
-    # BCrypt hash all passwords
+    # BCrypt hash all valid non-empty passwords
     hashed_dict = {}
-    for role, pw in new_passwords.items():
-        if pw:
-            hashed_dict[role] = bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt()).decode()
+    for role_name, pw in new_passwords.items():
+        if isinstance(pw, str) and pw.strip():
+            hashed_dict[role_name] = bcrypt.hashpw(pw.strip().encode('utf-8'), bcrypt.gensalt()).decode()
+
+    if not hashed_dict:
+        return jsonify({"error": "Please provide at least one non-empty password."}), 400
+
+    # Fetch existing saved passwords and merge to avoid wiping other roles
+    existing_passwords = db_get_passwords() or {}
+    existing_passwords.update(hashed_dict)
 
     # Save to db
-    success = db_save_passwords(hashed_dict)
+    success = db_save_passwords(existing_passwords)
     if success:
-        return jsonify({"success": True})
+        return jsonify({"success": True, "updated_roles": list(hashed_dict.keys())})
     return jsonify({"error": "Failed to update security passwords."}), 500
 
 @app.route('/api/config', methods=['GET', 'POST'])
