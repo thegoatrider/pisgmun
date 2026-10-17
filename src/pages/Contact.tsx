@@ -82,26 +82,37 @@ export const Contact: React.FC = () => {
               </h3>
             </div>
             
-            <div style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem', marginBottom: '1.25rem', display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+            <div style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', marginBottom: '1.25rem', display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ flexShrink: 0 }}>
                 <img
-                  src={coordinatorImg}
-                  alt="Ms. Suman Sinha"
+                  src={coordinatorImg || '/coordinator_suman_sinha.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/coordinator_suman_sinha.jpg') {
+                      target.src = '/coordinator_suman_sinha.jpg';
+                    }
+                  }}
+                  alt="Ms. Suman Sinha - MUN Coordinator"
                   style={{
-                    width: '90px',
-                    height: '110px',
+                    width: '120px',
+                    height: '145px',
                     objectFit: 'cover',
-                    borderRadius: 'var(--radius-sm)',
-                    boxShadow: '0 4px 10px rgba(10, 37, 64, 0.12)',
-                    border: '2px solid rgba(197, 160, 89, 0.35)'
+                    objectPosition: 'center 15%',
+                    borderRadius: '12px',
+                    boxShadow: '0 6px 16px rgba(10, 37, 64, 0.15)',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    display: 'block'
                   }}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ color: 'var(--color-primary)', fontSize: '1.2rem', margin: '0 0 0.5rem 0', fontWeight: 700 }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
+                  Head Coordinator
+                </span>
+                <h4 style={{ color: 'var(--color-primary)', fontSize: '1.35rem', margin: '0 0 0.65rem 0', fontWeight: 700 }}>
                   Ms. Suman Sinha
                 </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.92rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <strong style={{ color: 'var(--color-secondary)' }}>Email:</strong>
                     <a href="mailto:suman.sinha@podar.org" style={{ color: 'var(--color-secondary)', fontWeight: 600 }}>
@@ -134,33 +145,62 @@ export const Contact: React.FC = () => {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {gradeTeam.map((member) => (
-                <div key={member.grade} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem' }}>
-                  <div style={{ display: 'flex', gap: member.inCharge === 'Archana Tripathi' ? '1rem' : '0', alignItems: 'center' }}>
-                    {member.inCharge === 'Archana Tripathi' && (
+                <div key={member.grade} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.15rem 1.25rem' }}>
+                  <div style={{ display: 'flex', gap: '1.15rem', alignItems: 'center' }}>
+                    {member.inCharge === 'Archana Tripathi' ? (
                       <img
-                        src={archanaImg}
-                        alt="Archana Tripathi"
+                        src={archanaImg || '/archana_tripathi.jpg'}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                            target.src = '/archana_tripathi.jpg';
+                          }
+                        }}
+                        alt="Archana Tripathi - Grade 8 In-Charge"
                         style={{
-                          width: '64px',
-                          height: '76px',
+                          width: '90px',
+                          height: '110px',
                           objectFit: 'cover',
-                          borderRadius: 'var(--radius-sm)',
-                          boxShadow: '0 3px 8px rgba(10, 37, 64, 0.12)',
-                          border: '2px solid rgba(197, 160, 89, 0.35)',
-                          flexShrink: 0
+                          borderRadius: '10px',
+                          boxShadow: '0 4px 12px rgba(10, 37, 64, 0.15)',
+                          border: '2px solid rgba(197, 160, 89, 0.45)',
+                          flexShrink: 0,
+                          display: 'block'
                         }}
                       />
+                    ) : (
+                      <div
+                        style={{
+                          width: '75px',
+                          height: '92px',
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(0, 32, 74, 0.04)',
+                          border: '1.5px dashed var(--color-border)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'var(--color-primary)',
+                          flexShrink: 0,
+                          gap: '4px'
+                        }}
+                      >
+                        <User size={26} style={{ opacity: 0.5, color: 'var(--color-secondary)' }} />
+                        <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
+                          Gr. {member.grade}
+                        </span>
+                      </div>
                     )}
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                         <span style={{ color: 'var(--color-secondary)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           Grade {member.grade} In-Charge
                         </span>
-                        <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.98rem' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '1.05rem' }}>
                           {member.inCharge}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.85rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.88rem' }}>
                         <div>
                           <strong style={{ color: 'var(--color-text-muted)', marginRight: '6px' }}>Email:</strong>
                           <a href={`mailto:${member.email}`} style={{ color: 'var(--color-secondary)' }}>{member.email}</a>

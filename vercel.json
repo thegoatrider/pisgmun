@@ -38,6 +38,18 @@
       "dest": "/icons.svg"
     },
     {
+      "src": "/coordinator_suman_sinha.jpg",
+      "dest": "/coordinator_suman_sinha.jpg"
+    },
+    {
+      "src": "/archana_tripathi.jpg",
+      "dest": "/archana_tripathi.jpg"
+    },
+    {
+      "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
+      "dest": "/$1"
+    },
+    {
       "src": "/resources/(.*)",
       "headers": {
         "Content-Type": "application/pdf",

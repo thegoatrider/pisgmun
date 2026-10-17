@@ -126,16 +126,22 @@ export const CommitteeDetail: React.FC = () => {
               </span>
               {member.name?.toLowerCase().includes('archana') && (
                 <img
-                  src={archanaImg}
+                  src={archanaImg || '/archana_tripathi.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                      target.src = '/archana_tripathi.jpg';
+                    }
+                  }}
                   alt="Archana Tripathi"
                   style={{
-                    width: '52px',
-                    height: '62px',
+                    width: '75px',
+                    height: '92px',
                     objectFit: 'cover',
-                    borderRadius: 'var(--radius-sm)',
-                    margin: '0.5rem 0 0.25rem 0',
-                    border: '1.5px solid rgba(197, 160, 89, 0.4)',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                    borderRadius: '8px',
+                    margin: '0.6rem 0 0.4rem 0',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.12)'
                   }}
                 />
               )}

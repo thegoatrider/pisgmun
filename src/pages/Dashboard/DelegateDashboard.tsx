@@ -280,6 +280,49 @@ export const DelegateDashboard: React.FC = () => {
             )}
           </Card>
 
+          {/* Grade Teacher In-Charge Card */}
+          {delegateReg.grade === 8 && (
+            <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
+                Grade 8 Teacher In-Charge
+              </span>
+              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <img
+                  src={archanaImg || '/archana_tripathi.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                      target.src = '/archana_tripathi.jpg';
+                    }
+                  }}
+                  alt="Archana Tripathi - Grade 8 In-Charge"
+                  style={{
+                    width: '85px',
+                    height: '105px',
+                    objectFit: 'cover',
+                    borderRadius: '10px',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
+                    display: 'block',
+                    flexShrink: 0
+                  }}
+                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
+                  <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
+                    Archana Tripathi
+                  </h4>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                    Team Manager • Grade 8
+                  </span>
+                  <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href="mailto:archana.tripathi@podar.org" style={{ color: 'var(--color-secondary)' }}>archana.tripathi@podar.org</a></div>
+                    <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <a href="tel:+919730031190" style={{ color: 'var(--color-text-main)' }}>+91 9730031190</a></div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* PMUN Session Dates & Conference Timeline Card */}
           <Card elevation="md" style={{ padding: '2rem', border: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -441,70 +484,85 @@ export const DelegateDashboard: React.FC = () => {
                       </div>
                       {commObj?.eb_rapporteur && commObj.eb_rapporteur.includes(',') ? (
                         <>
-                          <div>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge 1</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-                              {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('archana') && (
-                                <img
-                                  src={archanaImg}
-                                  alt="Archana Tripathi"
-                                  style={{
-                                    width: '36px',
-                                    height: '44px',
-                                    objectFit: 'cover',
-                                    borderRadius: '4px',
-                                    border: '1.5px solid rgba(197, 160, 89, 0.4)',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                    flexShrink: 0
-                                  }}
-                                />
-                              )}
-                              <strong>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
-                            </div>
-                          </div>
-                          <div>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge 2</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-                              {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('archana') && (
-                                <img
-                                  src={archanaImg}
-                                  alt="Archana Tripathi"
-                                  style={{
-                                    width: '36px',
-                                    height: '44px',
-                                    objectFit: 'cover',
-                                    borderRadius: '4px',
-                                    border: '1.5px solid rgba(197, 160, 89, 0.4)',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                    flexShrink: 0
-                                  }}
-                                />
-                              )}
-                              <strong>{commObj.eb_rapporteur.split(',')[1]?.trim() || 'TBD'}</strong>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <div>
-                          <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-                            {commObj?.eb_rapporteur?.toLowerCase().includes('archana') && (
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px' }}>In-Charge 1</span>
+                            {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('archana') && (
                               <img
-                                src={archanaImg}
+                                src={archanaImg || '/archana_tripathi.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                                    target.src = '/archana_tripathi.jpg';
+                                  }
+                                }}
                                 alt="Archana Tripathi"
                                 style={{
-                                  width: '36px',
-                                  height: '44px',
+                                  width: '78px',
+                                  height: '96px',
                                   objectFit: 'cover',
-                                  borderRadius: '4px',
-                                  border: '1.5px solid rgba(197, 160, 89, 0.4)',
-                                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                  flexShrink: 0
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
                                 }}
                               />
                             )}
-                            <strong>{commObj?.eb_rapporteur || 'TBD'}</strong>
+                            <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
                           </div>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px' }}>In-Charge 2</span>
+                            {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('archana') && (
+                              <img
+                                src={archanaImg || '/archana_tripathi.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                                    target.src = '/archana_tripathi.jpg';
+                                  }
+                                }}
+                                alt="Archana Tripathi"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
+                            <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[1]?.trim() || 'TBD'}</strong>
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px' }}>In-Charge</span>
+                          {commObj?.eb_rapporteur?.toLowerCase().includes('archana') && (
+                            <img
+                              src={archanaImg || '/archana_tripathi.jpg'}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                                  target.src = '/archana_tripathi.jpg';
+                                }
+                              }}
+                              alt="Archana Tripathi"
+                              style={{
+                                width: '78px',
+                                height: '96px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(197, 160, 89, 0.45)',
+                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                display: 'block',
+                                marginBottom: '0.35rem'
+                              }}
+                            />
+                          )}
+                          <strong style={{ fontSize: '0.85rem' }}>{commObj?.eb_rapporteur || 'TBD'}</strong>
                         </div>
                       )}
                     </div>
@@ -966,9 +1024,15 @@ export const DelegateDashboard: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '3px' }}>
                         {msg.sender_role.startsWith('in_charge_') && delegateReg.grade === 8 && (
                           <img
-                            src={archanaImg}
+                            src={archanaImg || '/archana_tripathi.jpg'}
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
+                                target.src = '/archana_tripathi.jpg';
+                              }
+                            }}
                             alt="Archana Tripathi"
-                            style={{ width: '22px', height: '26px', objectFit: 'cover', borderRadius: '3px', border: '1px solid rgba(197, 160, 89, 0.4)' }}
+                            style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
                           />
                         )}
                         <span style={{ fontWeight: 700, fontSize: '0.68rem', color: msg.sender_role === 'delegate' ? 'var(--color-secondary)' : 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
