@@ -617,23 +617,11 @@ export const Home: React.FC = () => {
               </p>
 
               <p style={{ margin: 0, textAlign: 'justify' }}>
-                Model United Nations is far more than a simulation of international diplomacy. It is an exercise in critical thinking, intellectual humility, negotiation, and the courage to challenge perspectives different from our own. It teaches us that leadership is not merely about having the strongest argument, but about possessing the wisdom to listen, the ability to reason, and the integrity to seek solutions beyond personal interests.
+                Model United Nations is far more than a simulation of international diplomacy. It is an exercise in critical thinking, intellectual humility, and constructive debate. Leadership is not merely about having the strongest argument, but about possessing the wisdom to listen, the ability to reason, and the integrity to seek solutions beyond personal interests.
               </p>
 
               <p style={{ margin: 0, textAlign: 'justify' }}>
-                As you prepare to step into your respective committees, I encourage you to look beyond the pursuit of awards and accolades. Strive instead to understand the complexities of the world you seek to represent. Research diligently, articulate your ideas with clarity, defend your positions with evidence, and remain open to the possibility that the most meaningful progress often begins with a willingness to reconsider one's own assumptions.
-              </p>
-
-              <p style={{ margin: 0, textAlign: 'justify' }}>
-                Remember, a remarkable delegate is not necessarily the one who speaks the most, but the one whose contributions move the committee forward. Every question asked with purpose, every resolution drafted with thought, and every negotiation conducted with respect brings us closer to the true spirit of diplomacy.
-              </p>
-
-              <p style={{ margin: 0, textAlign: 'justify' }}>
-                PISGMUN is an opportunity for us to build upon our foundations, raise our standards, and create an environment where intellectual curiosity, constructive debate, and collaborative leadership can flourish. I urge each one of you to approach this experience with enthusiasm, discipline, and an unwavering commitment to excellence.
-              </p>
-
-              <p style={{ margin: 0, textAlign: 'justify' }}>
-                Come prepared to question, to learn, to collaborate, and, above all, to grow. Let your conduct reflect the values you represent, and let your ideas demonstrate the potential that young leaders hold to shape a more informed, equitable, and peaceful world.
+                As you step into your committees, look beyond the pursuit of awards. A remarkable delegate is not necessarily the one who speaks the most, but the one whose contributions move the committee forward. Research diligently, articulate your ideas with clarity, and defend your positions with evidence.
               </p>
 
               {/* Callout Quote */}
@@ -643,7 +631,7 @@ export const Home: React.FC = () => {
                   backgroundColor: 'rgba(12, 86, 179, 0.05)',
                   padding: '1.25rem 1.6rem',
                   borderRadius: '0 10px 10px 0',
-                  margin: '0.75rem 0',
+                  margin: '0.5rem 0',
                   color: 'var(--color-primary)',
                   fontWeight: 600,
                   fontSize: '1.05rem',
@@ -654,7 +642,7 @@ export const Home: React.FC = () => {
               </div>
 
               <p style={{ margin: 0, textAlign: 'justify' }}>
-                I look forward to witnessing thoughtful deliberations, compelling arguments, meaningful alliances, and the emergence of young leaders who understand that the future is not simply something to inherit, but something to shape.
+                I look forward to witnessing thoughtful deliberations, meaningful alliances, and the emergence of young leaders who understand that the future is not simply something to inherit, but something to shape.
               </p>
 
               <p style={{ margin: 0 }}>
