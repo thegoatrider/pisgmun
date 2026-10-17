@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Calendar, MapPin, Users, BookOpen, Globe2, Award, Users2, SearchCode, Milestone, ArrowRight, Clock, CheckCircle } from 'lucide-react';
+import { ShieldAlert, Calendar, MapPin, Users, BookOpen, Globe2, Award, Users2, SearchCode, Milestone, ArrowRight, Clock, CheckCircle, Quote } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { Button } from '../components/UI/Button';
 import { useAuth } from '../context/AuthContext';
+import coordinatorImg from '../assets/coordinator_suman_sinha.jpg';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -513,6 +514,191 @@ export const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* 3.5 Message from the MUN Coordinator */}
+      <section className="section" style={{ backgroundColor: '#ffffff', borderTop: '1px solid var(--color-border)' }}>
+        <div className="container">
+          <div className="text-center apple-scroll-reveal" style={{ marginBottom: '3rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontWeight: 700 }}>
+              Message from the MUN Coordinator
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: '0.5rem 0 1.25rem 0' }}>
+              <div style={{ height: '1.2px', width: '30px', backgroundColor: 'var(--color-border)' }}></div>
+              <span style={{ color: 'var(--color-secondary)', fontSize: '0.55rem' }}>◆</span>
+              <div style={{ height: '1.2px', width: '30px', backgroundColor: 'var(--color-border)' }}></div>
+            </div>
+            <p style={{ color: 'var(--color-text-muted)', maxWidth: '600px', margin: '0 auto' }}>
+              Official welcome address to delegates of the 2nd Edition of PISGMUN Nagpur 2026.
+            </p>
+          </div>
+
+          <Card
+            elevation="md"
+            className="apple-scroll-reveal"
+            style={{
+              maxWidth: '920px',
+              margin: '0 auto',
+              padding: '3rem',
+              backgroundColor: '#ffffff',
+              border: '1.5px solid var(--color-border)',
+              borderRadius: 'var(--radius-xl, 18px)',
+              boxShadow: '0 12px 35px -8px rgba(0, 32, 74, 0.08)'
+            }}
+          >
+            {/* Header: Coordinator Portrait & Name */}
+            <div
+              className="coordinator-header"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2rem',
+                marginBottom: '2.25rem',
+                paddingBottom: '2rem',
+                borderBottom: '1px solid var(--color-border)'
+              }}
+            >
+              <img
+                src={coordinatorImg}
+                alt="Ms. Suman Sinha - MUN Coordinator"
+                style={{
+                  width: '145px',
+                  height: '175px',
+                  objectFit: 'cover',
+                  objectPosition: 'center 15%',
+                  borderRadius: '16px',
+                  border: '2px solid rgba(0, 32, 74, 0.1)',
+                  boxShadow: '0 8px 20px rgba(0, 32, 74, 0.12)',
+                  flexShrink: 0
+                }}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(12, 86, 179, 0.08)', color: 'var(--color-secondary)', padding: '0.25rem 0.85rem', borderRadius: 'var(--radius-round)', fontSize: '0.78rem', fontWeight: 700, width: 'fit-content' }}>
+                  <Quote size={13} /> Welcome Address
+                </div>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '2.2rem',
+                    color: 'var(--color-primary)',
+                    margin: '0.2rem 0',
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
+                    lineHeight: 1.15
+                  }}
+                >
+                  Ms. Suman Sinha
+                </h3>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-secondary)' }}>
+                  MUN Coordinator
+                </div>
+                <div style={{ fontSize: '0.92rem', color: 'var(--color-text-muted)' }}>
+                  Podar International School, Godhani • Nagpur
+                </div>
+              </div>
+            </div>
+
+            {/* Letter Body */}
+            <div
+              style={{
+                fontSize: '1.02rem',
+                color: 'var(--color-text-main)',
+                lineHeight: '1.9',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.35rem'
+              }}
+            >
+              <p style={{ margin: 0, fontWeight: 700, fontSize: '1.15rem', color: 'var(--color-primary)' }}>
+                Dear Delegates,
+              </p>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                It is my immense pleasure to welcome you to the <strong style={{ color: 'var(--color-primary)' }}>2nd Edition of PISGMUN, Nagpur</strong> — a platform where curiosity meets conviction, diplomacy meets determination, and young minds discover the power of their voices.
+              </p>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                Model United Nations is far more than a simulation of international diplomacy. It is an exercise in critical thinking, intellectual humility, negotiation, and the courage to challenge perspectives different from our own. It teaches us that leadership is not merely about having the strongest argument, but about possessing the wisdom to listen, the ability to reason, and the integrity to seek solutions beyond personal interests.
+              </p>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                As you prepare to step into your respective committees, I encourage you to look beyond the pursuit of awards and accolades. Strive instead to understand the complexities of the world you seek to represent. Research diligently, articulate your ideas with clarity, defend your positions with evidence, and remain open to the possibility that the most meaningful progress often begins with a willingness to reconsider one's own assumptions.
+              </p>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                Remember, a remarkable delegate is not necessarily the one who speaks the most, but the one whose contributions move the committee forward. Every question asked with purpose, every resolution drafted with thought, and every negotiation conducted with respect brings us closer to the true spirit of diplomacy.
+              </p>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                PISGMUN is an opportunity for us to build upon our foundations, raise our standards, and create an environment where intellectual curiosity, constructive debate, and collaborative leadership can flourish. I urge each one of you to approach this experience with enthusiasm, discipline, and an unwavering commitment to excellence.
+              </p>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                Come prepared to question, to learn, to collaborate, and, above all, to grow. Let your conduct reflect the values you represent, and let your ideas demonstrate the potential that young leaders hold to shape a more informed, equitable, and peaceful world.
+              </p>
+
+              {/* Callout Quote */}
+              <div
+                style={{
+                  borderLeft: '4px solid var(--color-secondary)',
+                  backgroundColor: 'rgba(12, 86, 179, 0.05)',
+                  padding: '1.25rem 1.6rem',
+                  borderRadius: '0 10px 10px 0',
+                  margin: '0.75rem 0',
+                  color: 'var(--color-primary)',
+                  fontWeight: 600,
+                  fontSize: '1.05rem',
+                  lineHeight: '1.75'
+                }}
+              >
+                The true measure of your participation will not lie solely in the recognition you receive, but in the perspective you gain, the confidence you develop, and the difference you make to the discussions around you.
+              </div>
+
+              <p style={{ margin: 0, textAlign: 'justify' }}>
+                I look forward to witnessing thoughtful deliberations, compelling arguments, meaningful alliances, and the emergence of young leaders who understand that the future is not simply something to inherit, but something to shape.
+              </p>
+
+              <p style={{ margin: 0 }}>
+                Wishing all delegates an enriching, intellectually stimulating, and memorable experience.
+              </p>
+
+              {/* Sign-off */}
+              <div
+                style={{
+                  marginTop: '1.5rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid var(--color-border)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.4rem'
+                }}
+              >
+                <div style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '1.08rem', letterSpacing: '0.3px', marginBottom: '0.75rem' }}>
+                  Give your best. Think beyond the obvious. Lead with purpose.
+                </div>
+                <div style={{ color: 'var(--color-text-muted)', fontSize: '0.92rem' }}>
+                  Warm regards,
+                </div>
+                <div style={{ fontWeight: 800, color: 'var(--color-primary)', fontSize: '1.05rem' }}>
+                  MUN Coordinator
+                </div>
+                <div style={{ fontStyle: 'italic', color: 'var(--color-text-muted)', fontSize: '0.92rem' }}>
+                  Podar International School, Godhani
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .coordinator-header {
+            flex-direction: column !important;
+            text-align: center !important;
+            align-items: center !important;
+          }
+        }
+      `}</style>
 
       {/* 4. Why PMUN Benefits */}
       <section className="section" style={{ backgroundColor: 'var(--color-bg-surface)', borderTop: '1px solid var(--color-border)' }}>
