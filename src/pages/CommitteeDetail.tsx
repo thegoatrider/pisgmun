@@ -6,6 +6,7 @@ import { Card } from '../components/UI/Card';
 import { Button } from '../components/UI/Button';
 import { Accordion } from '../components/UI/Accordion';
 import { FileText, Download, ArrowLeft, Loader2 } from 'lucide-react';
+import archanaImg from '../assets/archana_tripathi.jpg';
 
 export const CommitteeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -119,10 +120,25 @@ export const CommitteeDetail: React.FC = () => {
               { role: 'In-Charge', name: committee.eb_rapporteur },
             ])
           ].map((member, i) => (
-            <div key={i} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem', textAlign: 'center' }}>
+            <div key={i} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>
                 {member.role}
               </span>
+              {member.name?.toLowerCase().includes('archana') && (
+                <img
+                  src={archanaImg}
+                  alt="Archana Tripathi"
+                  style={{
+                    width: '52px',
+                    height: '62px',
+                    objectFit: 'cover',
+                    borderRadius: 'var(--radius-sm)',
+                    margin: '0.5rem 0 0.25rem 0',
+                    border: '1.5px solid rgba(197, 160, 89, 0.4)',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                  }}
+                />
+              )}
               <h4 style={{ color: 'var(--color-primary)', margin: '0.25rem 0 0 0', fontSize: '1.1rem' }}>
                 {member.name}
               </h4>

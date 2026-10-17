@@ -3,6 +3,8 @@ import { User, Users, Send, CheckCircle } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { Input } from '../components/UI/Input';
 import { Button } from '../components/UI/Button';
+import coordinatorImg from '../assets/coordinator_suman_sinha.jpg';
+import archanaImg from '../assets/archana_tripathi.jpg';
 
 export const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -80,22 +82,38 @@ export const Contact: React.FC = () => {
               </h3>
             </div>
             
-            <div style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', marginBottom: '1.25rem' }}>
-              <h4 style={{ color: 'var(--color-primary)', fontSize: '1.2rem', margin: '0 0 0.75rem 0', fontWeight: 700 }}>
-                Suman Sinha
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.9rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <strong style={{ color: 'var(--color-secondary)' }}>Email:</strong>
-                  <a href="mailto:suman.sinha@podar.org" style={{ color: 'var(--color-secondary)', fontWeight: 600 }}>
-                    suman.sinha@podar.org
-                  </a>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong>
-                  <a href="tel:+919373959534" style={{ color: 'var(--color-text-main)', fontWeight: 600 }}>
-                    +91 9373959534
-                  </a>
+            <div style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem', marginBottom: '1.25rem', display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+              <div style={{ flexShrink: 0 }}>
+                <img
+                  src={coordinatorImg}
+                  alt="Ms. Suman Sinha"
+                  style={{
+                    width: '90px',
+                    height: '110px',
+                    objectFit: 'cover',
+                    borderRadius: 'var(--radius-sm)',
+                    boxShadow: '0 4px 10px rgba(10, 37, 64, 0.12)',
+                    border: '2px solid rgba(197, 160, 89, 0.35)'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ color: 'var(--color-primary)', fontSize: '1.2rem', margin: '0 0 0.5rem 0', fontWeight: 700 }}>
+                  Ms. Suman Sinha
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.9rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <strong style={{ color: 'var(--color-secondary)' }}>Email:</strong>
+                    <a href="mailto:suman.sinha@podar.org" style={{ color: 'var(--color-secondary)', fontWeight: 600 }}>
+                      suman.sinha@podar.org
+                    </a>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong>
+                    <a href="tel:+919373959534" style={{ color: 'var(--color-text-main)', fontWeight: 600 }}>
+                      +91 9373959534
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -117,22 +135,41 @@ export const Contact: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {gradeTeam.map((member) => (
                 <div key={member.grade} style={{ backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <span style={{ color: 'var(--color-secondary)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      Grade {member.grade} In-Charge
-                    </span>
-                    <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.98rem' }}>
-                      {member.inCharge}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.85rem' }}>
-                    <div>
-                      <strong style={{ color: 'var(--color-text-muted)', marginRight: '6px' }}>Email:</strong>
-                      <a href={`mailto:${member.email}`} style={{ color: 'var(--color-secondary)' }}>{member.email}</a>
-                    </div>
-                    <div>
-                      <strong style={{ color: 'var(--color-text-muted)', marginRight: '6px' }}>Phone:</strong>
-                      <a href={`tel:${member.contact.replace(/\s+/g, '')}`} style={{ color: 'var(--color-text-main)' }}>{member.contact}</a>
+                  <div style={{ display: 'flex', gap: member.inCharge === 'Archana Tripathi' ? '1rem' : '0', alignItems: 'center' }}>
+                    {member.inCharge === 'Archana Tripathi' && (
+                      <img
+                        src={archanaImg}
+                        alt="Archana Tripathi"
+                        style={{
+                          width: '64px',
+                          height: '76px',
+                          objectFit: 'cover',
+                          borderRadius: 'var(--radius-sm)',
+                          boxShadow: '0 3px 8px rgba(10, 37, 64, 0.12)',
+                          border: '2px solid rgba(197, 160, 89, 0.35)',
+                          flexShrink: 0
+                        }}
+                      />
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <span style={{ color: 'var(--color-secondary)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          Grade {member.grade} In-Charge
+                        </span>
+                        <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.98rem' }}>
+                          {member.inCharge}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.85rem' }}>
+                        <div>
+                          <strong style={{ color: 'var(--color-text-muted)', marginRight: '6px' }}>Email:</strong>
+                          <a href={`mailto:${member.email}`} style={{ color: 'var(--color-secondary)' }}>{member.email}</a>
+                        </div>
+                        <div>
+                          <strong style={{ color: 'var(--color-text-muted)', marginRight: '6px' }}>Phone:</strong>
+                          <a href={`tel:${member.contact.replace(/\s+/g, '')}`} style={{ color: 'var(--color-text-main)' }}>{member.contact}</a>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

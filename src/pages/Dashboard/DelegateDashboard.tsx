@@ -6,6 +6,7 @@ import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
 import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2, Calendar, Camera, ChevronRight } from 'lucide-react';
 import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer';
+import archanaImg from '../../assets/archana_tripathi.jpg';
 
 export const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -442,17 +443,68 @@ export const DelegateDashboard: React.FC = () => {
                         <>
                           <div>
                             <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge 1</span>
-                            <strong>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
+                              {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('archana') && (
+                                <img
+                                  src={archanaImg}
+                                  alt="Archana Tripathi"
+                                  style={{
+                                    width: '36px',
+                                    height: '44px',
+                                    objectFit: 'cover',
+                                    borderRadius: '4px',
+                                    border: '1.5px solid rgba(197, 160, 89, 0.4)',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    flexShrink: 0
+                                  }}
+                                />
+                              )}
+                              <strong>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
+                            </div>
                           </div>
                           <div>
                             <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge 2</span>
-                            <strong>{commObj.eb_rapporteur.split(',')[1]?.trim() || 'TBD'}</strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
+                              {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('archana') && (
+                                <img
+                                  src={archanaImg}
+                                  alt="Archana Tripathi"
+                                  style={{
+                                    width: '36px',
+                                    height: '44px',
+                                    objectFit: 'cover',
+                                    borderRadius: '4px',
+                                    border: '1.5px solid rgba(197, 160, 89, 0.4)',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    flexShrink: 0
+                                  }}
+                                />
+                              )}
+                              <strong>{commObj.eb_rapporteur.split(',')[1]?.trim() || 'TBD'}</strong>
+                            </div>
                           </div>
                         </>
                       ) : (
                         <div>
                           <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block' }}>In-Charge</span>
-                          <strong>{commObj?.eb_rapporteur || 'TBD'}</strong>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
+                            {commObj?.eb_rapporteur?.toLowerCase().includes('archana') && (
+                              <img
+                                src={archanaImg}
+                                alt="Archana Tripathi"
+                                style={{
+                                  width: '36px',
+                                  height: '44px',
+                                  objectFit: 'cover',
+                                  borderRadius: '4px',
+                                  border: '1.5px solid rgba(197, 160, 89, 0.4)',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                  flexShrink: 0
+                                }}
+                              />
+                            )}
+                            <strong>{commObj?.eb_rapporteur || 'TBD'}</strong>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -867,7 +919,7 @@ export const DelegateDashboard: React.FC = () => {
                   transition: 'all 0.15s'
                 }}
               >
-                In-Charge (Grade {delegateReg.grade})
+                {delegateReg.grade === 8 ? 'In-Charge (Archana Tripathi - Gr. 8)' : `In-Charge (Grade ${delegateReg.grade})`}
               </button>
             </div>
 
@@ -911,8 +963,17 @@ export const DelegateDashboard: React.FC = () => {
                         lineHeight: '1.4'
                       }}
                     >
-                      <div style={{ fontWeight: 700, fontSize: '0.68rem', color: msg.sender_role === 'delegate' ? 'var(--color-secondary)' : 'var(--color-primary)', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {msg.sender_role === 'delegate' ? 'You (Delegate)' : msg.sender_role === 'coordinator' ? 'MUN Coordinator' : `Grade ${delegateReg.grade} In-Charge`}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '3px' }}>
+                        {msg.sender_role.startsWith('in_charge_') && delegateReg.grade === 8 && (
+                          <img
+                            src={archanaImg}
+                            alt="Archana Tripathi"
+                            style={{ width: '22px', height: '26px', objectFit: 'cover', borderRadius: '3px', border: '1px solid rgba(197, 160, 89, 0.4)' }}
+                          />
+                        )}
+                        <span style={{ fontWeight: 700, fontSize: '0.68rem', color: msg.sender_role === 'delegate' ? 'var(--color-secondary)' : 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {msg.sender_role === 'delegate' ? 'You (Delegate)' : msg.sender_role === 'coordinator' ? 'MUN Coordinator' : delegateReg.grade === 8 ? 'Archana Tripathi (Grade 8 In-Charge)' : `Grade ${delegateReg.grade} In-Charge`}
+                        </span>
                       </div>
                       <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
                       <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
