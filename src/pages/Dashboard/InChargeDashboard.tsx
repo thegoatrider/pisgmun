@@ -4,7 +4,16 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/UI/Card';
 import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
-import { Loader2, Download, Search, LogOut } from 'lucide-react';
+import { Loader2, Download, Search, LogOut, Calendar, X, CheckSquare, Square, UserCheck } from 'lucide-react';
+import { API } from '../../services/api';
+
+const CONFERENCE_DATES = [
+  { id: '2026-10-15', label: '15 Oct (Session 1)' },
+  { id: '2026-10-16', label: '16 Oct (Session 2)' },
+  { id: '2026-10-17', label: '17 Oct (Session 3)' },
+  { id: '2026-10-21', label: '21 Oct (Session 4)' },
+  { id: '2026-10-28', label: '28 Oct (Session 5)' },
+];
 
 export const InChargeDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +22,8 @@ export const InChargeDashboard: React.FC = () => {
   const [inChargeGrade, setInChargeGrade] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [selectedAttendanceDate, setSelectedAttendanceDate] = useState<string>('2026-10-15');
+  const [attendanceMap, setAttendanceMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const storedGrade = localStorage.getItem('pmun_session_incharge_grade');
@@ -111,6 +122,166 @@ export const InChargeDashboard: React.FC = () => {
 
   // Filter registrations for this grade
   const gradeRegistrations = registrations.filter((r) => r.grade === inChargeGrade);
+
+  // Attendance synchronization (Local + Server)
+  useEffect(() => {
+    if (!inChargeGrade || !selectedAttendanceDate) return;
+    const localKey = `pmun_attendance_${inChargeGrade}_${selectedAttendanceDate}`;
+    const cached = localStorage.getItem(localKey);
+    if (cached) {
+      try {
+        setAttendanceMap(JSON.parse(cached));
+      } catch {}
+    } else {
+      setAttendanceMap({});
+    }
+
+    API.getAttendance(inChargeGrade, selectedAttendanceDate).then((serverData) => {
+      if (serverData && Object.keys(serverData).length > 0) {
+        setAttendanceMap((prev) => {
+          const merged = { ...serverData, ...prev };
+          localStorage.setItem(localKey, JSON.stringify(merged));
+          return merged;
+        });
+      }
+    });
+  }, [inChargeGrade, selectedAttendanceDate]);
+
+  // EB Name matching helper
+  const checkNameMatch = (officialEbName?: string, regName?: string) => {
+    if (!officialEbName || !regName) return false;
+    const ebParts = officialEbName.toLowerCase().replace(/\([^\)]*\)/g, '').trim().split(/\s+/).filter(Boolean);
+    const regParts = regName.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const ebClean = ebParts.join(' ');
+    const regClean = regParts.join(' ');
+    if (ebClean && (ebClean.includes(regClean) || regClean.includes(ebClean))) return true;
+    if (ebParts.length > 0 && regParts.length > 0) {
+      const firstEb = ebParts[0];
+      const lastEb = ebParts[ebParts.length - 1];
+      const firstReg = regParts[0];
+      const lastReg = regParts[regParts.length - 1];
+      if ((firstEb === firstReg && (lastEb === lastReg || ebParts.length === 1)) || (lastEb === lastReg && ebParts.length > 1 && regParts.length > 1)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const commMap: Record<number, string> = {
+    7: 'unep',
+    8: 'un-women',
+    9: 'unhrc',
+    10: 'unicef'
+  };
+  const gradeTargetComm = inChargeGrade ? commMap[inChargeGrade] : '';
+
+  // Attendance Roster: All approved delegates with final countries.
+  // Rule: Do not show chairs and vice chairs of different committees, show Naisha Phadke in Grade 10 roster too.
+  const attendanceRoster = registrations.filter((r) => {
+    if (r.status !== 'APPROVED') return false;
+
+    // Special instruction: show Naisha Phadke in Grade 10 attendance roster too
+    const isNaisha = r.name.toLowerCase().includes('naisha');
+    if (inChargeGrade === 10 && isNaisha) {
+      return true;
+    }
+
+    // Do not show chairs and vice chairs of different committees
+    const isChairOrVcOfOtherComm = committees.some((c) => {
+      if (c.id === gradeTargetComm) return false;
+      return checkNameMatch(c.eb_chair, r.name) || checkNameMatch(c.eb_vice_chair, r.name);
+    });
+    if (isChairOrVcOfOtherComm) {
+      return false;
+    }
+
+    // Must be assigned to this grade's committee, or registered in this in-charge grade
+    if (r.committee === gradeTargetComm) return true;
+    if (r.grade === inChargeGrade && (r.committee === gradeTargetComm || !r.committee || r.committee === 'NOT ASSIGNED')) return true;
+
+    return false;
+  });
+
+  const filteredAttendanceRoster = attendanceRoster.filter((r) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return r.name.toLowerCase().includes(q) ||
+           r.id.toLowerCase().includes(q) ||
+           (r.assigned_country && r.assigned_country.toLowerCase().includes(q)) ||
+           (r.section && r.section.toLowerCase().includes(q));
+  });
+
+  const handleToggleAttendance = (regId: string) => {
+    setAttendanceMap((prev) => {
+      const current = !!prev[regId];
+      const updated = { ...prev, [regId]: !current };
+      if (inChargeGrade) {
+        const localKey = `pmun_attendance_${inChargeGrade}_${selectedAttendanceDate}`;
+        localStorage.setItem(localKey, JSON.stringify(updated));
+        API.saveAttendance(inChargeGrade, selectedAttendanceDate, updated);
+      }
+      return updated;
+    });
+  };
+
+  const handleMarkAllAttendance = (status: boolean) => {
+    const updated: Record<string, boolean> = {};
+    attendanceRoster.forEach((r) => {
+      updated[r.id] = status;
+    });
+    setAttendanceMap(updated);
+    if (inChargeGrade) {
+      const localKey = `pmun_attendance_${inChargeGrade}_${selectedAttendanceDate}`;
+      localStorage.setItem(localKey, JSON.stringify(updated));
+      API.saveAttendance(inChargeGrade, selectedAttendanceDate, updated);
+    }
+  };
+
+  const presentCount = attendanceRoster.filter((r) => !!attendanceMap[r.id]).length;
+  const absentCount = attendanceRoster.length - presentCount;
+  const attendancePercent = attendanceRoster.length > 0 ? Math.round((presentCount / attendanceRoster.length) * 100) : 0;
+
+  const handleExportAttendanceCSV = () => {
+    if (attendanceRoster.length === 0) {
+      alert('No delegates in attendance roster to export.');
+      return;
+    }
+
+    const headers = [
+      'Registration ID',
+      'Delegate Name',
+      'Grade',
+      'Section',
+      'School',
+      'Assigned Committee',
+      'Final Country / Portfolio',
+      'Date',
+      'Attendance Status'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...attendanceRoster.map((r) => [
+        r.id,
+        `"${r.name.replace(/"/g, '""')}"`,
+        r.grade,
+        r.section,
+        `"${r.school.replace(/"/g, '""')}"`,
+        r.committee,
+        `"${(r.assigned_country || '').replace(/"/g, '""')}"`,
+        selectedAttendanceDate,
+        attendanceMap[r.id] ? 'PRESENT' : 'ABSENT'
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `PMUN_Grade_${inChargeGrade}_Attendance_${selectedAttendanceDate}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Stats calculation
   const totalCount = gradeRegistrations.length;
@@ -295,8 +466,46 @@ export const InChargeDashboard: React.FC = () => {
 
       {/* Roster Filters Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem', flexWrap: 'wrap' }} className="filters-header">
-        {/* Search */}
-        {statusFilter !== 'MESSAGES' ? (
+        {/* Search or Dates Selector */}
+        {statusFilter === 'ATTENDANCE' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-primary)' }}>
+              <Calendar size={15} style={{ color: 'var(--color-secondary)' }} />
+              <span>Session Date:</span>
+            </div>
+            <div style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--color-border)', padding: '3px', borderRadius: 'var(--radius-md)', flexWrap: 'wrap' }}>
+              {CONFERENCE_DATES.map((cd) => (
+                <button
+                  key={cd.id}
+                  type="button"
+                  onClick={() => setSelectedAttendanceDate(cd.id)}
+                  style={{
+                    border: 'none',
+                    background: selectedAttendanceDate === cd.id ? '#ffffff' : 'transparent',
+                    color: selectedAttendanceDate === cd.id ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                    padding: '0.35rem 0.75rem',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-sm)',
+                    boxShadow: selectedAttendanceDate === cd.id ? 'var(--shadow-sm)' : 'none',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {cd.label}
+                </button>
+              ))}
+            </div>
+            <input
+              type="date"
+              value={selectedAttendanceDate}
+              onChange={(e) => setSelectedAttendanceDate(e.target.value)}
+              className="form-control"
+              style={{ padding: '0.3rem 0.55rem', fontSize: '0.75rem', width: 'auto', fontWeight: 600 }}
+              title="Pick a custom session date"
+            />
+          </div>
+        ) : statusFilter !== 'MESSAGES' ? (
           <div style={{ position: 'relative', width: '320px' }}>
             <Search size={18} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--color-text-muted)' }} />
             <input
@@ -314,7 +523,7 @@ export const InChargeDashboard: React.FC = () => {
 
         {/* Tab Filters */}
         <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--color-border)', padding: '3px', borderRadius: 'var(--radius-md)' }}>
-          {['ALL', 'APPROVED', 'PENDING', 'REJECTED', 'MESSAGES'].map((f) => (
+          {['ALL', 'APPROVED', 'PENDING', 'REJECTED', 'MESSAGES', 'ATTENDANCE'].map((f) => (
             <button
               key={f}
               onClick={() => setStatusFilter(f)}
@@ -331,7 +540,7 @@ export const InChargeDashboard: React.FC = () => {
                 transition: 'all var(--transition-fast)',
               }}
             >
-              {f === 'MESSAGES' ? 'Messages' : f}
+              {f === 'MESSAGES' ? 'Messages' : f === 'ATTENDANCE' ? 'Attendance' : f}
             </button>
           ))}
         </div>
@@ -474,6 +683,172 @@ export const InChargeDashboard: React.FC = () => {
                 </Button>
               </form>
             </div>
+          </div>
+        </Card>
+      ) : statusFilter === 'ATTENDANCE' ? (
+        <Card elevation="md" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Header Controls & Summary Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '0.5px', display: 'block' }}>
+                  Active Attendance Roster
+                </span>
+                <h3 style={{ margin: '0.2rem 0 0 0', color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: 700 }}>
+                  Grade {inChargeGrade} • {CONFERENCE_DATES.find(cd => cd.id === selectedAttendanceDate)?.label || selectedAttendanceDate}
+                </h3>
+              </div>
+
+              {/* Attendance Metrics */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 700, color: '#059669' }}>
+                  <UserCheck size={15} />
+                  <span>Present: {presentCount} / {attendanceRoster.length} ({attendancePercent}%)</span>
+                </div>
+                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 700, color: '#dc2626' }}>
+                  <X size={15} />
+                  <span>Absent: {absentCount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleMarkAllAttendance(true)}
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <CheckSquare size={14} style={{ color: '#059669' }} />
+                Mark All Present
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleMarkAllAttendance(false)}
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <Square size={14} style={{ color: '#dc2626' }} />
+                Mark All Absent
+              </Button>
+
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleExportAttendanceCSV}
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <Download size={14} />
+                Export CSV
+              </Button>
+            </div>
+          </div>
+
+          {/* Attendance Table */}
+          <div className="table-responsive">
+            <table className="table table-compact" style={{ width: '100%' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '130px', textAlign: 'center' }}>Attendance</th>
+                  <th>ID</th>
+                  <th>Delegate Name</th>
+                  <th>Sec</th>
+                  <th>School</th>
+                  <th>Final Country / Portfolio</th>
+                  <th>Assigned Committee</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAttendanceRoster.map((reg) => {
+                  const isPresent = !!attendanceMap[reg.id];
+                  const isEbRole = reg.assigned_country === 'Chair' || reg.assigned_country === 'Vice-Chair';
+                  return (
+                    <tr
+                      key={reg.id}
+                      onClick={() => handleToggleAttendance(reg.id)}
+                      style={{
+                        cursor: 'pointer',
+                        backgroundColor: isPresent ? 'rgba(16, 185, 129, 0.04)' : '#ffffff',
+                        transition: 'background-color 0.15s'
+                      }}
+                    >
+                      {/* Checkbox & Status Indicator */}
+                      <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', margin: 0 }}>
+                          <input
+                            type="checkbox"
+                            checked={isPresent}
+                            onChange={() => handleToggleAttendance(reg.id)}
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              cursor: 'pointer',
+                              accentColor: '#059669'
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 800,
+                              letterSpacing: '0.5px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              backgroundColor: isPresent ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.12)',
+                              color: isPresent ? '#059669' : '#dc2626'
+                            }}
+                          >
+                            {isPresent ? 'PRESENT' : 'ABSENT'}
+                          </span>
+                        </label>
+                      </td>
+
+                      <td style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '0.82rem' }}>
+                        {reg.id}
+                      </td>
+
+                      <td>
+                        <div style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.88rem' }}>
+                          {reg.name}
+                        </div>
+                        {isEbRole && (
+                          <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px' }}>
+                            ★ Executive Board
+                          </span>
+                        )}
+                      </td>
+
+                      <td style={{ fontWeight: 600 }}>{reg.section}</td>
+
+                      <td style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>
+                        {reg.school}
+                      </td>
+
+                      <td>
+                        <strong style={{ color: isEbRole ? 'var(--color-primary)' : 'var(--color-secondary)', fontSize: '0.88rem' }}>
+                          {reg.assigned_country || 'Pending'}
+                        </strong>
+                      </td>
+
+                      <td>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', padding: '2px 8px', borderRadius: '4px' }}>
+                          {reg.committee.toUpperCase()}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {filteredAttendanceRoster.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="text-center" style={{ padding: '3rem', color: 'var(--color-text-muted)' }}>
+                      No approved delegates found for Grade {inChargeGrade} attendance roster.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </Card>
       ) : (

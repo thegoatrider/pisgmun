@@ -222,16 +222,48 @@ export const DelegateDashboard: React.FC = () => {
 
   const commPdfPath = pdfMapping[targetCommId?.toLowerCase()] || '#';
 
+  // Determine Chair / Vice-Chair status
+  const checkNameMatch = (officialEbName: string, regName: string) => {
+    if (!officialEbName || !regName) return false;
+    const ebParts = officialEbName.toLowerCase().replace(/\([^\)]*\)/g, '').trim().split(/\s+/).filter(Boolean);
+    const regParts = regName.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const ebClean = ebParts.join(' ');
+    const regClean = regParts.join(' ');
+    if (ebClean && (ebClean.includes(regClean) || regClean.includes(ebClean))) return true;
+    if (ebParts.length > 0 && regParts.length > 0) {
+      const firstEb = ebParts[0];
+      const lastEb = ebParts[ebParts.length - 1];
+      const firstReg = regParts[0];
+      const lastReg = regParts[regParts.length - 1];
+      if ((firstEb === firstReg && (lastEb === lastReg || ebParts.length === 1)) || (lastEb === lastReg && ebParts.length > 1 && regParts.length > 1)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const isExplicitChair = assignedCountry?.trim().toLowerCase() === 'chair';
+  const isExplicitViceChair = assignedCountry?.trim().toLowerCase() === 'vice-chair' || assignedCountry?.trim().toLowerCase() === 'vice chair';
+
+  const isEbChair = isExplicitChair || committees.some((c) => checkNameMatch(c.eb_chair, name));
+  const isEbViceChair = !isEbChair && (isExplicitViceChair || committees.some((c) => checkNameMatch(c.eb_vice_chair, name)));
+
+  const greetingTitle = isEbChair
+    ? `Welcome, Chair ${name}`
+    : isEbViceChair
+    ? `Welcome, Vice-Chair ${name}`
+    : `Welcome, ${name}`;
+
   return (
     <div className="container section fade-in">
       {/* Welcome Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }} className="welcome-header">
         <div>
           <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '1px' }}>
-            Candidate Portal
+            {isEbChair || isEbViceChair ? 'Executive Board Portal' : 'Candidate Portal'}
           </span>
           <h2 style={{ fontSize: '2rem', color: 'var(--color-primary)', margin: '0.25rem 0 0 0' }}>
-            Welcome, {name}
+            {greetingTitle}
           </h2>
         </div>
         <Button variant="outline" size="sm" onClick={handleLogout}>
@@ -492,10 +524,10 @@ export const DelegateDashboard: React.FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.25rem' }}>
                   <div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 800, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
-                      Allocated Country
+                      {isEbChair || isEbViceChair ? 'Executive Board Role' : 'Allocated Country'}
                     </span>
                     <strong style={{ fontSize: '1.2rem', color: isApproved ? 'var(--color-secondary)' : 'var(--color-text-muted)' }}>
-                      {targetCountry}
+                      {isEbChair ? 'Chairperson' : isEbViceChair ? 'Vice Chairperson' : targetCountry}
                     </strong>
                   </div>
                   <div>

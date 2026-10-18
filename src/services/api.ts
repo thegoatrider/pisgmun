@@ -186,5 +186,31 @@ export const API = {
     });
     const data = await handleResponse(res);
     return !!data.success;
+  },
+
+  // Attendance
+  async getAttendance(grade: number, date?: string): Promise<Record<string, boolean>> {
+    try {
+      const url = date ? `/api/attendance?grade=${grade}&date=${encodeURIComponent(date)}` : `/api/attendance?grade=${grade}`;
+      const res = await fetch(url);
+      if (!res.ok) return {};
+      return await res.json();
+    } catch {
+      return {};
+    }
+  },
+
+  async saveAttendance(grade: number, date: string, attendance: Record<string, boolean>): Promise<boolean> {
+    try {
+      const res = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grade, date, attendance })
+      });
+      const data = await handleResponse(res);
+      return !!data.success;
+    } catch {
+      return false;
+    }
   }
 };

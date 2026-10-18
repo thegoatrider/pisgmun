@@ -372,6 +372,37 @@ def db_save_messages(msg_list):
         res = requests.post(url, headers=headers, json=payload)
         return res.status_code in (200, 201)
 
+def db_get_attendance():
+    if IS_DEMO_MODE:
+        return read_mock().get("attendance", {})
+    else:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.attendance"
+            res = requests.get(url, headers=get_supabase_headers())
+            if res.status_code == 200 and res.json():
+                return res.json()[0].get("value", {})
+        except Exception as e:
+            print("db_get_attendance error:", e)
+        return {}
+
+def db_save_attendance(att_dict):
+    if IS_DEMO_MODE:
+        data = read_mock()
+        data["attendance"] = att_dict
+        write_mock(data)
+        return True
+    else:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.attendance"
+            payload = {"key": "attendance", "value": att_dict, "updated_at": "now()"}
+            headers = get_supabase_headers()
+            headers["Prefer"] = "resolution=merge-duplicates"
+            res = requests.post(url, headers=headers, json=payload)
+            return res.status_code in (200, 201)
+        except Exception as e:
+            print("db_save_attendance error:", e)
+            return False
+
 def db_get_committees():
     if IS_DEMO_MODE:
         return read_mock().get("committees", [])
@@ -1053,6 +1084,33 @@ def api_config():
         if db_save_config(payload):
             return jsonify({"success": True})
         return jsonify({"error": "Failed to save settings."}), 500
+
+@app.route('/api/attendance', methods=['GET', 'POST'])
+def api_attendance():
+    if request.method == 'GET':
+        date_param = request.args.get('date')
+        grade_param = request.args.get('grade')
+        all_att = db_get_attendance() or {}
+        if date_param and grade_param:
+            return jsonify(all_att.get(f"{grade_param}_{date_param}", {}))
+        elif grade_param:
+            # Return all dates for this grade
+            prefix = f"{grade_param}_"
+            return jsonify({k[len(prefix):]: v for k, v in all_att.items() if k.startswith(prefix)})
+        return jsonify(all_att)
+    else:
+        payload = request.json or {}
+        grade = payload.get('grade')
+        date_str = payload.get('date')
+        attendance_map = payload.get('attendance', {})
+        if not grade or not date_str:
+            return jsonify({"error": "Missing grade or date"}), 400
+
+        all_att = db_get_attendance() or {}
+        all_att[f"{grade}_{date_str}"] = attendance_map
+        if db_save_attendance(all_att):
+            return jsonify({"success": True, "saved": len(attendance_map)})
+        return jsonify({"error": "Failed to save attendance."}), 500
 
 @app.route('/api/committees', methods=['GET'])
 def api_committees():
