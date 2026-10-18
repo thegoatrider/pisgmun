@@ -6,6 +6,7 @@ import { Button } from '../components/UI/Button';
 import coordinatorImg from '../assets/coordinator_suman_sinha.jpg';
 import archanaImg from '../assets/archana_tripathi.jpg';
 import shaliniImg from '../assets/shalini_pandey.jpg';
+import karishmaImg from '../assets/karishma_khankule.jpg';
 
 export const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -179,6 +180,27 @@ export const Contact: React.FC = () => {
                           }
                         }}
                         alt="Shalini Pandey - Grade 10 In-Charge"
+                        style={{
+                          width: '90px',
+                          height: '110px',
+                          objectFit: 'cover',
+                          borderRadius: '10px',
+                          boxShadow: '0 4px 12px rgba(10, 37, 64, 0.15)',
+                          border: '2px solid rgba(197, 160, 89, 0.45)',
+                          flexShrink: 0,
+                          display: 'block'
+                        }}
+                      />
+                    ) : member.inCharge === 'Karishma Khankule' ? (
+                      <img
+                        src={karishmaImg || '/karishma_khankule.jpg'}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== window.location.origin + '/karishma_khankule.jpg') {
+                            target.src = '/karishma_khankule.jpg';
+                          }
+                        }}
+                        alt="Karishma Khankule - Grade 7 In-Charge"
                         style={{
                           width: '90px',
                           height: '110px',

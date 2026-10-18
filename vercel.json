@@ -50,6 +50,10 @@
       "dest": "/shalini_pandey.jpg"
     },
     {
+      "src": "/karishma_khankule.jpg",
+      "dest": "/karishma_khankule.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },
