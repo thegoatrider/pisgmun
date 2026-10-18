@@ -9,6 +9,7 @@ import { FileText, Download, ArrowLeft, Loader2 } from 'lucide-react';
 import archanaImg from '../assets/archana_tripathi.jpg';
 import shaliniImg from '../assets/shalini_pandey.jpg';
 import karishmaImg from '../assets/karishma_khankule.jpg';
+import reenaImg from '../assets/reena_singh.jpg';
 
 export const CommitteeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -178,6 +179,27 @@ export const CommitteeDetail: React.FC = () => {
                     }
                   }}
                   alt="Karishma Khankule"
+                  style={{
+                    width: '75px',
+                    height: '92px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    margin: '0.6rem 0 0.4rem 0',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.12)'
+                  }}
+                />
+              )}
+              {member.name?.toLowerCase().includes('reena') && (
+                <img
+                  src={reenaImg || '/reena_singh.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/reena_singh.jpg') {
+                      target.src = '/reena_singh.jpg';
+                    }
+                  }}
+                  alt="Reena Singh"
                   style={{
                     width: '75px',
                     height: '92px',

@@ -9,6 +9,7 @@ import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer'
 import archanaImg from '../../assets/archana_tripathi.jpg';
 import shaliniImg from '../../assets/shalini_pandey.jpg';
 import karishmaImg from '../../assets/karishma_khankule.jpg';
+import reenaImg from '../../assets/reena_singh.jpg';
 
 export const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -400,6 +401,49 @@ export const DelegateDashboard: React.FC = () => {
             </Card>
           )}
 
+          {/* Grade 9 Teacher In-Charge Card */}
+          {delegateReg.grade === 9 && (
+            <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
+                Grade 9 Teacher In-Charge
+              </span>
+              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <img
+                  src={reenaImg || '/reena_singh.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/reena_singh.jpg') {
+                      target.src = '/reena_singh.jpg';
+                    }
+                  }}
+                  alt="Reena Singh - Grade 9 In-Charge"
+                  style={{
+                    width: '85px',
+                    height: '105px',
+                    objectFit: 'cover',
+                    borderRadius: '10px',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
+                    display: 'block',
+                    flexShrink: 0
+                  }}
+                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
+                  <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
+                    Reena Singh
+                  </h4>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                    Team Manager • Grade 9
+                  </span>
+                  <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href="mailto:reena.singh3@podar.org" style={{ color: 'var(--color-secondary)' }}>reena.singh3@podar.org</a></div>
+                    <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <a href="tel:+917972989376" style={{ color: 'var(--color-text-main)' }}>+91 7972989376</a></div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Grade 10 Teacher In-Charge Card */}
           {delegateReg.grade === 10 && (
             <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
@@ -672,6 +716,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }}
                               />
                             )}
+                            {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('reena') && (
+                              <img
+                                src={reenaImg || '/reena_singh.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/reena_singh.jpg') {
+                                    target.src = '/reena_singh.jpg';
+                                  }
+                                }}
+                                alt="Reena Singh"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
                             <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -730,6 +796,28 @@ export const DelegateDashboard: React.FC = () => {
                                   }
                                 }}
                                 alt="Karishma Khankule"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
+                            {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('reena') && (
+                              <img
+                                src={reenaImg || '/reena_singh.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/reena_singh.jpg') {
+                                    target.src = '/reena_singh.jpg';
+                                  }
+                                }}
+                                alt="Reena Singh"
                                 style={{
                                   width: '78px',
                                   height: '96px',
@@ -802,6 +890,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Karishma Khankule"
+                              style={{
+                                width: '78px',
+                                height: '96px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(197, 160, 89, 0.45)',
+                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                display: 'block',
+                                marginBottom: '0.35rem'
+                              }}
+                            />
+                          )}
+                          {commObj?.eb_rapporteur?.toLowerCase().includes('reena') && (
+                            <img
+                              src={reenaImg || '/reena_singh.jpg'}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (target.src !== window.location.origin + '/reena_singh.jpg') {
+                                  target.src = '/reena_singh.jpg';
+                                }
+                              }}
+                              alt="Reena Singh"
                               style={{
                                 width: '78px',
                                 height: '96px',
@@ -1229,7 +1339,7 @@ export const DelegateDashboard: React.FC = () => {
                   transition: 'all 0.15s'
                 }}
               >
-                {delegateReg.grade === 7 ? 'In-Charge (Karishma Khankule - Gr. 7)' : delegateReg.grade === 8 ? 'In-Charge (Archana Tripathi - Gr. 8)' : delegateReg.grade === 10 ? 'In-Charge (Shalini Pandey - Gr. 10)' : `In-Charge (Grade ${delegateReg.grade})`}
+                {delegateReg.grade === 7 ? 'In-Charge (Karishma Khankule - Gr. 7)' : delegateReg.grade === 8 ? 'In-Charge (Archana Tripathi - Gr. 8)' : delegateReg.grade === 9 ? 'In-Charge (Reena Singh - Gr. 9)' : delegateReg.grade === 10 ? 'In-Charge (Shalini Pandey - Gr. 10)' : `In-Charge (Grade ${delegateReg.grade})`}
               </button>
             </div>
 
@@ -1299,6 +1409,18 @@ export const DelegateDashboard: React.FC = () => {
                               alt="Archana Tripathi"
                               style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
                             />
+                          ) : delegateReg.grade === 9 ? (
+                            <img
+                              src={reenaImg || '/reena_singh.jpg'}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (target.src !== window.location.origin + '/reena_singh.jpg') {
+                                  target.src = '/reena_singh.jpg';
+                                }
+                              }}
+                              alt="Reena Singh"
+                              style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
+                            />
                           ) : delegateReg.grade === 10 ? (
                             <img
                               src={shaliniImg || '/shalini_pandey.jpg'}
@@ -1314,7 +1436,7 @@ export const DelegateDashboard: React.FC = () => {
                           ) : null
                         )}
                         <span style={{ fontWeight: 700, fontSize: '0.68rem', color: msg.sender_role === 'delegate' ? 'var(--color-secondary)' : 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          {msg.sender_role === 'delegate' ? 'You (Delegate)' : msg.sender_role === 'coordinator' ? 'MUN Coordinator' : delegateReg.grade === 7 ? 'Karishma Khankule (Grade 7 In-Charge)' : delegateReg.grade === 8 ? 'Archana Tripathi (Grade 8 In-Charge)' : delegateReg.grade === 10 ? 'Shalini Pandey (Grade 10 In-Charge)' : `Grade ${delegateReg.grade} In-Charge`}
+                          {msg.sender_role === 'delegate' ? 'You (Delegate)' : msg.sender_role === 'coordinator' ? 'MUN Coordinator' : delegateReg.grade === 7 ? 'Karishma Khankule (Grade 7 In-Charge)' : delegateReg.grade === 8 ? 'Archana Tripathi (Grade 8 In-Charge)' : delegateReg.grade === 9 ? 'Reena Singh (Grade 9 In-Charge)' : delegateReg.grade === 10 ? 'Shalini Pandey (Grade 10 In-Charge)' : `Grade ${delegateReg.grade} In-Charge`}
                         </span>
                       </div>
                       <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>

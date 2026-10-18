@@ -54,6 +54,10 @@
       "dest": "/karishma_khankule.jpg"
     },
     {
+      "src": "/reena_singh.jpg",
+      "dest": "/reena_singh.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },
