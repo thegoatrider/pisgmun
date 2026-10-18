@@ -191,8 +191,8 @@ if IS_DEMO_MODE:
         # Create base mockup JSON
         mock_data = {
             "config": {
-                "registration_status": "OPEN",
-                "deadline": "2026-09-01T00:00:00Z",
+                "registration_status": "CLOSED",
+                "deadline": "2026-10-18T00:00:00Z",
                 "allow_switch_committee": False
             },
             "passwords": {},
@@ -271,7 +271,7 @@ def db_get_config():
         if res.status_code == 200 and res.json():
             return res.json()[0].get("value", {})
         # Seed default
-        default_val = {"registration_status": "OPEN", "deadline": "2026-11-20T23:59:59.000Z", "allow_switch_committee": False}
+        default_val = {"registration_status": "CLOSED", "deadline": "2026-10-18T00:00:00.000Z", "allow_switch_committee": False}
         db_save_config(default_val)
         return default_val
 
