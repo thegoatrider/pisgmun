@@ -16,7 +16,9 @@ import {
   UserCheck, 
   FileText, 
   Eye, 
-  RefreshCw 
+  RefreshCw,
+  Save,
+  Check 
 } from 'lucide-react';
 import { API } from '../../services/api';
 
@@ -74,6 +76,9 @@ export const InChargeDashboard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [selectedAttendanceDate, setSelectedAttendanceDate] = useState<string>('2026-10-15');
   const [attendanceMap, setAttendanceMap] = useState<Record<string, boolean>>({});
+  const [isSavingAttendance, setIsSavingAttendance] = useState<boolean>(false);
+  const [attendanceSavedMessage, setAttendanceSavedMessage] = useState<string | null>(null);
+  const [hasUnsavedAttendance, setHasUnsavedAttendance] = useState<boolean>(false);
 
   // Position papers state
   const [positionPapers, setPositionPapers] = useState<any[]>([]);
@@ -241,6 +246,8 @@ export const InChargeDashboard: React.FC = () => {
   // Attendance synchronization (Local + Server)
   useEffect(() => {
     if (!inChargeComm || !selectedAttendanceDate) return;
+    setHasUnsavedAttendance(false);
+    setAttendanceSavedMessage(null);
     const g = COMM_TO_GRADE[inChargeComm] || inChargeComm;
     const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
     const legacyKey = `pmun_attendance_${g}_${selectedAttendanceDate}`;
@@ -345,6 +352,8 @@ export const InChargeDashboard: React.FC = () => {
     setAttendanceMap((prev) => {
       const current = !!prev[regId];
       const updated = { ...prev, [regId]: !current };
+      setHasUnsavedAttendance(true);
+      setAttendanceSavedMessage(null);
       if (inChargeComm) {
         const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
         localStorage.setItem(localKey, JSON.stringify(updated));
@@ -362,12 +371,41 @@ export const InChargeDashboard: React.FC = () => {
       updated[r.id] = status;
     });
     setAttendanceMap(updated);
+    setHasUnsavedAttendance(true);
+    setAttendanceSavedMessage(null);
     if (inChargeComm) {
       const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
       localStorage.setItem(localKey, JSON.stringify(updated));
       API.saveAttendance(inChargeComm, selectedAttendanceDate, updated);
       const g = COMM_TO_GRADE[inChargeComm];
       if (g) API.saveAttendance(g, selectedAttendanceDate, updated);
+    }
+  };
+
+  const handleSaveAttendance = async () => {
+    if (!inChargeComm || !selectedAttendanceDate) return;
+    setIsSavingAttendance(true);
+    setAttendanceSavedMessage(null);
+    try {
+      const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
+      localStorage.setItem(localKey, JSON.stringify(attendanceMap));
+
+      const success = await API.saveAttendance(inChargeComm, selectedAttendanceDate, attendanceMap);
+      const g = COMM_TO_GRADE[inChargeComm];
+      if (g) {
+        await API.saveAttendance(g, selectedAttendanceDate, attendanceMap);
+      }
+
+      if (success) {
+        setHasUnsavedAttendance(false);
+        setAttendanceSavedMessage(`Attendance saved successfully! (${presentCount} Present, ${absentCount} Absent)`);
+      } else {
+        alert('Could not save attendance to the server. Please verify your connection.');
+      }
+    } catch (err) {
+      alert('Error occurred while saving attendance.');
+    } finally {
+      setIsSavingAttendance(false);
     }
   };
 
@@ -1063,6 +1101,28 @@ export const InChargeDashboard: React.FC = () => {
             {/* Quick Actions */}
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveAttendance}
+                loading={isSavingAttendance}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.4rem 0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  backgroundColor: '#059669',
+                  borderColor: '#059669',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  boxShadow: hasUnsavedAttendance ? '0 0 0 2px rgba(5, 150, 105, 0.45)' : 'none'
+                }}
+              >
+                <Save size={14} />
+                Save Attendance
+              </Button>
+
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleMarkAllAttendance(true)}
@@ -1083,7 +1143,7 @@ export const InChargeDashboard: React.FC = () => {
               </Button>
 
               <Button
-                variant="primary"
+                variant="outline"
                 size="sm"
                 onClick={handleExportAttendanceCSV}
                 style={{ fontSize: '0.75rem', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -1093,6 +1153,23 @@ export const InChargeDashboard: React.FC = () => {
               </Button>
             </div>
           </div>
+
+          {/* Save Status Notification */}
+          {attendanceSavedMessage && (
+            <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', border: '1px solid #10b981', color: '#065f46', padding: '0.65rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Check size={16} style={{ color: '#059669' }} />
+                <span>{attendanceSavedMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAttendanceSavedMessage(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#065f46' }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
 
           {/* Attendance Table */}
           <div className="table-responsive">
@@ -1197,6 +1274,32 @@ export const InChargeDashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Bottom Save Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid var(--color-border)', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              Summary: <strong>{attendanceRoster.length}</strong> total delegates ({presentCount} Present, {absentCount} Absent)
+            </span>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSaveAttendance}
+              loading={isSavingAttendance}
+              style={{
+                fontSize: '0.8rem',
+                padding: '0.5rem 1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: '#059669',
+                borderColor: '#059669',
+                fontWeight: 700
+              }}
+            >
+              <Save size={15} />
+              Save Attendance ({presentCount} Present)
+            </Button>
           </div>
         </Card>
       ) : (
