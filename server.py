@@ -1438,6 +1438,16 @@ def api_coordinator_position_papers():
     return jsonify(active_pps)
 
 
+@app.route('/api/in-charge/position-papers', methods=['GET'])
+def api_in_charge_position_papers():
+    comm_param = request.args.get('committee', '').lower().strip()
+    pp_list = db_get_position_papers()
+    active_pps = [pp for pp in pp_list if not pp.get('deleted_by_coordinator', False)]
+    if comm_param:
+        active_pps = [pp for pp in active_pps if pp.get('committee', '').lower().strip() == comm_param]
+    return jsonify(active_pps)
+
+
 @app.route('/api/coordinator/position-paper/<pp_id>', methods=['DELETE'])
 def api_coordinator_delete_position_paper(pp_id):
     # Only coordinator authorized
@@ -1557,12 +1567,17 @@ def api_messages():
                 return jsonify({"error": "Delegate registration not found."}), 404
             
             delegate_grade = str(delegate.get('grade', ''))
+            delegate_comm = (delegate.get('committee') or delegate.get('preferred_committee') or '').lower().strip()
             
             # Filter messages relevant to this delegate
             filtered = []
             for msg in msg_list:
                 rec_id = msg.get('recipient_id', '')
-                if rec_id == reg_id or rec_id == 'all' or rec_id == f"grade_{delegate_grade}" or msg.get('sender_id') == reg_id:
+                if (rec_id == reg_id or 
+                    rec_id == 'all' or 
+                    rec_id == f"grade_{delegate_grade}" or 
+                    (delegate_comm and rec_id == f"comm_{delegate_comm}") or 
+                    msg.get('sender_id') == reg_id):
                     filtered.append(msg)
             return jsonify(filtered)
 
@@ -1570,7 +1585,7 @@ def api_messages():
             return jsonify(msg_list)
 
         elif role.startswith('in_charge_'):
-            # In-charge can fetch messages sent by themselves, or received from delegates of their grade
+            # In-charge can fetch messages sent by themselves, or received from delegates of their grade/committee
             filtered = []
             for msg in msg_list:
                 sender = msg.get('sender_role', '')
@@ -1601,27 +1616,34 @@ def api_messages():
                 return jsonify({"error": "Delegate registration not found."}), 404
             
             delegate_grade = str(delegate.get('grade', ''))
+            delegate_comm = (delegate.get('committee') or delegate.get('preferred_committee') or '').lower().strip()
+            comm_to_incharge = {'unep': 'in_charge_7', 'un-women': 'in_charge_8', 'unhrc': 'in_charge_9', 'unicef': 'in_charge_10'}
+            incharge_role = comm_to_incharge.get(delegate_comm, f"in_charge_{delegate_grade}")
             
             # Delegate can only send private 'message' type (no announcements)
             if msg_type != 'message':
                 return jsonify({"error": "Delegates cannot publish announcements."}), 403
             
-            # Delegate can only send to 'coordinator' or their own 'in_charge_X'
-            allowed_recipients = {'coordinator', f"in_charge_{delegate_grade}"}
+            # Delegate can only send to 'coordinator' or their committee/grade in-charge
+            allowed_recipients = {'coordinator', f"in_charge_{delegate_grade}", incharge_role}
             if recipient_id not in allowed_recipients:
-                return jsonify({"error": "You can only message the coordinator or your grade in-charge."}), 403
+                return jsonify({"error": "You can only message the coordinator or your committee in-charge."}), 403
 
-        # If in-charge, validate that they are sending to their own grade
+        # If in-charge, validate that they are sending to their own grade or committee
         elif role.startswith('in_charge_'):
             grade = role.split('_')[-1]
-            if recipient_id == f"grade_{grade}":
-                pass # valid grade-wide broadcast
+            role_to_comm = {'in_charge_7': 'unep', 'in_charge_8': 'un-women', 'in_charge_9': 'unhrc', 'in_charge_10': 'unicef'}
+            comm = role_to_comm.get(role, '')
+            if recipient_id in (f"grade_{grade}", f"comm_{comm}"):
+                pass # valid grade/committee-wide broadcast
             else:
-                # verify it's a student of their grade
+                # verify it's a student of their committee or grade
                 regs = db_get_registrations()
                 student = next((r for r in regs if r.get('id') == recipient_id), None)
-                if not student or str(student.get('grade')) != grade:
-                    return jsonify({"error": f"You can only send messages to Grade {grade} students."}), 403
+                s_comm = (student.get('committee') or student.get('preferred_committee') or '').lower().strip() if student else ''
+                s_grade = str(student.get('grade', '')) if student else ''
+                if not student or (s_grade != grade and s_comm != comm):
+                    return jsonify({"error": f"You can only send messages to students of your committee/grade."}), 403
 
         new_msg = {
             "id": f"msg_{int(time.time() * 1000)}",

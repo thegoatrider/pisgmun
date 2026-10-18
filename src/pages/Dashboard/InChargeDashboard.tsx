@@ -4,7 +4,20 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/UI/Card';
 import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
-import { Loader2, Download, Search, LogOut, Calendar, X, CheckSquare, Square, UserCheck } from 'lucide-react';
+import { 
+  Loader2, 
+  Download, 
+  Search, 
+  LogOut, 
+  Calendar, 
+  X, 
+  CheckSquare, 
+  Square, 
+  UserCheck, 
+  FileText, 
+  Eye, 
+  RefreshCw 
+} from 'lucide-react';
 import { API } from '../../services/api';
 
 const CONFERENCE_DATES = [
@@ -15,25 +28,88 @@ const CONFERENCE_DATES = [
   { id: '2026-10-28', label: '28 Oct (Session 5)' },
 ];
 
+export const formatSection = (sec?: string): string => {
+  if (!sec) return '';
+  const trimmed = sec.trim();
+  if (!trimmed) return '';
+  const match = trimmed.match(/^[a-zA-Z]/);
+  return match ? match[0].toUpperCase() : trimmed.charAt(0).toUpperCase();
+};
+
+const COMM_LABELS: Record<string, string> = {
+  unep: 'UNEP',
+  'un-women': 'UN-WOMEN',
+  unhrc: 'UNHRC',
+  unicef: 'UNICEF',
+};
+
+const COMM_FULL_NAMES: Record<string, string> = {
+  unep: 'United Nations Environment Programme (UNEP)',
+  'un-women': 'UN Women',
+  unhrc: 'United Nations Human Rights Council (UNHRC)',
+  unicef: "United Nations Children's Fund (UNICEF)",
+};
+
+const GRADE_TO_COMM: Record<number, string> = {
+  7: 'unep',
+  8: 'un-women',
+  9: 'unhrc',
+  10: 'unicef',
+};
+
+const COMM_TO_GRADE: Record<string, number> = {
+  unep: 7,
+  'un-women': 8,
+  unhrc: 9,
+  unicef: 10,
+};
+
 export const InChargeDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { registrations, committees, logout, isLoading } = useAuth();
+  const { role, registrations, committees, logout, isLoading } = useAuth();
 
+  const [inChargeComm, setInChargeComm] = useState<string>('');
   const [inChargeGrade, setInChargeGrade] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [selectedAttendanceDate, setSelectedAttendanceDate] = useState<string>('2026-10-15');
   const [attendanceMap, setAttendanceMap] = useState<Record<string, boolean>>({});
 
+  // Position papers state
+  const [positionPapers, setPositionPapers] = useState<any[]>([]);
+  const [isPPLoading, setIsPPLoading] = useState<boolean>(false);
+  const [activePPPreview, setActivePPPreview] = useState<any>(null);
+  const [ppSearchQuery, setPpSearchQuery] = useState<string>('');
+
   useEffect(() => {
-    const storedGrade = localStorage.getItem('pmun_session_incharge_grade');
+    let comm = localStorage.getItem('pmun_session_incharge_committee') || sessionStorage.getItem('pmun_session_incharge_committee');
+    const storedGrade = localStorage.getItem('pmun_session_incharge_grade') || sessionStorage.getItem('pmun_session_incharge_grade');
+    
     if (storedGrade) {
-      setInChargeGrade(parseInt(storedGrade));
+      const gNum = parseInt(storedGrade);
+      setInChargeGrade(gNum);
+      if (!comm && GRADE_TO_COMM[gNum]) {
+        comm = GRADE_TO_COMM[gNum];
+      }
+    }
+
+    if (!comm && role && role.startsWith('in_charge_')) {
+      const g = parseInt(role.replace('in_charge_', ''));
+      if (g && GRADE_TO_COMM[g]) {
+        comm = GRADE_TO_COMM[g];
+        setInChargeGrade(g);
+      }
+    }
+
+    if (comm) {
+      setInChargeComm(comm.toLowerCase());
+      if (!storedGrade && COMM_TO_GRADE[comm.toLowerCase()]) {
+        setInChargeGrade(COMM_TO_GRADE[comm.toLowerCase()]);
+      }
     } else {
-      // If no grade found, force log out
       logout().then(() => navigate('/login'));
     }
-  }, [logout, navigate]);
+  }, [logout, navigate, role]);
 
   const formatIST = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
@@ -60,12 +136,13 @@ export const InChargeDashboard: React.FC = () => {
   const [newMsgContent, setNewMsgContent] = useState('');
   const [isMsgSending, setIsMsgSending] = useState(false);
 
-  // Sync recipient default once grade is loaded
+  // Sync recipient default once committee is loaded
   useEffect(() => {
-    if (inChargeGrade && !activeMsgRecipient) {
-      setActiveMsgRecipient(`grade_${inChargeGrade}`);
+    if (inChargeComm && !activeMsgRecipient) {
+      const g = COMM_TO_GRADE[inChargeComm] || 10;
+      setActiveMsgRecipient(`grade_${g}`);
     }
-  }, [inChargeGrade, activeMsgRecipient]);
+  }, [inChargeComm, activeMsgRecipient]);
 
   const fetchMessages = async () => {
     try {
@@ -120,14 +197,55 @@ export const InChargeDashboard: React.FC = () => {
     }
   };
 
-  // Filter registrations for this grade
-  const gradeRegistrations = registrations.filter((r) => r.grade === inChargeGrade);
+  // Helper for Position Paper blob URL
+  const getFileBlobUrl = (dataURI: string) => {
+    try {
+      const parts = dataURI.split(',');
+      const byteString = atob(parts[1]);
+      const mimeString = parts[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeString });
+      return URL.createObjectURL(blob);
+    } catch {
+      return dataURI;
+    }
+  };
+
+  // Position Paper Fetching for this committee
+  const fetchPositionPapers = async () => {
+    if (!inChargeComm) return;
+    setIsPPLoading(true);
+    try {
+      const res = await fetch(`/api/in-charge/position-papers?committee=${encodeURIComponent(inChargeComm)}&_=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPositionPapers(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsPPLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (statusFilter === 'POSITION_PAPERS' && inChargeComm) {
+      fetchPositionPapers();
+    }
+  }, [statusFilter, inChargeComm]);
 
   // Attendance synchronization (Local + Server)
   useEffect(() => {
-    if (!inChargeGrade || !selectedAttendanceDate) return;
-    const localKey = `pmun_attendance_${inChargeGrade}_${selectedAttendanceDate}`;
-    const cached = localStorage.getItem(localKey);
+    if (!inChargeComm || !selectedAttendanceDate) return;
+    const g = COMM_TO_GRADE[inChargeComm] || inChargeComm;
+    const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
+    const legacyKey = `pmun_attendance_${g}_${selectedAttendanceDate}`;
+
+    const cached = localStorage.getItem(localKey) || localStorage.getItem(legacyKey);
     if (cached) {
       try {
         setAttendanceMap(JSON.parse(cached));
@@ -136,18 +254,28 @@ export const InChargeDashboard: React.FC = () => {
       setAttendanceMap({});
     }
 
-    API.getAttendance(inChargeGrade, selectedAttendanceDate).then((serverData) => {
+    API.getAttendance(inChargeComm, selectedAttendanceDate).then((serverData) => {
       if (serverData && Object.keys(serverData).length > 0) {
         setAttendanceMap((prev) => {
           const merged = { ...serverData, ...prev };
           localStorage.setItem(localKey, JSON.stringify(merged));
           return merged;
         });
+      } else if (typeof g === 'number') {
+        API.getAttendance(g, selectedAttendanceDate).then((legacyData) => {
+          if (legacyData && Object.keys(legacyData).length > 0) {
+            setAttendanceMap((prev) => {
+              const merged = { ...legacyData, ...prev };
+              localStorage.setItem(localKey, JSON.stringify(merged));
+              return merged;
+            });
+          }
+        });
       }
     });
-  }, [inChargeGrade, selectedAttendanceDate]);
+  }, [inChargeComm, selectedAttendanceDate]);
 
-  // EB Name matching helper
+  // Executive Board name matching helper
   const checkNameMatch = (officialEbName?: string, regName?: string) => {
     if (!officialEbName || !regName) return false;
     const ebParts = officialEbName.toLowerCase().replace(/\([^\)]*\)/g, '').trim().split(/\s+/).filter(Boolean);
@@ -167,40 +295,41 @@ export const InChargeDashboard: React.FC = () => {
     return false;
   };
 
-  const commMap: Record<number, string> = {
-    7: 'unep',
-    8: 'un-women',
-    9: 'unhrc',
-    10: 'unicef'
-  };
-  const gradeTargetComm = inChargeGrade ? commMap[inChargeGrade] : '';
-
-  // Attendance Roster: All approved delegates with final countries.
-  // Rule: Do not show chairs and vice chairs of different committees, show Naisha Phadke in Grade 10 roster too.
-  const attendanceRoster = registrations.filter((r) => {
-    if (r.status !== 'APPROVED') return false;
-
-    // Special instruction: show Naisha Phadke in Grade 10 attendance roster too
-    const isNaisha = r.name.toLowerCase().includes('naisha');
-    if (inChargeGrade === 10 && isNaisha) {
-      return true;
-    }
-
-    // Do not show chairs and vice chairs of different committees
-    const isChairOrVcOfOtherComm = committees.some((c) => {
-      if (c.id === gradeTargetComm) return false;
-      return checkNameMatch(c.eb_chair, r.name) || checkNameMatch(c.eb_vice_chair, r.name);
+  const isEbOfOtherCommittee = (regName: string, currentCommId: string) => {
+    return committees.some((c) => {
+      if (c.id.toLowerCase() === currentCommId.toLowerCase()) return false;
+      return checkNameMatch(c.eb_chair, regName) || checkNameMatch(c.eb_vice_chair, regName);
     });
-    if (isChairOrVcOfOtherComm) {
+  };
+
+  const isEbOfThisCommittee = (regName: string, currentCommId: string) => {
+    const commObj = committees.find((c) => c.id.toLowerCase() === currentCommId.toLowerCase());
+    if (!commObj) return false;
+    return checkNameMatch(commObj.eb_chair, regName) || checkNameMatch(commObj.eb_vice_chair, regName);
+  };
+
+  // Filter registrations strictly for this committee
+  // Rule: Exclude EB of other committees, include EB of this committee, exclude Chahak Tahilyani
+  const committeeRegistrations = registrations.filter((r) => {
+    if (r.name.toLowerCase().includes('chahak')) return false;
+
+    if (isEbOfOtherCommittee(r.name, inChargeComm)) {
       return false;
     }
 
-    // Must be assigned to this grade's committee, or registered in this in-charge grade
-    if (r.committee === gradeTargetComm) return true;
-    if (r.grade === inChargeGrade && (r.committee === gradeTargetComm || !r.committee || r.committee === 'NOT ASSIGNED')) return true;
+    if (isEbOfThisCommittee(r.name, inChargeComm)) {
+      return true;
+    }
 
-    return false;
+    if (r.committee && r.committee !== 'NOT ASSIGNED') {
+      return r.committee.toLowerCase().trim() === inChargeComm;
+    }
+
+    return (r.preferred_committee || '').toLowerCase().trim() === inChargeComm;
   });
+
+  // Attendance Roster: All approved delegates of this committee (which includes Chair & Vice-Chair of this committee, and nowhere else)
+  const attendanceRoster = committeeRegistrations.filter((r) => r.status === 'APPROVED');
 
   const filteredAttendanceRoster = attendanceRoster.filter((r) => {
     if (!searchQuery) return true;
@@ -208,17 +337,20 @@ export const InChargeDashboard: React.FC = () => {
     return r.name.toLowerCase().includes(q) ||
            r.id.toLowerCase().includes(q) ||
            (r.assigned_country && r.assigned_country.toLowerCase().includes(q)) ||
-           (r.section && r.section.toLowerCase().includes(q));
+           formatSection(r.section).toLowerCase().includes(q) ||
+           r.school.toLowerCase().includes(q);
   });
 
   const handleToggleAttendance = (regId: string) => {
     setAttendanceMap((prev) => {
       const current = !!prev[regId];
       const updated = { ...prev, [regId]: !current };
-      if (inChargeGrade) {
-        const localKey = `pmun_attendance_${inChargeGrade}_${selectedAttendanceDate}`;
+      if (inChargeComm) {
+        const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
         localStorage.setItem(localKey, JSON.stringify(updated));
-        API.saveAttendance(inChargeGrade, selectedAttendanceDate, updated);
+        API.saveAttendance(inChargeComm, selectedAttendanceDate, updated);
+        const g = COMM_TO_GRADE[inChargeComm];
+        if (g) API.saveAttendance(g, selectedAttendanceDate, updated);
       }
       return updated;
     });
@@ -230,10 +362,12 @@ export const InChargeDashboard: React.FC = () => {
       updated[r.id] = status;
     });
     setAttendanceMap(updated);
-    if (inChargeGrade) {
-      const localKey = `pmun_attendance_${inChargeGrade}_${selectedAttendanceDate}`;
+    if (inChargeComm) {
+      const localKey = `pmun_attendance_${inChargeComm}_${selectedAttendanceDate}`;
       localStorage.setItem(localKey, JSON.stringify(updated));
-      API.saveAttendance(inChargeGrade, selectedAttendanceDate, updated);
+      API.saveAttendance(inChargeComm, selectedAttendanceDate, updated);
+      const g = COMM_TO_GRADE[inChargeComm];
+      if (g) API.saveAttendance(g, selectedAttendanceDate, updated);
     }
   };
 
@@ -265,9 +399,9 @@ export const InChargeDashboard: React.FC = () => {
         r.id,
         `"${r.name.replace(/"/g, '""')}"`,
         r.grade,
-        r.section,
+        formatSection(r.section),
         `"${r.school.replace(/"/g, '""')}"`,
-        r.committee,
+        (r.committee || inChargeComm).toUpperCase(),
         `"${(r.assigned_country || '').replace(/"/g, '""')}"`,
         selectedAttendanceDate,
         attendanceMap[r.id] ? 'PRESENT' : 'ABSENT'
@@ -278,22 +412,23 @@ export const InChargeDashboard: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `PMUN_Grade_${inChargeGrade}_Attendance_${selectedAttendanceDate}.csv`;
+    link.download = `PMUN_${(COMM_LABELS[inChargeComm] || inChargeComm).toUpperCase()}_Attendance_${selectedAttendanceDate}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
-  // Stats calculation
-  const totalCount = gradeRegistrations.length;
-  const approvedCount = gradeRegistrations.filter((r) => r.status === 'APPROVED').length;
-  const pendingCount = gradeRegistrations.filter((r) => r.status === 'PENDING' || r.status === 'NOT ASSIGNED').length;
-  const rejectedCount = gradeRegistrations.filter((r) => r.status === 'REJECTED').length;
+  // Stats calculation for this committee
+  const totalCount = committeeRegistrations.length;
+  const approvedCount = committeeRegistrations.filter((r) => r.status === 'APPROVED').length;
+  const pendingCount = committeeRegistrations.filter((r) => r.status === 'PENDING' || r.status === 'NOT ASSIGNED').length;
+  const rejectedCount = committeeRegistrations.filter((r) => r.status === 'REJECTED').length;
 
   // Filter by search query and status filter
-  const filteredRegs = gradeRegistrations.filter((r) => {
+  const filteredRegs = committeeRegistrations.filter((r) => {
     const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           r.school.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.id.toLowerCase().includes(searchQuery.toLowerCase());
+                          r.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          formatSection(r.section).toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'ALL' || 
                           (statusFilter === 'APPROVED' && r.status === 'APPROVED') ||
@@ -305,7 +440,7 @@ export const InChargeDashboard: React.FC = () => {
 
   // Direct CSV Exporter
   const handleExportCSV = () => {
-    if (gradeRegistrations.length === 0) {
+    if (committeeRegistrations.length === 0) {
       alert('No registrations available to export.');
       return;
     }
@@ -329,19 +464,19 @@ export const InChargeDashboard: React.FC = () => {
 
     const csvContent = [
       headers.join(','),
-      ...gradeRegistrations.map((r) =>
+      ...committeeRegistrations.map((r) =>
         [
           r.id,
           `"${r.name.replace(/"/g, '""')}"`,
           r.grade,
-          r.section,
+          formatSection(r.section),
           `"${r.school.replace(/"/g, '""')}"`,
           r.email,
           r.phone,
           r.portfolio_preference,
           `"${(r.mun_experience || 'First time delegate').replace(/"/g, '""')}"`,
           r.preferred_committee,
-          `"${r.country_preferences.join('; ')}"`,
+          `"${(r.country_preferences || []).join('; ')}"`,
           r.committee,
           r.assigned_country,
           r.status
@@ -353,13 +488,13 @@ export const InChargeDashboard: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `PMUN_Grade_${inChargeGrade}_Roster.csv`);
+    link.setAttribute('download', `PMUN_${(COMM_LABELS[inChargeComm] || inChargeComm).toUpperCase()}_Roster.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  if (isLoading || inChargeGrade === null) {
+  if (isLoading || !inChargeComm) {
     return (
       <div style={{ display: 'flex', width: '100%', height: '50vh', alignItems: 'center', justifyContent: 'center' }}>
         <Loader2 className="spin" size={32} style={{ color: 'var(--color-secondary)' }} />
@@ -367,16 +502,10 @@ export const InChargeDashboard: React.FC = () => {
     );
   }
 
-  // Get committees of this grade
-  const gradeCommittees = committees.filter((c) => {
-    // UNICEF, UNHRC -> Grades 9-10. UNEP, UN Women -> Grades 7-8
-    const id = c.id.toLowerCase();
-    if (inChargeGrade === 8 || inChargeGrade === 7) {
-      return ['unep', 'un-women'].includes(id);
-    } else {
-      return ['unhrc', 'unicef'].includes(id);
-    }
-  });
+  const currentCommObj = committees.find((c) => c.id.toLowerCase() === inChargeComm.toLowerCase());
+  const commCapacity = currentCommObj?.capacity || 50;
+  const approvedInComm = registrations.filter((r) => r.committee === inChargeComm && r.status === 'APPROVED').length;
+  const percentage = Math.min((approvedInComm / commCapacity) * 100, 100);
 
   return (
     <div className="section fade-in" style={{ width: '100%', maxWidth: '1440px', margin: '0 auto', paddingLeft: 'var(--space-lg)', paddingRight: 'var(--space-lg)' }}>
@@ -384,10 +513,10 @@ export const InChargeDashboard: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }} className="welcome-header">
         <div>
           <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '1px' }}>
-            Staff Panel
+            Staff Panel • Assigned Committee In-Charge
           </span>
           <h2 style={{ fontSize: '2rem', color: 'var(--color-primary)', margin: '0.25rem 0 0 0' }}>
-            Grade {inChargeGrade} In-Charge Portal
+            {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} In-Charge Portal
           </h2>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -404,19 +533,19 @@ export const InChargeDashboard: React.FC = () => {
       <div className="grid grid-cols-4" style={{ marginBottom: '2.5rem' }}>
         <Card elevation="sm" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1.5rem', textAlign: 'center' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Total Registrations
+            Committee Delegates
           </span>
           <strong style={{ fontSize: '1.8rem', color: 'var(--color-primary)' }}>{totalCount}</strong>
         </Card>
         <Card elevation="sm" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1.5rem', textAlign: 'center' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Approved Files
+            Approved Allocations
           </span>
           <strong style={{ fontSize: '1.8rem', color: 'var(--color-success)' }}>{approvedCount}</strong>
         </Card>
         <Card elevation="sm" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1.5rem', textAlign: 'center' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Pending Files
+            Pending Review
           </span>
           <strong style={{ fontSize: '1.8rem', color: 'var(--color-warning)' }}>{pendingCount}</strong>
         </Card>
@@ -428,39 +557,61 @@ export const InChargeDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Committee Capacities Overlay */}
+      {/* Committee Overview Card */}
       <Card elevation="md" style={{ padding: '1.5rem 2rem', marginBottom: '2.5rem' }}>
-        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
-          Assigned Grade Committees Allocation
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }} className="grid-responsive">
-          {gradeCommittees.map((comm) => {
-            const count = registrations.filter((r) => r.committee === comm.id && r.status === 'APPROVED').length;
-            const percentage = Math.min((count / comm.capacity) * 100, 100);
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px' }}>
+              Committee Overview & Capacities
+            </span>
+            <h3 style={{ margin: '0.2rem 0 0 0', fontSize: '1.25rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+              {COMM_FULL_NAMES[inChargeComm] || inChargeComm.toUpperCase()}
+            </h3>
+          </div>
+          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+            <span>{approvedInComm} / {commCapacity} Seats Approved ({percentage.toFixed(0)}%)</span>
+          </div>
+        </div>
 
-            return (
-              <div key={comm.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                  <span>{comm.id.toUpperCase()}</span>
-                  <span>{count} / {comm.capacity} Approved</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-round)', overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      width: `${percentage}%`,
-                      height: '100%',
-                      backgroundColor: percentage >= 90 ? 'var(--color-error)' : 'var(--color-secondary)',
-                      borderRadius: 'var(--radius-round)',
-                      transition: 'width var(--transition-normal)',
-                    }}
-                  />
-                </div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontStyle: 'italic', display: 'block' }}>
-                  {comm.name}
-                </span>
-              </div>
-            );
-          })}
+        {/* Capacity Bar */}
+        <div style={{ width: '100%', height: '10px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-round)', overflow: 'hidden', marginBottom: '1.25rem' }}>
+          <div
+            style={{
+              width: `${percentage}%`,
+              height: '100%',
+              backgroundColor: percentage >= 90 ? 'var(--color-error)' : 'var(--color-secondary)',
+              borderRadius: 'var(--radius-round)',
+              transition: 'width var(--transition-normal)',
+            }}
+          />
+        </div>
+
+        {/* Committee Agenda & EB Info */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', backgroundColor: 'var(--color-bg-main)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)' }}>
+          <div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', display: 'block' }}>
+              Committee Agenda
+            </span>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+              {currentCommObj?.agenda || 'Standard Agenda'}
+            </p>
+          </div>
+          <div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', display: 'block' }}>
+              Executive Board (Chair & Vice-Chair)
+            </span>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+              Chair: <strong>{currentCommObj?.eb_chair || 'TBD'}</strong> • Vice-Chair: <strong>{currentCommObj?.eb_vice_chair || 'TBD'}</strong>
+            </p>
+          </div>
+          <div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', display: 'block' }}>
+              Teacher In-Charge / Rapporteurs
+            </span>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+              {currentCommObj?.eb_rapporteur || 'Assigned Staff'}
+            </p>
+          </div>
         </div>
       </Card>
 
@@ -505,7 +656,7 @@ export const InChargeDashboard: React.FC = () => {
               title="Pick a custom session date"
             />
           </div>
-        ) : statusFilter !== 'MESSAGES' ? (
+        ) : statusFilter !== 'MESSAGES' && statusFilter !== 'POSITION_PAPERS' ? (
           <div style={{ position: 'relative', width: '320px' }}>
             <Search size={18} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--color-text-muted)' }} />
             <input
@@ -522,31 +673,39 @@ export const InChargeDashboard: React.FC = () => {
         )}
 
         {/* Tab Filters */}
-        <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--color-border)', padding: '3px', borderRadius: 'var(--radius-md)' }}>
-          {['ALL', 'APPROVED', 'PENDING', 'REJECTED', 'MESSAGES', 'ATTENDANCE'].map((f) => (
+        <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--color-border)', padding: '3px', borderRadius: 'var(--radius-md)', flexWrap: 'wrap' }}>
+          {[
+            { id: 'ALL', label: 'All' },
+            { id: 'APPROVED', label: 'Approved' },
+            { id: 'PENDING', label: 'Pending' },
+            { id: 'REJECTED', label: 'Declined' },
+            { id: 'ATTENDANCE', label: 'Attendance' },
+            { id: 'POSITION_PAPERS', label: 'Position Papers' },
+            { id: 'MESSAGES', label: 'Messages' },
+          ].map((tab) => (
             <button
-              key={f}
-              onClick={() => setStatusFilter(f)}
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
               style={{
                 border: 'none',
-                background: statusFilter === f ? 'var(--color-bg-surface)' : 'transparent',
-                color: statusFilter === f ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                background: statusFilter === tab.id ? 'var(--color-bg-surface)' : 'transparent',
+                color: statusFilter === tab.id ? 'var(--color-primary)' : 'var(--color-text-muted)',
                 padding: '0.45rem 1rem',
                 fontSize: '0.72rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 borderRadius: 'var(--radius-sm)',
-                boxShadow: statusFilter === f ? 'var(--shadow-sm)' : 'none',
+                boxShadow: statusFilter === tab.id ? 'var(--shadow-sm)' : 'none',
                 transition: 'all var(--transition-fast)',
               }}
             >
-              {f === 'MESSAGES' ? 'Messages' : f === 'ATTENDANCE' ? 'Attendance' : f}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Roster Table or Messages Console */}
+      {/* Roster Table, Position Papers, or Messages Console */}
       {statusFilter === 'MESSAGES' ? (
         <Card elevation="md" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', minHeight: '480px' }}>
           <div style={{ display: 'flex', gap: '2rem' }} className="grid-responsive">
@@ -559,31 +718,31 @@ export const InChargeDashboard: React.FC = () => {
               {/* Broadcast */}
               <button
                 type="button"
-                onClick={() => setActiveMsgRecipient(`grade_${inChargeGrade}`)}
+                onClick={() => setActiveMsgRecipient(`comm_${inChargeComm}`)}
                 style={{
                   padding: '0.7rem 0.85rem',
                   textAlign: 'left',
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid',
-                  borderColor: activeMsgRecipient === `grade_${inChargeGrade}` ? 'var(--color-secondary)' : 'var(--color-border)',
-                  backgroundColor: activeMsgRecipient === `grade_${inChargeGrade}` ? 'var(--color-secondary-bg)' : '#ffffff',
-                  color: activeMsgRecipient === `grade_${inChargeGrade}` ? 'var(--color-secondary)' : 'var(--color-primary)',
+                  borderColor: (activeMsgRecipient === `comm_${inChargeComm}` || activeMsgRecipient === `grade_${inChargeGrade}`) ? 'var(--color-secondary)' : 'var(--color-border)',
+                  backgroundColor: (activeMsgRecipient === `comm_${inChargeComm}` || activeMsgRecipient === `grade_${inChargeGrade}`) ? 'var(--color-secondary-bg)' : '#ffffff',
+                  color: (activeMsgRecipient === `comm_${inChargeComm}` || activeMsgRecipient === `grade_${inChargeGrade}`) ? 'var(--color-secondary)' : 'var(--color-primary)',
                   fontWeight: 700,
                   cursor: 'pointer',
                   fontSize: '0.8rem',
                   marginBottom: '0.75rem'
                 }}
               >
-                📢 Broadcast: Grade {inChargeGrade}
+                📢 Broadcast: {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} Committee
               </button>
 
               <span style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.4rem', display: 'block' }}>
-                Grade {inChargeGrade} Students
+                {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} Delegates
               </span>
-              {gradeRegistrations.length === 0 ? (
-                <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>No students registered.</p>
+              {committeeRegistrations.length === 0 ? (
+                <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>No delegates registered.</p>
               ) : (
-                gradeRegistrations.map(reg => (
+                committeeRegistrations.map((reg) => (
                   <button
                     key={reg.id}
                     type="button"
@@ -606,7 +765,9 @@ export const InChargeDashboard: React.FC = () => {
                     }}
                   >
                     <span style={{ fontWeight: 700 }}>{reg.name}</span>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>Section {reg.section} • {reg.id}</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
+                      Gr {reg.grade}-{formatSection(reg.section)} • {reg.assigned_country || 'Delegate'} • {reg.id}
+                    </span>
                   </button>
                 ))
               )}
@@ -617,16 +778,20 @@ export const InChargeDashboard: React.FC = () => {
               <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem' }}>
                 <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--color-primary)' }}>
                   Active Chat:{' '}
-                  {activeMsgRecipient === `grade_${inChargeGrade}`
-                    ? `📢 Grade ${inChargeGrade} Broadcast`
-                    : `👤 ${gradeRegistrations.find(r => r.id === activeMsgRecipient)?.name || activeMsgRecipient}`}
+                  {activeMsgRecipient.startsWith('comm_') || activeMsgRecipient.startsWith('grade_')
+                    ? `📢 ${COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} Committee Broadcast`
+                    : `👤 ${committeeRegistrations.find(r => r.id === activeMsgRecipient)?.name || activeMsgRecipient}`}
                 </span>
               </div>
 
               {/* Chat messages list */}
               <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                 {messages.filter(msg => {
-                  const roleStr = `in_charge_${inChargeGrade}`;
+                  const roleStr = `in_charge_${inChargeGrade || COMM_TO_GRADE[inChargeComm] || 8}`;
+                  const isBroadcast = activeMsgRecipient.startsWith('comm_') || activeMsgRecipient.startsWith('grade_');
+                  if (isBroadcast) {
+                    return (msg.recipient_id === activeMsgRecipient || msg.recipient_id === `comm_${inChargeComm}` || msg.recipient_id === `grade_${inChargeGrade}`) && msg.sender_role === roleStr;
+                  }
                   return (msg.recipient_id === activeMsgRecipient && msg.sender_role === roleStr) ||
                          (msg.sender_id === activeMsgRecipient && msg.sender_role === 'delegate' && msg.recipient_id === roleStr);
                 }).length === 0 ? (
@@ -636,7 +801,11 @@ export const InChargeDashboard: React.FC = () => {
                 ) : (
                   messages
                     .filter(msg => {
-                      const roleStr = `in_charge_${inChargeGrade}`;
+                      const roleStr = `in_charge_${inChargeGrade || COMM_TO_GRADE[inChargeComm] || 8}`;
+                      const isBroadcast = activeMsgRecipient.startsWith('comm_') || activeMsgRecipient.startsWith('grade_');
+                      if (isBroadcast) {
+                        return (msg.recipient_id === activeMsgRecipient || msg.recipient_id === `comm_${inChargeComm}` || msg.recipient_id === `grade_${inChargeGrade}`) && msg.sender_role === roleStr;
+                      }
                       return (msg.recipient_id === activeMsgRecipient && msg.sender_role === roleStr) ||
                              (msg.sender_id === activeMsgRecipient && msg.sender_role === 'delegate' && msg.recipient_id === roleStr);
                     })
@@ -656,7 +825,9 @@ export const InChargeDashboard: React.FC = () => {
                         }}
                       >
                         <div style={{ fontWeight: 700, fontSize: '0.65rem', color: msg.sender_role.startsWith('in_charge_') ? 'var(--color-secondary)' : 'var(--color-primary)', marginBottom: '3px', textTransform: 'uppercase' }}>
-                          {msg.sender_role.startsWith('in_charge_') ? `You (Grade ${inChargeGrade} In-Charge)` : `${gradeRegistrations.find(r => r.id === msg.sender_id)?.name || msg.sender_id} (Delegate)`}
+                          {msg.sender_role.startsWith('in_charge_')
+                            ? `You (${COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} In-Charge)`
+                            : `${committeeRegistrations.find(r => r.id === msg.sender_id)?.name || msg.sender_id} (Delegate)`}
                         </div>
                         <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
                         <div style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
@@ -671,7 +842,7 @@ export const InChargeDashboard: React.FC = () => {
               <form onSubmit={handleSendInChargeMessage} style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   type="text"
-                  placeholder="Type your grade announcement here..."
+                  placeholder="Type your committee announcement here..."
                   value={newMsgContent}
                   onChange={(e) => setNewMsgContent(e.target.value)}
                   className="form-control"
@@ -685,6 +856,183 @@ export const InChargeDashboard: React.FC = () => {
             </div>
           </div>
         </Card>
+      ) : statusFilter === 'POSITION_PAPERS' ? (
+        <Card elevation="md" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
+            <div>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', letterSpacing: '0.5px', display: 'block' }}>
+                Research & Policy Submissions
+              </span>
+              <h3 style={{ margin: '0.2rem 0 0 0', color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: 700 }}>
+                {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} Position Papers ({positionPapers.length})
+              </h3>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <Button variant="outline" size="sm" onClick={fetchPositionPapers} loading={isPPLoading} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <RefreshCw size={14} /> Refresh
+              </Button>
+            </div>
+          </div>
+
+          {/* Active Preview Drawer/Box */}
+          {activePPPreview && (
+            <div style={{ border: '2px solid var(--color-secondary)', borderRadius: 'var(--radius-md)', padding: '1.25rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px' }}>
+                    Document Preview
+                  </span>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-primary)' }}>
+                    {activePPPreview.delegate_name} ({activePPPreview.registration_id}) — {activePPPreview.filename}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <a
+                    href={getFileBlobUrl(activePPPreview.file_data)}
+                    download={activePPPreview.filename}
+                    className="btn btn-sm btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none' }}
+                  >
+                    <Download size={14} /> Download File
+                  </a>
+                  <Button variant="outline" size="sm" onClick={() => setActivePPPreview(null)}>
+                    <X size={14} /> Close Preview
+                  </Button>
+                </div>
+              </div>
+
+              {activePPPreview.file_type === 'application/pdf' || activePPPreview.filename.toLowerCase().endsWith('.pdf') ? (
+                <iframe
+                  src={getFileBlobUrl(activePPPreview.file_data)}
+                  title={activePPPreview.filename}
+                  width="100%"
+                  height="540px"
+                  style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', backgroundColor: '#ffffff' }}
+                />
+              ) : (
+                <div style={{ padding: '3rem 2rem', textAlign: 'center', backgroundColor: '#ffffff', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
+                  <FileText size={48} style={{ color: 'var(--color-secondary)', margin: '0 auto 1rem auto' }} />
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-primary)' }}>Microsoft Word Document (.docx / .doc)</h4>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', maxWidth: '420px', margin: '0 auto 1.25rem auto' }}>
+                    In-browser preview is available for PDF files. You can download and open this paper directly in Microsoft Word or Google Docs.
+                  </p>
+                  <a
+                    href={getFileBlobUrl(activePPPreview.file_data)}
+                    download={activePPPreview.filename}
+                    className="btn btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+                  >
+                    <Download size={16} /> Download {activePPPreview.filename}
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Search and Note */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', width: '320px' }}>
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '10px', color: 'var(--color-text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Search papers by delegate name..."
+                value={ppSearchQuery}
+                onChange={(e) => setPpSearchQuery(e.target.value)}
+                className="form-control"
+                style={{ paddingLeft: '36px', width: '100%' }}
+              />
+            </div>
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              Showing only papers submitted for <strong>{COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()}</strong>
+            </span>
+          </div>
+
+          {isPPLoading ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
+              <Loader2 className="spin" size={28} style={{ color: 'var(--color-secondary)' }} />
+            </div>
+          ) : positionPapers.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--color-text-muted)' }}>
+              <FileText size={42} style={{ opacity: 0.35, margin: '0 auto 1rem auto' }} />
+              <p style={{ fontWeight: 600, fontSize: '0.95rem', margin: '0 0 0.35rem 0' }}>No Position Papers Submitted Yet</p>
+              <span style={{ fontSize: '0.82rem' }}>
+                When delegates allocated to {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} upload their research papers, they will appear here.
+              </span>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-compact" style={{ width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th>Delegate Name</th>
+                    <th>Reg ID</th>
+                    <th>Allocated Portfolio</th>
+                    <th>Document</th>
+                    <th>Uploaded Date</th>
+                    <th style={{ textAlign: 'center' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {positionPapers
+                    .filter((pp) => {
+                      if (!ppSearchQuery) return true;
+                      const q = ppSearchQuery.toLowerCase();
+                      return (
+                        (pp.delegate_name && pp.delegate_name.toLowerCase().includes(q)) ||
+                        (pp.registration_id && pp.registration_id.toLowerCase().includes(q)) ||
+                        (pp.filename && pp.filename.toLowerCase().includes(q))
+                      );
+                    })
+                    .map((pp) => {
+                      const reg = registrations.find((r) => r.id === pp.registration_id);
+                      return (
+                        <tr key={pp.id}>
+                          <td>
+                            <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{pp.delegate_name}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                              Grade {reg?.grade || 'N/A'} - {formatSection(reg?.section)} • {reg?.school || 'Podar International'}
+                            </div>
+                          </td>
+                          <td style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '0.82rem' }}>{pp.registration_id}</td>
+                          <td>
+                            <strong style={{ color: 'var(--color-secondary)' }}>{reg?.assigned_country || 'Delegate'}</strong>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <FileText size={16} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
+                              <span style={{ fontSize: '0.82rem', fontWeight: 600, wordBreak: 'break-all' }}>{pp.filename}</span>
+                            </div>
+                          </td>
+                          <td style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{formatIST(pp.uploaded_at)}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: '6px' }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setActivePPPreview(pp)}
+                                style={{ fontSize: '0.75rem', padding: '0.35rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              >
+                                <Eye size={13} /> View
+                              </Button>
+                              <a
+                                href={getFileBlobUrl(pp.file_data)}
+                                download={pp.filename}
+                                className="btn btn-sm btn-outline"
+                                style={{ fontSize: '0.75rem', padding: '0.35rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                                title="Download"
+                              >
+                                <Download size={13} /> Download
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       ) : statusFilter === 'ATTENDANCE' ? (
         <Card elevation="md" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {/* Header Controls & Summary Bar */}
@@ -695,7 +1043,7 @@ export const InChargeDashboard: React.FC = () => {
                   Active Attendance Roster
                 </span>
                 <h3 style={{ margin: '0.2rem 0 0 0', color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: 700 }}>
-                  Grade {inChargeGrade} • {CONFERENCE_DATES.find(cd => cd.id === selectedAttendanceDate)?.label || selectedAttendanceDate}
+                  {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} Committee • {CONFERENCE_DATES.find(cd => cd.id === selectedAttendanceDate)?.label || selectedAttendanceDate}
                 </h3>
               </div>
 
@@ -819,7 +1167,7 @@ export const InChargeDashboard: React.FC = () => {
                         )}
                       </td>
 
-                      <td style={{ fontWeight: 600 }}>{reg.section}</td>
+                      <td style={{ fontWeight: 600 }}>{formatSection(reg.section)}</td>
 
                       <td style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>
                         {reg.school}
@@ -833,7 +1181,7 @@ export const InChargeDashboard: React.FC = () => {
 
                       <td>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', backgroundColor: 'var(--color-bg-main)', border: '1px solid var(--color-border)', padding: '2px 8px', borderRadius: '4px' }}>
-                          {reg.committee.toUpperCase()}
+                          {(reg.committee || inChargeComm).toUpperCase()}
                         </span>
                       </td>
                     </tr>
@@ -843,7 +1191,7 @@ export const InChargeDashboard: React.FC = () => {
                 {filteredAttendanceRoster.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center" style={{ padding: '3rem', color: 'var(--color-text-muted)' }}>
-                      No approved delegates found for Grade {inChargeGrade} attendance roster.
+                      No approved delegates found for {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} attendance roster.
                     </td>
                   </tr>
                 )}
@@ -866,40 +1214,48 @@ export const InChargeDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredRegs.map((reg) => (
-                <tr key={reg.id}>
-                  <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
-                  <td>
-                    <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                      Reg At: {formatIST(reg.created_at)}
-                    </div>
-                  </td>
-                  <td>{reg.section}</td>
-                  <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
-                  <td style={{ fontSize: '0.82rem' }}>
-                    <div style={{ fontWeight: 600 }}>{reg.preferred_committee.toUpperCase()}</div>
-                    <div style={{ color: 'var(--color-text-muted)' }}>{reg.country_preferences[0]}</div>
-                  </td>
-                  <td style={{ fontSize: '0.82rem' }}>
-                    {reg.committee !== 'NOT ASSIGNED' ? (
-                      <div>
-                        <strong style={{ color: 'var(--color-secondary)' }}>{reg.assigned_country}</strong>
-                        <span style={{ color: 'var(--color-text-muted)', marginLeft: '4px' }}>({reg.committee.toUpperCase()})</span>
+              {filteredRegs.map((reg) => {
+                const isEbRole = reg.assigned_country === 'Chair' || reg.assigned_country === 'Vice-Chair';
+                return (
+                  <tr key={reg.id}>
+                    <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{reg.id}</td>
+                    <td>
+                      <div style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{reg.name}</div>
+                      {isEbRole && (
+                        <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px' }}>
+                          ★ Executive Board
+                        </span>
+                      )}
+                      <div style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                        Reg At: {formatIST(reg.created_at)}
                       </div>
-                    ) : (
-                      <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Pending Allocation</span>
-                    )}
-                  </td>
-                  <td>
-                    <Badge status={reg.status} />
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>{formatSection(reg.section)}</td>
+                    <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reg.school}>{reg.school}</td>
+                    <td style={{ fontSize: '0.82rem' }}>
+                      <div style={{ fontWeight: 600 }}>{(reg.preferred_committee || '').toUpperCase()}</div>
+                      <div style={{ color: 'var(--color-text-muted)' }}>{(reg.country_preferences || [])[0] || 'N/A'}</div>
+                    </td>
+                    <td style={{ fontSize: '0.82rem' }}>
+                      {reg.committee && reg.committee !== 'NOT ASSIGNED' ? (
+                        <div>
+                          <strong style={{ color: isEbRole ? 'var(--color-primary)' : 'var(--color-secondary)' }}>{reg.assigned_country}</strong>
+                          <span style={{ color: 'var(--color-text-muted)', marginLeft: '4px' }}>({reg.committee.toUpperCase()})</span>
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Pending Allocation</span>
+                      )}
+                    </td>
+                    <td>
+                      <Badge status={reg.status} />
+                    </td>
+                  </tr>
+                );
+              })}
               {filteredRegs.length === 0 && (
                 <tr>
                   <td colSpan={7} className="text-center" style={{ padding: '3rem', color: 'var(--color-text-muted)' }}>
-                    No delegates found matching the active search / filters.
+                    No delegates found matching the active search / filters for {COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()}.
                   </td>
                 </tr>
               )}

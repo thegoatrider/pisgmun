@@ -13,8 +13,10 @@ export const Login: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { login, role: sessionRole, isLoading: authLoading } = useAuth();
 
+  type InChargeCommitteeType = 'unicef' | 'unhrc' | 'unep' | 'un-women';
+
   const [selectedRole, setSelectedRole] = useState<RoleType>('delegate');
-  const [inChargeGrade, setInChargeGrade] = useState<'7' | '8' | '9' | '10'>('8');
+  const [inChargeCommittee, setInChargeCommittee] = useState<InChargeCommitteeType>('unicef');
   
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +27,13 @@ export const Login: React.FC = () => {
     const urlRole = searchParams.get('role');
     if (urlRole) {
       if (urlRole === 'in_charge') {
-        setSelectedRole('in_charge_8');
+        setSelectedRole('in_charge_10');
       } else if (urlRole.startsWith('in_charge_') || urlRole === 'coordinator' || urlRole === 'delegate') {
         setSelectedRole(urlRole as RoleType);
+        if (urlRole === 'in_charge_7') setInChargeCommittee('unep');
+        else if (urlRole === 'in_charge_8') setInChargeCommittee('un-women');
+        else if (urlRole === 'in_charge_9') setInChargeCommittee('unhrc');
+        else if (urlRole === 'in_charge_10') setInChargeCommittee('unicef');
       }
     }
   }, [searchParams]);
@@ -58,9 +64,17 @@ export const Login: React.FC = () => {
 
     setIsSubmitting(true);
     
+    // Map committee to backend auth role
+    const commToRole: Record<InChargeCommitteeType, RoleType> = {
+      unep: 'in_charge_7',
+      'un-women': 'in_charge_8',
+      unhrc: 'in_charge_9',
+      unicef: 'in_charge_10',
+    };
+
     // Determine the actual role string for backend verification
     const activeRole = selectedRole.startsWith('in_charge_') 
-      ? `in_charge_${inChargeGrade}` 
+      ? commToRole[inChargeCommittee] 
       : selectedRole;
 
     const formattedPassword = selectedRole === 'delegate' 
@@ -72,6 +86,17 @@ export const Login: React.FC = () => {
 
     if (result.success) {
       if (activeRole.startsWith('in_charge_')) {
+        const gradeMap: Record<InChargeCommitteeType, string> = {
+          unep: '7',
+          'un-women': '8',
+          unhrc: '9',
+          unicef: '10',
+        };
+        const gStr = gradeMap[inChargeCommittee] || '8';
+        sessionStorage.setItem('pmun_session_incharge_committee', inChargeCommittee);
+        localStorage.setItem('pmun_session_incharge_committee', inChargeCommittee);
+        sessionStorage.setItem('pmun_session_incharge_grade', gStr);
+        localStorage.setItem('pmun_session_incharge_grade', gStr);
         navigate('/dashboard/in-charge');
       } else if (activeRole === 'delegate') {
         navigate('/dashboard/delegate');
@@ -225,19 +250,19 @@ export const Login: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit}>
-            {/* Conditional Grade Selector for In-Charge */}
+            {/* Conditional Committee Selector for In-Charge */}
             {selectedRole.startsWith('in_charge_') && (
               <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                <label className="form-label">Assigned Grade</label>
+                <label className="form-label">Assigned Committee</label>
                 <select
-                  value={inChargeGrade}
-                  onChange={(e) => setInChargeGrade(e.target.value as '7' | '8' | '9' | '10')}
+                  value={inChargeCommittee}
+                  onChange={(e) => setInChargeCommittee(e.target.value as InChargeCommitteeType)}
                   className="form-control"
                 >
-                  <option value="7">Grade 7 In-Charge</option>
-                  <option value="8">Grade 8 In-Charge</option>
-                  <option value="9">Grade 9 In-Charge</option>
-                  <option value="10">Grade 10 In-Charge</option>
+                  <option value="unicef">UNICEF In-Charge</option>
+                  <option value="unhrc">UNHRC In-Charge</option>
+                  <option value="unep">UNEP In-Charge</option>
+                  <option value="un-women">UN-WOMEN In-Charge</option>
                 </select>
               </div>
             )}

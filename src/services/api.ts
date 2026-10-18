@@ -189,7 +189,7 @@ export const API = {
   },
 
   // Attendance
-  async getAttendance(grade: number, date?: string): Promise<Record<string, boolean>> {
+  async getAttendance(grade: number | string, date?: string): Promise<Record<string, boolean>> {
     try {
       const url = date ? `/api/attendance?grade=${grade}&date=${encodeURIComponent(date)}` : `/api/attendance?grade=${grade}`;
       const res = await fetch(url);
@@ -200,7 +200,7 @@ export const API = {
     }
   },
 
-  async saveAttendance(grade: number, date: string, attendance: Record<string, boolean>): Promise<boolean> {
+  async saveAttendance(grade: number | string, date: string, attendance: Record<string, boolean>): Promise<boolean> {
     try {
       const res = await fetch('/api/attendance', {
         method: 'POST',
