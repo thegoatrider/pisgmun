@@ -7,6 +7,7 @@ import { Button } from '../components/UI/Button';
 import { Accordion } from '../components/UI/Accordion';
 import { FileText, Download, ArrowLeft, Loader2 } from 'lucide-react';
 import archanaImg from '../assets/archana_tripathi.jpg';
+import shaliniImg from '../assets/shalini_pandey.jpg';
 
 export const CommitteeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -134,6 +135,27 @@ export const CommitteeDetail: React.FC = () => {
                     }
                   }}
                   alt="Archana Tripathi"
+                  style={{
+                    width: '75px',
+                    height: '92px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    margin: '0.6rem 0 0.4rem 0',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.12)'
+                  }}
+                />
+              )}
+              {member.name?.toLowerCase().includes('shalini') && (
+                <img
+                  src={shaliniImg || '/shalini_pandey.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/shalini_pandey.jpg') {
+                      target.src = '/shalini_pandey.jpg';
+                    }
+                  }}
+                  alt="Shalini Pandey"
                   style={{
                     width: '75px',
                     height: '92px',

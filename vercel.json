@@ -46,6 +46,10 @@
       "dest": "/archana_tripathi.jpg"
     },
     {
+      "src": "/shalini_pandey.jpg",
+      "dest": "/shalini_pandey.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },
