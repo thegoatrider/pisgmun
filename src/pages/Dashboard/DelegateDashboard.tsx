@@ -10,6 +10,7 @@ import archanaImg from '../../assets/archana_tripathi.jpg';
 import shaliniImg from '../../assets/shalini_pandey.jpg';
 import karishmaImg from '../../assets/karishma_khankule.jpg';
 import reenaImg from '../../assets/reena_singh.jpg';
+import jyotiImg from '../../assets/jyoti_adurti.jpg';
 
 export const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -738,6 +739,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }}
                               />
                             )}
+                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('jyoti') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('adurt')) && (
+                              <img
+                                src={jyotiImg || '/jyoti_adurti.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
+                                    target.src = '/jyoti_adurti.jpg';
+                                  }
+                                }}
+                                alt="Jyoti Adurti"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
                             <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -818,6 +841,28 @@ export const DelegateDashboard: React.FC = () => {
                                   }
                                 }}
                                 alt="Reena Singh"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
+                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('jyoti') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('adurt')) && (
+                              <img
+                                src={jyotiImg || '/jyoti_adurti.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
+                                    target.src = '/jyoti_adurti.jpg';
+                                  }
+                                }}
+                                alt="Jyoti Adurti"
                                 style={{
                                   width: '78px',
                                   height: '96px',
@@ -912,6 +957,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Reena Singh"
+                              style={{
+                                width: '78px',
+                                height: '96px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(197, 160, 89, 0.45)',
+                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                display: 'block',
+                                marginBottom: '0.35rem'
+                              }}
+                            />
+                          )}
+                          {(commObj?.eb_rapporteur?.toLowerCase().includes('jyoti') || commObj?.eb_rapporteur?.toLowerCase().includes('adurt')) && (
+                            <img
+                              src={jyotiImg || '/jyoti_adurti.jpg'}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
+                                  target.src = '/jyoti_adurti.jpg';
+                                }
+                              }}
+                              alt="Jyoti Adurti"
                               style={{
                                 width: '78px',
                                 height: '96px',

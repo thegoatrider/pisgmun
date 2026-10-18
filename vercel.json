@@ -58,6 +58,10 @@
       "dest": "/reena_singh.jpg"
     },
     {
+      "src": "/jyoti_adurti.jpg",
+      "dest": "/jyoti_adurti.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },

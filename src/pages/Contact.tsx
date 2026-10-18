@@ -8,6 +8,7 @@ import archanaImg from '../assets/archana_tripathi.jpg';
 import shaliniImg from '../assets/shalini_pandey.jpg';
 import karishmaImg from '../assets/karishma_khankule.jpg';
 import reenaImg from '../assets/reena_singh.jpg';
+import jyotiImg from '../assets/jyoti_adurti.jpg';
 
 export const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -223,6 +224,27 @@ export const Contact: React.FC = () => {
                           }
                         }}
                         alt="Reena Singh - Grade 9 In-Charge"
+                        style={{
+                          width: '90px',
+                          height: '110px',
+                          objectFit: 'cover',
+                          borderRadius: '10px',
+                          boxShadow: '0 4px 12px rgba(10, 37, 64, 0.15)',
+                          border: '2px solid rgba(197, 160, 89, 0.45)',
+                          flexShrink: 0,
+                          display: 'block'
+                        }}
+                      />
+                    ) : (member.inCharge?.toLowerCase().includes('jyoti') || member.inCharge?.toLowerCase().includes('adurt')) ? (
+                      <img
+                        src={jyotiImg || '/jyoti_adurti.jpg'}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
+                            target.src = '/jyoti_adurti.jpg';
+                          }
+                        }}
+                        alt="Jyoti Adurti"
                         style={{
                           width: '90px',
                           height: '110px',
