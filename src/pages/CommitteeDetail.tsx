@@ -11,6 +11,7 @@ import shaliniImg from '../assets/shalini_pandey.jpg';
 import karishmaImg from '../assets/karishma_khankule.jpg';
 import reenaImg from '../assets/reena_singh.jpg';
 import jyotiImg from '../assets/jyoti_adurti.jpg';
+import ishaImg from '../assets/isha_chourse.jpg';
 
 export const CommitteeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -222,6 +223,27 @@ export const CommitteeDetail: React.FC = () => {
                     }
                   }}
                   alt="Jyoti Adurti"
+                  style={{
+                    width: '75px',
+                    height: '92px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    margin: '0.6rem 0 0.4rem 0',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.12)'
+                  }}
+                />
+              )}
+              {(member.name?.toLowerCase().includes('isha') || member.name?.toLowerCase().includes('chourse')) && (
+                <img
+                  src={ishaImg || '/isha_chourse.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/isha_chourse.jpg') {
+                      target.src = '/isha_chourse.jpg';
+                    }
+                  }}
+                  alt="Isha Chourse"
                   style={{
                     width: '75px',
                     height: '92px',

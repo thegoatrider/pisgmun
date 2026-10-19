@@ -62,6 +62,10 @@
       "dest": "/jyoti_adurti.jpg"
     },
     {
+      "src": "/isha_chourse.jpg",
+      "dest": "/isha_chourse.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },

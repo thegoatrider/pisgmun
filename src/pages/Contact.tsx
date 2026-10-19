@@ -9,6 +9,7 @@ import shaliniImg from '../assets/shalini_pandey.jpg';
 import karishmaImg from '../assets/karishma_khankule.jpg';
 import reenaImg from '../assets/reena_singh.jpg';
 import jyotiImg from '../assets/jyoti_adurti.jpg';
+import ishaImg from '../assets/isha_chourse.jpg';
 
 export const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -245,6 +246,27 @@ export const Contact: React.FC = () => {
                           }
                         }}
                         alt="Jyoti Adurti"
+                        style={{
+                          width: '90px',
+                          height: '110px',
+                          objectFit: 'cover',
+                          borderRadius: '10px',
+                          boxShadow: '0 4px 12px rgba(10, 37, 64, 0.15)',
+                          border: '2px solid rgba(197, 160, 89, 0.45)',
+                          flexShrink: 0,
+                          display: 'block'
+                        }}
+                      />
+                    ) : (member.inCharge?.toLowerCase().includes('isha') || member.inCharge?.toLowerCase().includes('chourse')) ? (
+                      <img
+                        src={ishaImg || '/isha_chourse.jpg'}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== window.location.origin + '/isha_chourse.jpg') {
+                            target.src = '/isha_chourse.jpg';
+                          }
+                        }}
+                        alt="Isha Chourse"
                         style={{
                           width: '90px',
                           height: '110px',
