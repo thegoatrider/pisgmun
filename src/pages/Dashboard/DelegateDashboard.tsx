@@ -12,6 +12,7 @@ import karishmaImg from '../../assets/karishma_khankule.jpg';
 import reenaImg from '../../assets/reena_singh.jpg';
 import jyotiImg from '../../assets/jyoti_adurti.jpg';
 import ishaImg from '../../assets/isha_chourse.jpg';
+import priyankaImg from '../../assets/priyanka_adgube.jpg';
 
 export const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -784,6 +785,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }}
                               />
                             )}
+                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('priyanka') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('adgube')) && (
+                              <img
+                                src={priyankaImg || '/priyanka_adgube.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/priyanka_adgube.jpg') {
+                                    target.src = '/priyanka_adgube.jpg';
+                                  }
+                                }}
+                                alt="Priyanka Adgube"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
                             <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -908,6 +931,28 @@ export const DelegateDashboard: React.FC = () => {
                                   }
                                 }}
                                 alt="Isha Chourse"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
+                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('priyanka') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('adgube')) && (
+                              <img
+                                src={priyankaImg || '/priyanka_adgube.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/priyanka_adgube.jpg') {
+                                    target.src = '/priyanka_adgube.jpg';
+                                  }
+                                }}
+                                alt="Priyanka Adgube"
                                 style={{
                                   width: '78px',
                                   height: '96px',
@@ -1046,6 +1091,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Isha Chourse"
+                              style={{
+                                width: '78px',
+                                height: '96px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(197, 160, 89, 0.45)',
+                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                display: 'block',
+                                marginBottom: '0.35rem'
+                              }}
+                            />
+                          )}
+                          {(commObj?.eb_rapporteur?.toLowerCase().includes('priyanka') || commObj?.eb_rapporteur?.toLowerCase().includes('adgube')) && (
+                            <img
+                              src={priyankaImg || '/priyanka_adgube.jpg'}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (target.src !== window.location.origin + '/priyanka_adgube.jpg') {
+                                  target.src = '/priyanka_adgube.jpg';
+                                }
+                              }}
+                              alt="Priyanka Adgube"
                               style={{
                                 width: '78px',
                                 height: '96px',

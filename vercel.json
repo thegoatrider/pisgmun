@@ -66,6 +66,10 @@
       "dest": "/isha_chourse.jpg"
     },
     {
+      "src": "/priyanka_adgube.jpg",
+      "dest": "/priyanka_adgube.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },
