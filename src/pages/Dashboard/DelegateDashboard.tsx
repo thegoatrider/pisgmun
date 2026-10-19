@@ -260,6 +260,46 @@ export const DelegateDashboard: React.FC = () => {
     ? `Welcome, Vice-Chair ${name}`
     : `Welcome, ${name}`;
 
+  const renderEbInChargePhoto = (fullName: string) => {
+    const lower = fullName?.toLowerCase() || '';
+    let src = '';
+    let fallback = '';
+    let alt = fullName;
+    if (lower.includes('archana')) { src = archanaImg; fallback = '/archana_tripathi.jpg'; }
+    else if (lower.includes('shalini')) { src = shaliniImg; fallback = '/shalini_pandey.jpg'; }
+    else if (lower.includes('karishma')) { src = karishmaImg; fallback = '/karishma_khankule.jpg'; }
+    else if (lower.includes('reena')) { src = reenaImg; fallback = '/reena_singh.jpg'; }
+    else if (lower.includes('jyoti') || lower.includes('adurt')) { src = jyotiImg; fallback = '/jyoti_adurti.jpg'; }
+    else if (lower.includes('isha') || lower.includes('chourse')) { src = ishaImg; fallback = '/isha_chourse.jpg'; }
+    else if (lower.includes('priyanka') || lower.includes('adgube')) { src = priyankaImg; fallback = '/priyanka_adgube.jpg'; }
+    else if (lower.includes('pooja') || lower.includes('kale')) { src = poojaImg; fallback = '/pooja_kale.jpg'; }
+    else return null;
+
+    return (
+      <img
+        src={src || fallback}
+        onError={(e) => {
+          const target = e.currentTarget;
+          if (target.src !== window.location.origin + fallback) {
+            target.src = fallback;
+          }
+        }}
+        alt={alt}
+        style={{
+          width: '78px',
+          height: '102px',
+          objectFit: 'cover',
+          objectPosition: 'top center',
+          borderRadius: '8px',
+          border: '2px solid rgba(197, 160, 89, 0.45)',
+          boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+          display: 'block',
+          marginBottom: '0.35rem'
+        }}
+      />
+    );
+  };
+
   return (
     <div className="container section fade-in">
       {/* Welcome Header */}
@@ -319,177 +359,133 @@ export const DelegateDashboard: React.FC = () => {
             )}
           </Card>
 
-          {/* Grade 8 Teacher In-Charge Card */}
-          {delegateReg.grade === 8 && (
-            <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
-                Grade 8 Teacher In-Charge
-              </span>
-              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <img
-                  src={archanaImg || '/archana_tripathi.jpg'}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
-                      target.src = '/archana_tripathi.jpg';
-                    }
-                  }}
-                  alt="Archana Tripathi - Grade 8 In-Charge"
-                  style={{
-                    width: '85px',
-                    height: '105px',
-                    objectFit: 'cover',
-                    borderRadius: '10px',
-                    border: '2px solid rgba(197, 160, 89, 0.45)',
-                    boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
-                    display: 'block',
-                    flexShrink: 0
-                  }}
-                />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
-                  <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
-                    Archana Tripathi
-                  </h4>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                    Team Manager • Grade 8
-                  </span>
-                  <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href="mailto:archana.tripathi@podar.org" style={{ color: 'var(--color-secondary)' }}>archana.tripathi@podar.org</a></div>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <a href="tel:+919730031190" style={{ color: 'var(--color-text-main)' }}>+91 9730031190</a></div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          )}
+          {/* Committee Teacher In-Charge Islands: In-Charge 1 & In-Charge 2 */}
+          {(() => {
+            const commKey = (targetCommId || (delegateReg.grade === 10 ? 'unicef' : delegateReg.grade === 9 ? 'unhrc' : delegateReg.grade === 8 ? 'un-women' : 'unep')).toLowerCase();
+            let icList = [];
+            if (commKey.includes('unicef')) {
+              icList = [
+                {
+                  badge: 'UNICEF • In-Charge 1',
+                  name: 'Shalini Pandey',
+                  designation: 'Teacher In-Charge • Grade 10 / UNICEF',
+                  email: 'shalini.pandey1@podar.org',
+                  contact: '+91 9265889963',
+                  img: shaliniImg || '/shalini_pandey.jpg',
+                },
+                {
+                  badge: 'UNICEF • In-Charge 2',
+                  name: 'Isha Chourse',
+                  designation: 'Faculty Advisor & Rapporteur • UNICEF',
+                  email: 'isha.chourse@podar.org',
+                  contact: 'Podar International School',
+                  img: ishaImg || '/isha_chourse.jpg',
+                },
+              ];
+            } else if (commKey.includes('unhrc')) {
+              icList = [
+                {
+                  badge: 'UNHRC • In-Charge 1',
+                  name: 'Reena Singh',
+                  designation: 'Teacher In-Charge • Grade 9 / UNHRC',
+                  email: 'reena.singh3@podar.org',
+                  contact: '+91 7972989376',
+                  img: reenaImg || '/reena_singh.jpg',
+                },
+                {
+                  badge: 'UNHRC • In-Charge 2',
+                  name: 'Priyanka Adgube',
+                  designation: 'Faculty Advisor & Rapporteur • UNHRC',
+                  email: 'priyanka.adgube@podar.org',
+                  contact: 'Podar International School',
+                  img: priyankaImg || '/priyanka_adgube.jpg',
+                },
+              ];
+            } else if (commKey.includes('unep')) {
+              icList = [
+                {
+                  badge: 'UNEP • In-Charge 1',
+                  name: 'Jyoti Adurti',
+                  designation: 'Teacher In-Charge • UNEP',
+                  email: 'jyoti.adurti@podar.org',
+                  contact: 'Podar International School',
+                  img: jyotiImg || '/jyoti_adurti.jpg',
+                },
+                {
+                  badge: 'UNEP • In-Charge 2',
+                  name: 'Pooja Kale',
+                  designation: 'Faculty Advisor & Rapporteur • UNEP',
+                  email: 'pooja.kale@podar.org',
+                  contact: 'Podar International School',
+                  img: poojaImg || '/pooja_kale.jpg',
+                },
+              ];
+            } else {
+              // UN-WOMEN default
+              icList = [
+                {
+                  badge: 'UN-WOMEN • In-Charge 1',
+                  name: 'Archana Tripathi',
+                  designation: 'Teacher In-Charge • Grade 8 / UN-WOMEN',
+                  email: 'archana.tripathi@podar.org',
+                  contact: '+91 9730031190',
+                  img: archanaImg || '/archana_tripathi.jpg',
+                },
+                {
+                  badge: 'UN-WOMEN • In-Charge 2',
+                  name: 'Karishma Khankule',
+                  designation: 'Teacher In-Charge • Grade 7 / UN-WOMEN',
+                  email: 'karishma.khankule@podar.org',
+                  contact: '+91 8378054842',
+                  img: karishmaImg || '/karishma_khankule.jpg',
+                },
+              ];
+            }
 
-          {/* Grade 7 Teacher In-Charge Card */}
-          {delegateReg.grade === 7 && (
-            <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
-                Grade 7 Teacher In-Charge
-              </span>
-              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <img
-                  src={karishmaImg || '/karishma_khankule.jpg'}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (target.src !== window.location.origin + '/karishma_khankule.jpg') {
-                      target.src = '/karishma_khankule.jpg';
-                    }
-                  }}
-                  alt="Karishma Khankule - Grade 7 In-Charge"
-                  style={{
-                    width: '85px',
-                    height: '105px',
-                    objectFit: 'cover',
-                    borderRadius: '10px',
-                    border: '2px solid rgba(197, 160, 89, 0.45)',
-                    boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
-                    display: 'block',
-                    flexShrink: 0
-                  }}
-                />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
-                  <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
-                    Karishma Khankule
-                  </h4>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                    Team Manager • Grade 7
-                  </span>
-                  <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href="mailto:karishma.khankule@podar.org" style={{ color: 'var(--color-secondary)' }}>karishma.khankule@podar.org</a></div>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <a href="tel:+918378054842" style={{ color: 'var(--color-text-main)' }}>+91 8378054842</a></div>
+            return icList.map((ic, icIdx) => (
+              <Card key={icIdx} elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
+                  {ic.badge}
+                </span>
+                <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <img
+                    src={ic.img}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      const fallback = ic.img.includes('http') ? ic.img : window.location.origin + ic.img;
+                      if (target.src !== fallback) {
+                        target.src = fallback;
+                      }
+                    }}
+                    alt={`${ic.name} - ${ic.badge}`}
+                    style={{
+                      width: '85px',
+                      height: '108px',
+                      objectFit: 'cover',
+                      objectPosition: 'top center',
+                      borderRadius: '10px',
+                      border: '2px solid rgba(197, 160, 89, 0.45)',
+                      boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
+                      display: 'block',
+                      flexShrink: 0
+                    }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
+                    <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
+                      {ic.name}
+                    </h4>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                      {ic.designation}
+                    </span>
+                    <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href={`mailto:${ic.email}`} style={{ color: 'var(--color-secondary)' }}>{ic.email}</a></div>
+                      <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <span style={{ color: 'var(--color-text-main)' }}>{ic.contact}</span></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Grade 9 Teacher In-Charge Card */}
-          {delegateReg.grade === 9 && (
-            <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
-                Grade 9 Teacher In-Charge
-              </span>
-              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <img
-                  src={reenaImg || '/reena_singh.jpg'}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (target.src !== window.location.origin + '/reena_singh.jpg') {
-                      target.src = '/reena_singh.jpg';
-                    }
-                  }}
-                  alt="Reena Singh - Grade 9 In-Charge"
-                  style={{
-                    width: '85px',
-                    height: '105px',
-                    objectFit: 'cover',
-                    borderRadius: '10px',
-                    border: '2px solid rgba(197, 160, 89, 0.45)',
-                    boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
-                    display: 'block',
-                    flexShrink: 0
-                  }}
-                />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
-                  <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
-                    Reena Singh
-                  </h4>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                    Team Manager • Grade 9
-                  </span>
-                  <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href="mailto:reena.singh3@podar.org" style={{ color: 'var(--color-secondary)' }}>reena.singh3@podar.org</a></div>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <a href="tel:+917972989376" style={{ color: 'var(--color-text-main)' }}>+91 7972989376</a></div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Grade 10 Teacher In-Charge Card */}
-          {delegateReg.grade === 10 && (
-            <Card elevation="md" style={{ padding: '1.5rem', border: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-secondary)', letterSpacing: '0.5px', display: 'block', marginBottom: '0.75rem' }}>
-                Grade 10 Teacher In-Charge
-              </span>
-              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <img
-                  src={shaliniImg || '/shalini_pandey.jpg'}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (target.src !== window.location.origin + '/shalini_pandey.jpg') {
-                      target.src = '/shalini_pandey.jpg';
-                    }
-                  }}
-                  alt="Shalini Pandey - Grade 10 In-Charge"
-                  style={{
-                    width: '85px',
-                    height: '105px',
-                    objectFit: 'cover',
-                    borderRadius: '10px',
-                    border: '2px solid rgba(197, 160, 89, 0.45)',
-                    boxShadow: '0 4px 12px rgba(10, 37, 64, 0.12)',
-                    display: 'block',
-                    flexShrink: 0
-                  }}
-                />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '180px' }}>
-                  <h4 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 700 }}>
-                    Shalini Pandey
-                  </h4>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                    Team Manager • Grade 10
-                  </span>
-                  <div style={{ fontSize: '0.82rem', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Email:</strong> <a href="mailto:shalini.pandey1@podar.org" style={{ color: 'var(--color-secondary)' }}>shalini.pandey1@podar.org</a></div>
-                    <div><strong style={{ color: 'var(--color-secondary)' }}>Contact:</strong> <a href="tel:+919265889963" style={{ color: 'var(--color-text-main)' }}>+91 9265889963</a></div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          )}
+              </Card>
+            ));
+          })()}
 
           {/* PMUN Session Dates & Conference Timeline Card */}
           <Card elevation="md" style={{ padding: '2rem', border: '1px solid var(--color-border)' }}>
@@ -654,544 +650,19 @@ export const DelegateDashboard: React.FC = () => {
                         <>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px' }}>In-Charge 1</span>
-                            {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('archana') && (
-                              <img
-                                src={archanaImg || '/archana_tripathi.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
-                                    target.src = '/archana_tripathi.jpg';
-                                  }
-                                }}
-                                alt="Archana Tripathi"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('shalini') && (
-                              <img
-                                src={shaliniImg || '/shalini_pandey.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/shalini_pandey.jpg') {
-                                    target.src = '/shalini_pandey.jpg';
-                                  }
-                                }}
-                                alt="Shalini Pandey"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('karishma') && (
-                              <img
-                                src={karishmaImg || '/karishma_khankule.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/karishma_khankule.jpg') {
-                                    target.src = '/karishma_khankule.jpg';
-                                  }
-                                }}
-                                alt="Karishma Khankule"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('reena') && (
-                              <img
-                                src={reenaImg || '/reena_singh.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/reena_singh.jpg') {
-                                    target.src = '/reena_singh.jpg';
-                                  }
-                                }}
-                                alt="Reena Singh"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('jyoti') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('adurt')) && (
-                              <img
-                                src={jyotiImg || '/jyoti_adurti.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
-                                    target.src = '/jyoti_adurti.jpg';
-                                  }
-                                }}
-                                alt="Jyoti Adurti"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('isha') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('chourse')) && (
-                              <img
-                                src={ishaImg || '/isha_chourse.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/isha_chourse.jpg') {
-                                    target.src = '/isha_chourse.jpg';
-                                  }
-                                }}
-                                alt="Isha Chourse"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('priyanka') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('adgube')) && (
-                              <img
-                                src={priyankaImg || '/priyanka_adgube.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/priyanka_adgube.jpg') {
-                                    target.src = '/priyanka_adgube.jpg';
-                                  }
-                                }}
-                                alt="Priyanka Adgube"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('pooja') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('kale')) && (
-                              <img
-                                src={poojaImg || '/pooja_kale.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/pooja_kale.jpg') {
-                                    target.src = '/pooja_kale.jpg';
-                                  }
-                                }}
-                                alt="Pooja Kale"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
+                            {renderEbInChargePhoto(commObj.eb_rapporteur.split(',')[0])}
                             <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px' }}>In-Charge 2</span>
-                            {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('archana') && (
-                              <img
-                                src={archanaImg || '/archana_tripathi.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
-                                    target.src = '/archana_tripathi.jpg';
-                                  }
-                                }}
-                                alt="Archana Tripathi"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('shalini') && (
-                              <img
-                                src={shaliniImg || '/shalini_pandey.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/shalini_pandey.jpg') {
-                                    target.src = '/shalini_pandey.jpg';
-                                  }
-                                }}
-                                alt="Shalini Pandey"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('karishma') && (
-                              <img
-                                src={karishmaImg || '/karishma_khankule.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/karishma_khankule.jpg') {
-                                    target.src = '/karishma_khankule.jpg';
-                                  }
-                                }}
-                                alt="Karishma Khankule"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('reena') && (
-                              <img
-                                src={reenaImg || '/reena_singh.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/reena_singh.jpg') {
-                                    target.src = '/reena_singh.jpg';
-                                  }
-                                }}
-                                alt="Reena Singh"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('jyoti') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('adurt')) && (
-                              <img
-                                src={jyotiImg || '/jyoti_adurti.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
-                                    target.src = '/jyoti_adurti.jpg';
-                                  }
-                                }}
-                                alt="Jyoti Adurti"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('isha') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('chourse')) && (
-                              <img
-                                src={ishaImg || '/isha_chourse.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/isha_chourse.jpg') {
-                                    target.src = '/isha_chourse.jpg';
-                                  }
-                                }}
-                                alt="Isha Chourse"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('priyanka') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('adgube')) && (
-                              <img
-                                src={priyankaImg || '/priyanka_adgube.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/priyanka_adgube.jpg') {
-                                    target.src = '/priyanka_adgube.jpg';
-                                  }
-                                }}
-                                alt="Priyanka Adgube"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
-                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('pooja') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('kale')) && (
-                              <img
-                                src={poojaImg || '/pooja_kale.jpg'}
-                                onError={(e) => {
-                                  const target = e.currentTarget;
-                                  if (target.src !== window.location.origin + '/pooja_kale.jpg') {
-                                    target.src = '/pooja_kale.jpg';
-                                  }
-                                }}
-                                alt="Pooja Kale"
-                                style={{
-                                  width: '78px',
-                                  height: '96px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                  border: '2px solid rgba(197, 160, 89, 0.45)',
-                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                  display: 'block',
-                                  marginBottom: '0.35rem'
-                                }}
-                              />
-                            )}
+                            {renderEbInChargePhoto(commObj.eb_rapporteur.split(',')[1])}
                             <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[1]?.trim() || 'TBD'}</strong>
                           </div>
                         </>
                       ) : (
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px' }}>In-Charge</span>
-                          {commObj?.eb_rapporteur?.toLowerCase().includes('archana') && (
-                            <img
-                              src={archanaImg || '/archana_tripathi.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/archana_tripathi.jpg') {
-                                  target.src = '/archana_tripathi.jpg';
-                                }
-                              }}
-                              alt="Archana Tripathi"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {commObj?.eb_rapporteur?.toLowerCase().includes('shalini') && (
-                            <img
-                              src={shaliniImg || '/shalini_pandey.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/shalini_pandey.jpg') {
-                                  target.src = '/shalini_pandey.jpg';
-                                }
-                              }}
-                              alt="Shalini Pandey"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {commObj?.eb_rapporteur?.toLowerCase().includes('karishma') && (
-                            <img
-                              src={karishmaImg || '/karishma_khankule.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/karishma_khankule.jpg') {
-                                  target.src = '/karishma_khankule.jpg';
-                                }
-                              }}
-                              alt="Karishma Khankule"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {commObj?.eb_rapporteur?.toLowerCase().includes('reena') && (
-                            <img
-                              src={reenaImg || '/reena_singh.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/reena_singh.jpg') {
-                                  target.src = '/reena_singh.jpg';
-                                }
-                              }}
-                              alt="Reena Singh"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {(commObj?.eb_rapporteur?.toLowerCase().includes('jyoti') || commObj?.eb_rapporteur?.toLowerCase().includes('adurt')) && (
-                            <img
-                              src={jyotiImg || '/jyoti_adurti.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/jyoti_adurti.jpg') {
-                                  target.src = '/jyoti_adurti.jpg';
-                                }
-                              }}
-                              alt="Jyoti Adurti"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {(commObj?.eb_rapporteur?.toLowerCase().includes('isha') || commObj?.eb_rapporteur?.toLowerCase().includes('chourse')) && (
-                            <img
-                              src={ishaImg || '/isha_chourse.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/isha_chourse.jpg') {
-                                  target.src = '/isha_chourse.jpg';
-                                }
-                              }}
-                              alt="Isha Chourse"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {(commObj?.eb_rapporteur?.toLowerCase().includes('priyanka') || commObj?.eb_rapporteur?.toLowerCase().includes('adgube')) && (
-                            <img
-                              src={priyankaImg || '/priyanka_adgube.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/priyanka_adgube.jpg') {
-                                  target.src = '/priyanka_adgube.jpg';
-                                }
-                              }}
-                              alt="Priyanka Adgube"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
-                          {(commObj?.eb_rapporteur?.toLowerCase().includes('pooja') || commObj?.eb_rapporteur?.toLowerCase().includes('kale')) && (
-                            <img
-                              src={poojaImg || '/pooja_kale.jpg'}
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                if (target.src !== window.location.origin + '/pooja_kale.jpg') {
-                                  target.src = '/pooja_kale.jpg';
-                                }
-                              }}
-                              alt="Pooja Kale"
-                              style={{
-                                width: '78px',
-                                height: '96px',
-                                objectFit: 'cover',
-                                borderRadius: '8px',
-                                border: '2px solid rgba(197, 160, 89, 0.45)',
-                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
-                                display: 'block',
-                                marginBottom: '0.35rem'
-                              }}
-                            />
-                          )}
+                          {renderEbInChargePhoto(commObj?.eb_rapporteur || '')}
                           <strong style={{ fontSize: '0.85rem' }}>{commObj?.eb_rapporteur || 'TBD'}</strong>
                         </div>
                       )}
@@ -1663,7 +1134,7 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Karishma Khankule"
-                              style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
+                              style={{ width: '32px', height: '38px', objectFit: 'cover', objectPosition: 'top center', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
                             />
                           ) : delegateReg.grade === 8 ? (
                             <img
@@ -1675,7 +1146,7 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Archana Tripathi"
-                              style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
+                              style={{ width: '32px', height: '38px', objectFit: 'cover', objectPosition: 'top center', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
                             />
                           ) : delegateReg.grade === 9 ? (
                             <img
@@ -1687,7 +1158,7 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Reena Singh"
-                              style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
+                              style={{ width: '32px', height: '38px', objectFit: 'cover', objectPosition: 'top center', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
                             />
                           ) : delegateReg.grade === 10 ? (
                             <img
@@ -1699,7 +1170,7 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Shalini Pandey"
-                              style={{ width: '32px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
+                              style={{ width: '32px', height: '38px', objectFit: 'cover', objectPosition: 'top center', borderRadius: '4px', border: '1.5px solid rgba(197, 160, 89, 0.45)' }}
                             />
                           ) : null
                         )}

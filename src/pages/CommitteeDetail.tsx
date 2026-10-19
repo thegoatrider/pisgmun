@@ -142,9 +142,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Archana Tripathi"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -163,9 +164,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Shalini Pandey"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -184,9 +186,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Karishma Khankule"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -205,9 +208,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Reena Singh"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -226,9 +230,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Jyoti Adurti"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -247,9 +252,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Isha Chourse"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -268,9 +274,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Priyanka Adgube"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',
@@ -289,9 +296,10 @@ export const CommitteeDetail: React.FC = () => {
                   }}
                   alt="Pooja Kale"
                   style={{
-                    width: '75px',
-                    height: '92px',
+                    width: '78px',
+                    height: '102px',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                     borderRadius: '8px',
                     margin: '0.6rem 0 0.4rem 0',
                     border: '2px solid rgba(197, 160, 89, 0.45)',

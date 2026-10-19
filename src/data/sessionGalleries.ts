@@ -1,4 +1,8 @@
 import mockSessionImg from '../assets/session_mock_img.png';
+import session1Photo1 from '../assets/session_15oct_1.jpg';
+import session1Photo2 from '../assets/session_15oct_2.jpg';
+import session1Photo3 from '../assets/session_15oct_3.jpg';
+import session1Photo4 from '../assets/session_15oct_4.jpg';
 
 export interface SessionPhoto {
   id: string;
@@ -17,6 +21,8 @@ export interface SessionData {
   summary: string;
   photos: SessionPhoto[];
 }
+
+const session1Description = `On 15th October, a comprehensive preparatory session for PISGMUN (PISG Model United Nations) was conducted to familiarise students with the overall structure, flow, and expectations of the upcoming programme. The primary objective of the session was to ensure that all participating students developed a clear understanding of how a Model United Nations conference functions and the various stages involved in the proceedings. During the session, students were introduced to the sequence of activities, committee procedures, rules of debate, and the important points to be kept in mind while participating in discussions. The resource persons explained the significance of maintaining diplomatic decorum, respecting differing perspectives, presenting arguments logically, and communicating ideas with clarity and confidence. Special emphasis was placed on the importance of thorough research, understanding the assigned agenda, gathering relevant information, and developing well-structured points to support one's arguments. Students were also guided on how to express their opinions effectively, participate constructively in formal discussions, listen attentively to fellow delegates, and respond to opposing viewpoints in a respectful and diplomatic manner. The session highlighted that Model United Nations is not merely an opportunity to speak in front of an audience, but also a platform to develop critical thinking, negotiation skills, leadership qualities, teamwork, and a deeper understanding of international affairs and global issues. Through the explanations and interactive discussions, students gained valuable insights into the practical aspects of the programme and were encouraged to approach the conference with preparation, responsibility, and an open mind. The session proved to be an important orientation exercise, helping students clarify their doubts, understand the expectations associated with their participation, and become more confident about the proceedings. Overall, the PISGMUN preparatory session conducted on 15th October was a meaningful and informative initiative that laid a strong foundation for the upcoming event, motivating students to participate enthusiastically and make the most of this enriching learning experience.`;
 
 const mockDescription = `The image depicts a remarkably suspicious-looking penguin standing in the middle of an abandoned shopping mall at exactly 3:47 a.m. The penguin is wearing a purple velvet suit, oversized sunglasses, and a pair of golden boots that appear to be at least three sizes too large. In its left flipper, it holds a half-eaten sandwich, while its right flipper is raised dramatically toward the ceiling, as though it has just discovered the meaning of life and is deeply disappointed by the results.
 
@@ -45,10 +51,28 @@ export const PREPARATORY_SESSIONS: SessionData[] = [
     summary: 'Rules of Procedure (RoP) Introduction, General Speakers List (GSL), and Committee Decorum.',
     photos: [
       {
-        id: 'photo-s1-mock',
-        imageUrl: mockSessionImg,
-        caption: 'Session 1 Dispatch & Analysis',
-        description: mockDescription,
+        id: 'photo-s1-1',
+        imageUrl: session1Photo1,
+        caption: 'Preparatory Session 1 - Introduction to Procedures and Conference Flow',
+        description: session1Description,
+      },
+      {
+        id: 'photo-s1-2',
+        imageUrl: session1Photo2,
+        caption: 'Delegate Cohort in Formal Orientation & Discussion',
+        description: session1Description,
+      },
+      {
+        id: 'photo-s1-3',
+        imageUrl: session1Photo3,
+        caption: 'Diplomatic Decorum, Debate Sequence, and Committee Rules',
+        description: session1Description,
+      },
+      {
+        id: 'photo-s1-4',
+        imageUrl: session1Photo4,
+        caption: 'Agenda Research, Points of Inquiry, and Position Preparation',
+        description: session1Description,
       },
     ],
   },
