@@ -13,6 +13,7 @@ import reenaImg from '../assets/reena_singh.jpg';
 import jyotiImg from '../assets/jyoti_adurti.jpg';
 import ishaImg from '../assets/isha_chourse.jpg';
 import priyankaImg from '../assets/priyanka_adgube.jpg';
+import poojaImg from '../assets/pooja_kale.jpg';
 
 export const CommitteeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -266,6 +267,27 @@ export const CommitteeDetail: React.FC = () => {
                     }
                   }}
                   alt="Priyanka Adgube"
+                  style={{
+                    width: '75px',
+                    height: '92px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    margin: '0.6rem 0 0.4rem 0',
+                    border: '2px solid rgba(197, 160, 89, 0.45)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.12)'
+                  }}
+                />
+              )}
+              {(member.name?.toLowerCase().includes('pooja') || member.name?.toLowerCase().includes('kale')) && (
+                <img
+                  src={poojaImg || '/pooja_kale.jpg'}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + '/pooja_kale.jpg') {
+                      target.src = '/pooja_kale.jpg';
+                    }
+                  }}
+                  alt="Pooja Kale"
                   style={{
                     width: '75px',
                     height: '92px',

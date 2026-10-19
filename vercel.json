@@ -70,6 +70,10 @@
       "dest": "/priyanka_adgube.jpg"
     },
     {
+      "src": "/pooja_kale.jpg",
+      "dest": "/pooja_kale.jpg"
+    },
+    {
       "src": "/(.*\\.(?:jpg|jpeg|png|gif|svg|ico|webp|pdf))",
       "dest": "/$1"
     },

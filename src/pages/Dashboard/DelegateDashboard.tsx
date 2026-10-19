@@ -13,6 +13,7 @@ import reenaImg from '../../assets/reena_singh.jpg';
 import jyotiImg from '../../assets/jyoti_adurti.jpg';
 import ishaImg from '../../assets/isha_chourse.jpg';
 import priyankaImg from '../../assets/priyanka_adgube.jpg';
+import poojaImg from '../../assets/pooja_kale.jpg';
 
 export const DelegateDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -807,6 +808,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }}
                               />
                             )}
+                            {(commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('pooja') || commObj.eb_rapporteur.split(',')[0]?.toLowerCase().includes('kale')) && (
+                              <img
+                                src={poojaImg || '/pooja_kale.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/pooja_kale.jpg') {
+                                    target.src = '/pooja_kale.jpg';
+                                  }
+                                }}
+                                alt="Pooja Kale"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
                             <strong style={{ fontSize: '0.85rem' }}>{commObj.eb_rapporteur.split(',')[0]?.trim() || 'TBD'}</strong>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -953,6 +976,28 @@ export const DelegateDashboard: React.FC = () => {
                                   }
                                 }}
                                 alt="Priyanka Adgube"
+                                style={{
+                                  width: '78px',
+                                  height: '96px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '2px solid rgba(197, 160, 89, 0.45)',
+                                  boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                  display: 'block',
+                                  marginBottom: '0.35rem'
+                                }}
+                              />
+                            )}
+                            {(commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('pooja') || commObj.eb_rapporteur.split(',')[1]?.toLowerCase().includes('kale')) && (
+                              <img
+                                src={poojaImg || '/pooja_kale.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== window.location.origin + '/pooja_kale.jpg') {
+                                    target.src = '/pooja_kale.jpg';
+                                  }
+                                }}
+                                alt="Pooja Kale"
                                 style={{
                                   width: '78px',
                                   height: '96px',
@@ -1113,6 +1158,28 @@ export const DelegateDashboard: React.FC = () => {
                                 }
                               }}
                               alt="Priyanka Adgube"
+                              style={{
+                                width: '78px',
+                                height: '96px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                border: '2px solid rgba(197, 160, 89, 0.45)',
+                                boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+                                display: 'block',
+                                marginBottom: '0.35rem'
+                              }}
+                            />
+                          )}
+                          {(commObj?.eb_rapporteur?.toLowerCase().includes('pooja') || commObj?.eb_rapporteur?.toLowerCase().includes('kale')) && (
+                            <img
+                              src={poojaImg || '/pooja_kale.jpg'}
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (target.src !== window.location.origin + '/pooja_kale.jpg') {
+                                  target.src = '/pooja_kale.jpg';
+                                }
+                              }}
+                              alt="Pooja Kale"
                               style={{
                                 width: '78px',
                                 height: '96px',
