@@ -6,6 +6,7 @@ import { Badge } from '../../components/UI/Badge';
 import { Button } from '../../components/UI/Button';
 import { Loader2, FileText, Download, Lock, CheckCircle, Clock, AlertTriangle, LogOut, Plus, Trash2, Calendar, Camera, ChevronRight } from 'lucide-react';
 import { StudyGuidesDrawer } from '../../components/Dashboard/StudyGuidesDrawer';
+import { FormattedMessage } from '../../components/FormattedMessage';
 import archanaImg from '../../assets/archana_tripathi.jpg';
 import shaliniImg from '../../assets/shalini_pandey.jpg';
 import karishmaImg from '../../assets/karishma_khankule.jpg';
@@ -146,7 +147,14 @@ export const DelegateDashboard: React.FC = () => {
       const res = await fetch(`/api/messages?_=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        setMessages(data);
+        const cleaned = Array.isArray(data)
+          ? data.filter((m: any) => {
+              const sent = String(m?.sent_at || '');
+              const isOct19 = sent.includes('10-19') || sent.includes('10/19') || sent.includes('19th Oct') || sent.includes('Oct 19');
+              return !(m?.type === 'announcement' && isOct19);
+            })
+          : [];
+        setMessages(cleaned);
       }
     } catch (e) {
       console.error('Failed to load messages', e);
@@ -993,14 +1001,14 @@ export const DelegateDashboard: React.FC = () => {
           </Card>
 
           {/* Announcements Card */}
-          <Card elevation="md" style={{ padding: '1.5rem', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', height: '300px' }}>
+          <Card elevation="md" style={{ padding: '1.5rem', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', minHeight: '340px' }}>
             <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem', color: 'var(--color-primary)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
               📢 Official Announcements
             </h3>
-            <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.75rem', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ flex: 1, minHeight: '220px', maxHeight: '420px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0.85rem', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {messages.filter(msg => msg.type === 'announcement').length === 0 ? (
-                <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>
-                  No official announcements received yet.
+                <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.82rem', fontStyle: 'italic', padding: '1rem' }}>
+                  No official announcements posted yet.
                 </div>
               ) : (
                 messages
@@ -1010,24 +1018,23 @@ export const DelegateDashboard: React.FC = () => {
                       key={msg.id}
                       style={{
                         alignSelf: 'stretch',
-                        backgroundColor: 'rgba(59, 130, 246, 0.04)',
-                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(0, 32, 74, 0.12)',
                         borderRadius: 'var(--radius-md)',
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.82rem',
+                        padding: '1rem 1.25rem',
                         color: 'var(--color-text-main)',
-                        lineHeight: '1.4'
+                        boxShadow: 'var(--shadow-sm)'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <span style={{ fontWeight: 800, fontSize: '0.68rem', color: 'var(--color-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          {msg.recipient_id === 'all' ? '📢 Global Announcement' : `🎓 Grade ${delegateReg.grade} Announcement`}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '6px' }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.7rem', color: 'var(--color-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {msg.recipient_id === 'all' ? '📢 Global MUN Announcement' : `🎓 Grade ${delegateReg.grade} Announcement`}
                         </span>
-                        <span style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>
                           {formatIST(msg.sent_at)}
                         </span>
                       </div>
-                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 500 }}>{msg.content}</div>
+                      <FormattedMessage content={msg.content} style={{ fontSize: '0.88rem', color: 'var(--color-primary)' }} />
                     </div>
                   ))
               )}
@@ -1178,7 +1185,7 @@ export const DelegateDashboard: React.FC = () => {
                           {msg.sender_role === 'delegate' ? 'You (Delegate)' : msg.sender_role === 'coordinator' ? 'MUN Coordinator' : delegateReg.grade === 7 ? 'Karishma Khankule (Grade 7 In-Charge)' : delegateReg.grade === 8 ? 'Archana Tripathi (Grade 8 In-Charge)' : delegateReg.grade === 9 ? 'Reena Singh (Grade 9 In-Charge)' : delegateReg.grade === 10 ? 'Shalini Pandey (Grade 10 In-Charge)' : `Grade ${delegateReg.grade} In-Charge`}
                         </span>
                       </div>
-                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
+                      <FormattedMessage content={msg.content} style={{ fontSize: '0.85rem' }} />
                       <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
                         {formatIST(msg.sent_at)}
                       </div>

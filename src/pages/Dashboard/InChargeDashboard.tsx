@@ -21,6 +21,7 @@ import {
   Check 
 } from 'lucide-react';
 import { API } from '../../services/api';
+import { FormattedMessage } from '../../components/FormattedMessage';
 
 const CONFERENCE_DATES = [
   { id: '2026-10-15', label: '15 Oct (Session 1)' },
@@ -154,7 +155,14 @@ export const InChargeDashboard: React.FC = () => {
       const res = await fetch(`/api/messages?_=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        setMessages(data);
+        const cleaned = Array.isArray(data)
+          ? data.filter((m: any) => {
+              const sent = String(m?.sent_at || '');
+              const isOct19 = sent.includes('10-19') || sent.includes('10/19') || sent.includes('19th Oct') || sent.includes('Oct 19');
+              return !(m?.type === 'announcement' && isOct19);
+            })
+          : [];
+        setMessages(cleaned);
       }
     } catch (e) {
       console.error(e);
@@ -867,7 +875,7 @@ export const InChargeDashboard: React.FC = () => {
                             ? `You (${COMM_LABELS[inChargeComm] || inChargeComm.toUpperCase()} In-Charge)`
                             : `${committeeRegistrations.find(r => r.id === msg.sender_id)?.name || msg.sender_id} (Delegate)`}
                         </div>
-                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
+                        <FormattedMessage content={msg.content} style={{ fontSize: '0.85rem' }} />
                         <div style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
                           {formatIST(msg.sent_at)}
                         </div>
@@ -877,19 +885,51 @@ export const InChargeDashboard: React.FC = () => {
               </div>
 
               {/* Chat sender input */}
-              <form onSubmit={handleSendInChargeMessage} style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type="text"
-                  placeholder="Type your committee announcement here..."
+              <form
+                onSubmit={handleSendInChargeMessage}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.75rem',
+                  backgroundColor: '#ffffff'
+                }}
+              >
+                <textarea
+                  placeholder="Type your committee announcement or message here... Press Enter for a new line, Ctrl+B for bold."
                   value={newMsgContent}
                   onChange={(e) => setNewMsgContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+                      e.preventDefault();
+                      const target = e.currentTarget;
+                      const start = target.selectionStart;
+                      const end = target.selectionEnd;
+                      const text = target.value;
+                      const selected = text.substring(start, end);
+                      const rep = selected ? `**${selected}**` : `**bold text**`;
+                      const updated = text.substring(0, start) + rep + text.substring(end);
+                      setNewMsgContent(updated);
+                    } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSendInChargeMessage(e);
+                    }
+                  }}
                   className="form-control"
-                  style={{ flex: 1 }}
+                  rows={3}
+                  style={{ width: '100%', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: '1.5' }}
                   disabled={isMsgSending}
                 />
-                <Button type="submit" variant="primary" loading={isMsgSending} style={{ padding: '0.65rem 1.5rem' }}>
-                  Send
-                </Button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                    💡 Enter = newline • Ctrl+B = bold • Ctrl+Enter = send
+                  </span>
+                  <Button type="submit" variant="primary" loading={isMsgSending} disabled={!newMsgContent.trim() || isMsgSending} style={{ padding: '0.5rem 1.4rem' }}>
+                    Send Announcement
+                  </Button>
+                </div>
               </form>
             </div>
           </div>

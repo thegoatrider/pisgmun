@@ -349,20 +349,46 @@ def db_save_position_papers(pp_list):
         return res.status_code in (200, 201)
 
 def db_get_messages():
+    raw_list = []
     if IS_DEMO_MODE:
-        return read_mock().get("messages", [])
+        raw_list = read_mock().get("messages", [])
     else:
-        url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.messages"
-        res = requests.get(url, headers=get_supabase_headers())
-        if res.status_code == 200 and res.json():
-            return res.json()[0].get("value", [])
-        return []
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.messages"
+            res = requests.get(url, headers=get_supabase_headers())
+            if res.status_code == 200 and res.json():
+                raw_list = res.json()[0].get("value", [])
+        except Exception as e:
+            print("db_get_messages error:", e)
+            raw_list = []
+
+    # Clean up / remove announcements from 19th October as requested by user
+    cleaned = []
+    purged = False
+    for m in raw_list:
+        sent_at = str(m.get('sent_at', ''))
+        # Identify announcement sent on 19th October
+        is_oct_19 = ('10-19' in sent_at or '10/19' in sent_at or '19th Oct' in sent_at or 'Oct 19' in sent_at)
+        if m.get('type') == 'announcement' and is_oct_19:
+            purged = True
+            continue
+        cleaned.append(m)
+
+    if purged:
+        db_save_messages(cleaned)
+        return cleaned
+
+    return raw_list
 
 def db_save_messages(msg_list):
-    if IS_DEMO_MODE:
+    try:
         data = read_mock()
         data["messages"] = msg_list
         write_mock(data)
+    except Exception as ex:
+        pass
+
+    if IS_DEMO_MODE:
         return True
     else:
         url = f"{SUPABASE_URL}/rest/v1/pmun_settings?key=eq.messages"
@@ -1660,6 +1686,27 @@ def api_messages():
         if db_save_messages(msg_list):
             return jsonify({"success": True, "message": new_msg})
         return jsonify({"error": "Failed to save message."}), 500
+
+
+@app.route('/api/messages/<msg_id>', methods=['DELETE'])
+@app.route('/api/messages/delete', methods=['POST'])
+def api_delete_message(msg_id=None):
+    role, reg_id = get_auth_session()
+    if role != 'coordinator':
+        return jsonify({"error": "Unauthorized. Only Coordinator can delete messages."}), 403
+
+    target_id = msg_id
+    if not target_id and request.is_json:
+        target_id = request.json.get('id')
+
+    if not target_id:
+        return jsonify({"error": "Message ID is required."}), 400
+
+    msg_list = db_get_messages()
+    updated = [m for m in msg_list if m.get('id') != target_id]
+    if db_save_messages(updated):
+        return jsonify({"success": True, "remaining": len(updated)})
+    return jsonify({"error": "Failed to delete message."}), 500
 
 
 # --- SECURITY HEADERS INJECTION ---

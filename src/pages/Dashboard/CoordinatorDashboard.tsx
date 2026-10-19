@@ -8,6 +8,8 @@ import { Button } from '../../components/UI/Button';
 import { Badge } from '../../components/UI/Badge';
 import { Modal } from '../../components/UI/Modal';
 import { Loader2, Download, Search, Settings, BookOpen, KeyRound, Save, CheckCircle, XCircle, Trash2, Edit3, LogOut, FileText, Mail } from 'lucide-react';
+import { FormattedMessage } from '../../components/FormattedMessage';
+import { AnnouncementComposer } from '../../components/AnnouncementComposer';
 
 export const CoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -231,7 +233,14 @@ export const CoordinatorDashboard: React.FC = () => {
       const res = await fetch(`/api/messages?_=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        setAllMessages(data);
+        const cleaned = Array.isArray(data)
+          ? data.filter((m: any) => {
+              const sent = String(m?.sent_at || '');
+              const isOct19 = sent.includes('10-19') || sent.includes('10/19') || sent.includes('19th Oct') || sent.includes('Oct 19');
+              return !(m?.type === 'announcement' && isOct19);
+            })
+          : [];
+        setAllMessages(cleaned);
       }
     } catch (e) {
       console.error(e);
@@ -323,8 +332,8 @@ export const CoordinatorDashboard: React.FC = () => {
   const [newAnnounceContent, setNewAnnounceContent] = useState('');
   const [isAnnounceSending, setIsAnnounceSending] = useState(false);
 
-  const handleSendCoordinatorAnnouncement = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendCoordinatorAnnouncement = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!newAnnounceContent.trim() || !activeAnnounceRecipient) return;
     setIsAnnounceSending(true);
     try {
@@ -341,11 +350,7 @@ export const CoordinatorDashboard: React.FC = () => {
       });
       if (res.ok) {
         setNewAnnounceContent('');
-        const fetchRes = await fetch('/api/messages');
-        if (fetchRes.ok) {
-          const data = await fetchRes.json();
-          setAllMessages(data);
-        }
+        await fetchAllMessages();
       } else {
         const err = await res.json().catch(() => ({ error: 'Failed to post announcement.' }));
         alert(err.error);
@@ -354,6 +359,24 @@ export const CoordinatorDashboard: React.FC = () => {
       alert('Network error.');
     } finally {
       setIsAnnounceSending(false);
+    }
+  };
+
+  const handleDeleteAnnouncement = async (msgId: string) => {
+    if (!window.confirm('Are you sure you want to delete this announcement? It will be permanently removed for all delegates.')) return;
+    try {
+      const res = await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        await fetch('/api/messages/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: msgId })
+        });
+      }
+      setAllMessages(prev => prev.filter(m => m.id !== msgId));
+    } catch (err) {
+      console.error('Failed to delete announcement', err);
+      alert('Failed to delete announcement. Please try again.');
     }
   };
 
@@ -2017,7 +2040,7 @@ export const CoordinatorDashboard: React.FC = () => {
                             <div style={{ fontWeight: 700, fontSize: '0.65rem', color: msg.sender_role === 'coordinator' ? 'var(--color-secondary)' : 'var(--color-primary)', marginBottom: '3px', textTransform: 'uppercase' }}>
                               {msg.sender_role === 'coordinator' ? 'You (MUN Coordinator)' : `${registrations.find(r => r.id === msg.sender_id)?.name || msg.sender_id} (Delegate)`}
                             </div>
-                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
+                            <FormattedMessage content={msg.content} style={{ fontSize: '0.85rem' }} />
                             <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
                               {formatIST(msg.sent_at)}
                             </div>
@@ -2027,19 +2050,51 @@ export const CoordinatorDashboard: React.FC = () => {
                   </div>
 
                   {/* Message compose form */}
-                  <form onSubmit={handleSendCoordinatorMessage} style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                      type="text"
-                      placeholder="Type your official announcement or message here..."
+                  <form
+                    onSubmit={handleSendCoordinatorMessage}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.75rem',
+                      backgroundColor: '#ffffff'
+                    }}
+                  >
+                    <textarea
+                      placeholder="Type your message here... Press Enter for a new line, Ctrl+B for bold."
                       value={newMsgContent}
                       onChange={(e) => setNewMsgContent(e.target.value)}
+                      onKeyDown={(e) => {
+                        if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+                          e.preventDefault();
+                          const target = e.currentTarget;
+                          const start = target.selectionStart;
+                          const end = target.selectionEnd;
+                          const text = target.value;
+                          const selected = text.substring(start, end);
+                          const rep = selected ? `**${selected}**` : `**bold text**`;
+                          const updated = text.substring(0, start) + rep + text.substring(end);
+                          setNewMsgContent(updated);
+                        } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                          e.preventDefault();
+                          handleSendCoordinatorMessage(e);
+                        }
+                      }}
                       className="form-control"
-                      style={{ flex: 1 }}
+                      rows={3}
+                      style={{ width: '100%', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: '1.5' }}
                       disabled={isMsgSending}
                     />
-                    <Button type="submit" variant="primary" loading={isMsgSending} style={{ padding: '0.65rem 1.5rem' }}>
-                      Send
-                    </Button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                        💡 Enter = newline • Ctrl+B = bold • Ctrl+Enter = send
+                      </span>
+                      <Button type="submit" variant="primary" loading={isMsgSending} disabled={!newMsgContent.trim() || isMsgSending} style={{ padding: '0.5rem 1.4rem' }}>
+                        Send Message
+                      </Button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -2119,12 +2174,12 @@ export const CoordinatorDashboard: React.FC = () => {
                   </div>
 
                   {/* Announcement feed */}
-                  <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <div style={{ height: '300px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'var(--color-bg-main)', display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1rem' }}>
                     {allMessages.filter(msg => {
                       return msg.type === 'announcement' && msg.recipient_id === activeAnnounceRecipient;
                     }).length === 0 ? (
-                      <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
-                        No announcements posted in this channel yet.
+                      <div style={{ margin: 'auto', color: 'var(--color-text-muted)', fontSize: '0.8rem', fontStyle: 'italic', textAlign: 'center' }}>
+                        No announcements posted in this channel yet. Type your announcement below.
                       </div>
                     ) : (
                       allMessages
@@ -2135,41 +2190,63 @@ export const CoordinatorDashboard: React.FC = () => {
                             style={{
                               alignSelf: 'stretch',
                               backgroundColor: '#ffffff',
-                              border: '1px solid var(--color-border)',
+                              border: '1px solid rgba(0, 32, 74, 0.12)',
                               borderRadius: 'var(--radius-md)',
-                              padding: '0.75rem 1rem',
-                              fontSize: '0.82rem',
-                              color: 'var(--color-primary)',
+                              padding: '1rem 1.25rem',
                               boxShadow: 'var(--shadow-sm)'
                             }}
                           >
-                            <div style={{ fontWeight: 700, fontSize: '0.65rem', color: 'var(--color-secondary)', marginBottom: '3px', textTransform: 'uppercase' }}>
-                              You (MUN Coordinator)
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '6px' }}>
+                              <div style={{ fontWeight: 800, fontSize: '0.72rem', color: 'var(--color-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                📢 Official MUN Secretariat Announcement
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
+                                  {formatIST(msg.sent_at)}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteAnnouncement(msg.id)}
+                                  title="Delete this announcement permanently"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '2px 8px',
+                                    backgroundColor: '#fee2e2',
+                                    border: '1px solid #fca5a5',
+                                    color: '#b91c1c',
+                                    borderRadius: '4px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  <Trash2 size={12} />
+                                  <span>Delete</span>
+                                </button>
+                              </div>
                             </div>
-                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 500 }}>{msg.content}</div>
-                            <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)', textAlign: 'right', marginTop: '4px' }}>
-                              {formatIST(msg.sent_at)}
-                            </div>
+                            <FormattedMessage content={msg.content} style={{ fontSize: '0.88rem', color: 'var(--color-primary)' }} />
                           </div>
                         ))
                     )}
                   </div>
 
-                  {/* Compose Announcement form */}
-                  <form onSubmit={handleSendCoordinatorAnnouncement} style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                      type="text"
-                      placeholder="Type your official announcement here..."
-                      value={newAnnounceContent}
-                      onChange={(e) => setNewAnnounceContent(e.target.value)}
-                      className="form-control"
-                      style={{ flex: 1 }}
-                      disabled={isAnnounceSending}
-                    />
-                    <Button type="submit" variant="primary" loading={isAnnounceSending} style={{ padding: '0.65rem 1.5rem' }}>
-                      Publish
-                    </Button>
-                  </form>
+                  {/* Compose Announcement Composer */}
+                  <AnnouncementComposer
+                    value={newAnnounceContent}
+                    onChange={setNewAnnounceContent}
+                    onSubmit={handleSendCoordinatorAnnouncement}
+                    isLoading={isAnnounceSending}
+                    submitLabel="Publish Announcement"
+                    targetLabel={
+                      activeAnnounceRecipient === 'all'
+                        ? 'All Delegates (Global Broadcast)'
+                        : `Grade ${activeAnnounceRecipient.split('_')[1]}`
+                    }
+                    placeholder={`Write your official announcement here...\n\nDear Delegates,\n\nPress Enter to go down to a new line (like formatting a letter).\nSelect text and press Ctrl+B (or Cmd+B) to make it bold.`}
+                  />
                 </div>
               </div>
             </Card>
